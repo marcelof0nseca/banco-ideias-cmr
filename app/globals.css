@@ -2,16 +2,40 @@
 
 /*
   Tokens de cor institucionais (especificacao, secao 12.2).
-  Derivados dos mockups; confirmar contra o manual de identidade da CMR
-  na fase de implementacao (contrato "Tokens de cor", dono: Pessoa A).
+  Derivados dos mockups e do prototipo (prototipo/banco-de-ideias.html);
+  confirmar contra o manual de identidade da CMR (contrato "Tokens de cor",
+  dono: Pessoa A). Contrastes conferidos para WCAG 2.1 AA: todo par
+  texto/fundo usado nos componentes fica >= 4,5:1.
 */
 @theme {
+  --font-sans: "Segoe UI", Roboto, -apple-system, Helvetica, Arial, sans-serif;
+  --font-mono: Consolas, "Liberation Mono", Menlo, monospace;
+
   --color-azul-cmr: #17356b;
   --color-azul-medio: #2f5ca8;
+  --color-azul-claro: #3e6fc4;
+  --color-azul-escuro: #1e4488;
   --color-azul-acao: #2563eb;
+  --color-azul-fundo: #eaf1fb;
+  --color-azul-suave: #e7edf7;
   --color-verde-cmr: #146c43;
+  --color-verde-fundo: #e8f5ee;
   --color-vermelho-cmr: #b42318;
+  --color-vermelho-fundo: #fef3f2;
   --color-ambar-cmr: #b54708;
+  --color-ambar-fundo: #fef6ee;
+  --color-roxo-cmr: #6b3fa0;
+  --color-roxo-fundo: #f3edfa;
+
+  --color-tinta: #1a1f2b;
+  --color-cinza: #5a6472;
+  --color-linha: #d7dee9;
+  --color-fundo: #f2f5f9;
+  --color-campo: #fbfcfe;
+
+  /* Anel de foco: ambar por fora + escuro por dentro, visivel (>= 3:1)
+     tanto sobre fundo claro quanto sobre a faixa azul do cabecalho. */
+  --color-foco: #ffb020;
 }
 
 :root {
@@ -19,6 +43,26 @@
 }
 
 body {
-  background: #f2f5f9;
-  color: #1a1f2b;
+  background: var(--color-fundo);
+  color: var(--color-tinta);
+  font-family: var(--font-sans);
+  line-height: 1.55;
+}
+
+a {
+  color: var(--color-azul-acao);
+}
+
+/* Foco sempre visivel (eMAG 4.1 / WCAG 2.4.7). Nunca remover sem substituto. */
+:focus-visible {
+  outline: 3px solid var(--color-foco);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--color-tinta);
+  border-radius: 3px;
+}
+
+/* Alvo do "Ir ao conteudo" e titulos de passo recebem foco por script;
+   o anel aparece so quando a navegacao e por teclado. */
+[tabindex="-1"]:focus:not(:focus-visible) {
+  outline: none;
 }

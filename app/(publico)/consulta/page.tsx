@@ -32,7 +32,7 @@ export default async function ConsultaPage() {
   }));
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <div className="max-w-3xl">
       <h1 className="text-2xl font-bold text-azul-cmr">
         Consulta publica de ideias
       </h1>
@@ -53,6 +53,6 @@ export default async function ConsultaPage() {
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }
