@@ -112,6 +112,17 @@
   --color-foco-escuro: #ffb020;
 }
 
+/*
+  Largura das barras dos graficos (components/ui/GraficoBarras.tsx):
+  barra-0 ... barra-100 = 0% ... 100%. Classe em vez de style="width" porque
+  a CSP do sistema proibe estilo inline. O @source inline garante que as 101
+  classes sejam geradas mesmo montadas dinamicamente.
+*/
+@utility barra-* {
+  width: calc(--value(integer) * 1%);
+}
+@source inline("barra-{0..100}");
+
 @layer base {
   :root {
     color-scheme: light;

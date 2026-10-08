@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Field, FieldError, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { NUMEROS_RPA, RPAS } from "@/lib/rpa";
 import { urlAbsoluta } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { enviarIdeia, type EstadoCadastro } from "./acoes";
@@ -43,14 +44,6 @@ const CHAVE_RASCUNHO = "bil-rascunho-ideia";
 
 const NOMES_PASSO = ["Já existe?", "A ideia", "Identificação", "Confirmação"];
 
-const RPAS = [
-  "RPA 1 — Centro",
-  "RPA 2 — Norte",
-  "RPA 3 — Noroeste",
-  "RPA 4 — Oeste",
-  "RPA 5 — Sudoeste",
-  "RPA 6 — Sul",
-];
 
 interface Props {
   temas: { id: string; nome: string }[];
@@ -378,9 +371,9 @@ export function AssistenteCadastro(props: Props) {
                     defaultValue={valores.rpa ?? ""}
                   >
                     <option value="">Não informar</option>
-                    {RPAS.map((r, i) => (
-                      <option key={r} value={i + 1}>
-                        {r}
+                    {NUMEROS_RPA.map((n) => (
+                      <option key={n} value={n}>
+                        {RPAS[n]}
                       </option>
                     ))}
                   </CampoSelecao>
