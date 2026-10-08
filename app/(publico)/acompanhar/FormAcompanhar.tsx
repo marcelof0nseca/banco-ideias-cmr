@@ -121,7 +121,7 @@ export function FormAcompanhar() {
                 id="titulo-resultado"
                 ref={resultado}
                 tabIndex={-1}
-                className="text-lg font-bold text-azul-cmr"
+                className="text-lg font-bold text-marca"
               >
                 {estado.acompanhamento.titulo}
               </h2>
@@ -143,7 +143,7 @@ export function FormAcompanhar() {
               </Alerta>
             )}
             <section aria-labelledby="titulo-tramitacao" className="flex flex-col gap-4">
-              <h3 id="titulo-tramitacao" className="font-semibold text-azul-cmr">
+              <h3 id="titulo-tramitacao" className="font-semibold text-marca">
                 Tramitação
               </h3>
               <LinhaDoTempo eventos={estado.acompanhamento.linhaDoTempo} />

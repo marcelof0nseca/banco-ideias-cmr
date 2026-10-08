@@ -25,7 +25,7 @@ function Numero({ rotulo, valor, detalhe }: { rotulo: string; valor: string; det
     <Card className="h-full">
       <CardHeader>
         <CardDescription className="font-medium">{rotulo}</CardDescription>
-        <CardTitle className="text-3xl font-semibold text-azul-cmr">{valor}</CardTitle>
+        <CardTitle className="text-3xl font-semibold text-marca">{valor}</CardTitle>
       </CardHeader>
       <CardContent className="text-xs text-muted-foreground">{detalhe}</CardContent>
     </Card>
@@ -42,7 +42,7 @@ export default async function IndicadoresPage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="max-w-3xl">
-        <h1 className="text-2xl font-bold text-azul-cmr">Indicadores</h1>
+        <h1 className="text-2xl font-bold text-marca">Indicadores</h1>
         <p className="mt-1 text-muted-foreground">
           Números do programa, sem nenhum dado pessoal. Atualizado em{" "}
           <time dateTime={ind.geradoEm}>{FORMATO_DATA_HORA.format(new Date(ind.geradoEm))}</time>.
@@ -93,7 +93,7 @@ export default async function IndicadoresPage() {
       </section>
 
       <section aria-labelledby="titulo-distribuicao" className="flex flex-col gap-4">
-        <h2 id="titulo-distribuicao" className="text-xl font-bold text-azul-cmr">
+        <h2 id="titulo-distribuicao" className="text-xl font-bold text-marca">
           Distribuição das ideias
         </h2>
         <div className="grid gap-4 lg:grid-cols-2">

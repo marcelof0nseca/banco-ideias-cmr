@@ -53,7 +53,7 @@ export default async function ConsultaPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-2xl font-bold text-azul-cmr">Consulta pública de ideias</h1>
+      <h1 className="text-2xl font-bold text-marca">Consulta pública de ideias</h1>
       <p className="mt-1 text-sm text-muted-foreground">
         {publicas.length === 1
           ? "1 ideia publicada no acervo."
@@ -65,7 +65,7 @@ export default async function ConsultaPage() {
             <Card>
               <CardHeader>
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <CardTitle className="text-lg font-bold text-azul-cmr">{i.titulo}</CardTitle>
+                  <CardTitle className="text-lg font-bold text-marca">{i.titulo}</CardTitle>
                   <SeloStatus status={i.status} />
                 </div>
                 <CardDescription>

@@ -254,7 +254,7 @@ export function AssistenteCadastro(props: Props) {
               aria-current={atual ? "step" : undefined}
               className={cn(
                 "flex min-w-32 flex-1 items-center gap-2 border-t-4 pt-2 text-sm font-semibold",
-                atual && "border-primary text-azul-cmr",
+                atual && "border-primary text-marca",
                 feito && "border-verde-cmr text-verde-cmr",
                 !atual && !feito && "border-border text-muted-foreground",
               )}
@@ -319,7 +319,7 @@ export function AssistenteCadastro(props: Props) {
               {/* ---------------- Passo 1 ---------------- */}
               <FieldSet hidden={!visivel(1)}>
                 <legend className="sr-only">Passo 1 de 4: sua ideia já existe?</legend>
-                <h2 ref={refTitulo(1)} tabIndex={-1} className="text-lg font-bold text-azul-medio">
+                <h2 ref={refTitulo(1)} tabIndex={-1} className="text-lg font-bold text-marca-medio">
                   Sua ideia já foi proposta por outra pessoa?
                 </h2>
                 <p className="text-muted-foreground">
@@ -343,7 +343,7 @@ export function AssistenteCadastro(props: Props) {
               {/* ---------------- Passo 2 ---------------- */}
               <FieldSet hidden={!visivel(2)}>
                 <legend className="sr-only">Passo 2 de 4: a ideia</legend>
-                <h2 ref={refTitulo(2)} tabIndex={-1} className="text-lg font-bold text-azul-medio">
+                <h2 ref={refTitulo(2)} tabIndex={-1} className="text-lg font-bold text-marca-medio">
                   Descreva sua ideia
                 </h2>
                 <FieldGroup className="grid gap-5 sm:grid-cols-2">
@@ -438,7 +438,7 @@ export function AssistenteCadastro(props: Props) {
               {/* ---------------- Passo 3 ---------------- */}
               <FieldSet hidden={!visivel(3)}>
                 <legend className="sr-only">Passo 3 de 4: identificação</legend>
-                <h2 ref={refTitulo(3)} tabIndex={-1} className="text-lg font-bold text-azul-medio">
+                <h2 ref={refTitulo(3)} tabIndex={-1} className="text-lg font-bold text-marca-medio">
                   Identificação do autor
                 </h2>
                 <FieldGroup className="grid gap-5 sm:grid-cols-2">
@@ -506,7 +506,7 @@ export function AssistenteCadastro(props: Props) {
                 </FieldGroup>
 
                 <Separator />
-                <h3 className="text-base font-bold text-azul-medio">Privacidade</h3>
+                <h3 className="text-base font-bold text-marca-medio">Privacidade</h3>
                 <Alerta titulo="Como seus dados são tratados">
                   <p>
                     A Resolução nº 2.690/2018 exige a identificação de quem apresenta uma ideia.

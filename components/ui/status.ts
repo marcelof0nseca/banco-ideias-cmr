@@ -37,7 +37,7 @@ export const APARENCIA_STATUS: Record<StatusIdeia, AparenciaStatus> = {
   DISPONIVEL: {
     rotulo: "Disponível",
     forma: "circulo",
-    classes: "text-azul-medio border-azul-medio bg-azul-fundo",
+    classes: "text-marca-medio border-marca-medio bg-marca-fundo",
   },
   EM_ANALISE: {
     rotulo: "Em análise",

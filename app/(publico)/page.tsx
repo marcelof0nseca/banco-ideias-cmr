@@ -30,7 +30,7 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-10">
       <section aria-labelledby="titulo-inicio" className="max-w-3xl">
-        <h1 id="titulo-inicio" className="text-3xl font-bold text-azul-cmr sm:text-4xl">
+        <h1 id="titulo-inicio" className="text-3xl font-bold text-marca sm:text-4xl">
           Sua ideia pode virar lei no Recife
         </h1>
         <p className="mt-4 text-lg">
@@ -51,7 +51,7 @@ export default function Home() {
       </section>
 
       <section aria-labelledby="titulo-como-funciona">
-        <h2 id="titulo-como-funciona" className="text-xl font-bold text-azul-cmr">
+        <h2 id="titulo-como-funciona" className="text-xl font-bold text-marca">
           Como funciona
         </h2>
         <ol className="mt-4 grid gap-4 md:grid-cols-3">
@@ -59,8 +59,8 @@ export default function Home() {
             <li key={titulo}>
               <Card className="h-full">
                 <CardHeader>
-                  <Icone aria-hidden="true" className="size-6 text-azul-medio" />
-                  <CardTitle className="text-base font-semibold text-azul-cmr">{titulo}</CardTitle>
+                  <Icone aria-hidden="true" className="size-6 text-marca-medio" />
+                  <CardTitle className="text-base font-semibold text-marca">{titulo}</CardTitle>
                   <CardDescription>{texto}</CardDescription>
                 </CardHeader>
               </Card>

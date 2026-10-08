@@ -11,7 +11,7 @@ export function Rodape() {
     { rotulo: "Site da Câmara", href: urlCamara(), externo: true },
   ];
   return (
-    <footer data-fundo="escuro" className="mt-10 bg-azul-cmr px-4 py-8 text-sm text-[#c6d8f3] print:hidden">
+    <footer data-fundo="escuro" className="mt-10 border-t-4 border-dourado bg-marca-noite px-4 py-8 text-sm text-white/80 print:hidden">
       <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2">
         <address className="not-italic">
           <strong className="block text-white">{INSTITUCIONAL.nome}</strong>

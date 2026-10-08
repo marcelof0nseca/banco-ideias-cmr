@@ -11,7 +11,7 @@
   Identidade visual (especificacao, secao 12.2) sobre o tema do shadcn/ui.
 
   Os tokens semanticos do shadcn (--primary, --muted-foreground...) apontam
-  para a paleta institucional da CMR, derivada do prototipo. Confirmar contra
+  para a paleta institucional da CMR (azul-petroleo + dourado do brasao). Confirmar contra
   o manual de identidade da Camara (contrato "Tokens de cor", dono: Pessoa A).
 
   Contraste (WCAG 2.1 AA), conferido em components/ui/tema.test.ts:
@@ -22,33 +22,34 @@
 */
 
 :root {
-  --background: #f2f5f9;
-  --foreground: #1a1f2b;
+  --background: #f1f6f7;
+  --foreground: #16232a;
   --card: #ffffff;
-  --card-foreground: #1a1f2b;
+  --card-foreground: #16232a;
   --popover: #ffffff;
-  --popover-foreground: #1a1f2b;
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --popover-foreground: #16232a;
+  /* Azul-petroleo da Camara: acoes (botoes, links). */
+  --primary: #0b7285;
+  --primary-hover: #095c6b;
   --primary-foreground: #ffffff;
-  --secondary: #e7edf7;
-  --secondary-foreground: #17356b;
-  --muted: #eef2f9;
-  --muted-foreground: #5a6472;
-  --accent: #eaf1fb;
-  --accent-foreground: #17356b;
+  --secondary: #e1eff2;
+  --secondary-foreground: #0b4f5e;
+  --muted: #eaf3f5;
+  --muted-foreground: #56656b;
+  --accent: #e3f2f5;
+  --accent-foreground: #0b4f5e;
   --destructive: #b42318;
-  --border: #d7dee9;
+  --border: #d3e2e6;
   /* Borda de controles de formulario: >= 3:1 contra branco (WCAG 1.4.11). */
-  --input: #7b8594;
-  --ring: #17356b;
+  --input: #77878d;
+  --ring: #0b4f5e;
   --radius: 0.5rem;
 
-  --chart-1: #2f5ca8;
+  --chart-1: #00809c; /* validada: skill dataviz (croma, luminosidade, contraste) */
   --chart-2: #146c43;
   --chart-3: #b54708;
   --chart-4: #6b3fa0;
-  --chart-5: #17356b;
+  --chart-5: #0b4f5e;
 }
 
 @theme inline {
@@ -90,15 +91,16 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Paleta institucional, para o que nao tem token semantico (faixa do
-   cabecalho, selos de situacao). */
+/* Paleta institucional: azul-petroleo da Camara + dourado do brasao, para o
+   que nao tem token semantico (faixa do cabecalho, selos de situacao). */
 @theme {
-  --color-azul-cmr: #17356b;
-  --color-azul-medio: #2f5ca8;
-  --color-azul-claro: #3e6fc4;
-  --color-azul-escuro: #1e4488;
-  --color-azul-noite: #10264f;
-  --color-azul-fundo: #eaf1fb;
+  --color-marca: #0b4f5e;
+  --color-marca-noite: #07343f;
+  --color-marca-escuro: #0e6272;
+  --color-marca-medio: #0e6c7d;
+  --color-marca-claro: #3fa7b8;
+  --color-marca-fundo: #e3f2f5;
+  --color-dourado: #ecb400;
   --color-verde-cmr: #146c43;
   --color-verde-fundo: #e8f5ee;
   --color-vermelho-cmr: #b42318;
@@ -107,8 +109,8 @@
   --color-ambar-fundo: #fef6ee;
   --color-roxo-cmr: #6b3fa0;
   --color-roxo-fundo: #f3edfa;
-  --color-cinza-selo: #5a6472;
-  --color-cinza-fundo: #f1f4f8;
+  --color-cinza-selo: #56656b;
+  --color-cinza-fundo: #eef2f3;
   --color-foco-escuro: #ffb020;
 }
 

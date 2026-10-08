@@ -39,8 +39,8 @@ export function NavPublica() {
                 className={cn(
                   "block rounded-t-lg border-t-4 px-4 py-2.5 text-sm font-semibold whitespace-nowrap no-underline transition-colors",
                   atual
-                    ? "border-azul-claro bg-background text-azul-cmr"
-                    : "border-transparent bg-azul-escuro text-white/90 hover:bg-[#2a5299] hover:text-white",
+                    ? "border-dourado bg-background text-marca"
+                    : "border-transparent bg-marca-escuro text-white hover:bg-marca-medio",
                 )}
               >
                 {item.rotulo}

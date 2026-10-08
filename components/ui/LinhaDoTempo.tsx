@@ -39,7 +39,7 @@ export function LinhaDoTempo({
                     ? "border-verde-cmr bg-verde-cmr"
                     : ultimo
                       ? "border-primary bg-primary"
-                      : "border-azul-medio",
+                      : "border-marca-medio",
               )}
             />
             <p className="text-sm text-muted-foreground">

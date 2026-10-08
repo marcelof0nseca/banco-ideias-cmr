@@ -14,7 +14,7 @@ import { Alert, AlertDescription, AlertTitle } from "./alert";
 export type TipoAlerta = "info" | "sucesso" | "erro" | "atencao";
 
 const APARENCIA: Record<TipoAlerta, { icone: LucideIcon; classes: string }> = {
-  info: { icone: Info, classes: "border-azul-medio/40 bg-azul-fundo *:[svg]:text-azul-medio" },
+  info: { icone: Info, classes: "border-marca-medio/40 bg-marca-fundo *:[svg]:text-marca-medio" },
   sucesso: { icone: CircleCheck, classes: "border-verde-cmr/40 bg-verde-fundo *:[svg]:text-verde-cmr" },
   erro: { icone: CircleAlert, classes: "border-vermelho-cmr/40 bg-vermelho-fundo *:[svg]:text-vermelho-cmr" },
   atencao: { icone: TriangleAlert, classes: "border-ambar-cmr/40 bg-ambar-fundo *:[svg]:text-ambar-cmr" },

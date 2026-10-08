@@ -12,7 +12,7 @@ export default function AcompanharPage() {
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold text-azul-cmr">Acompanhar minha ideia</h1>
+        <h1 className="text-2xl font-bold text-marca">Acompanhar minha ideia</h1>
         <p className="mt-1 text-muted-foreground">
           Veja a situação da ideia que você enviou, inclusive enquanto ela está em triagem. Se a
           ideia for arquivada, o motivo aparece aqui.

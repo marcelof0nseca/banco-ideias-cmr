@@ -47,7 +47,7 @@ export function GraficoBarras({
   return (
     <figure aria-labelledby={`${id}-titulo`} className="flex flex-col gap-4">
       <div>
-        <h3 id={`${id}-titulo`} className="text-base font-semibold text-azul-cmr">
+        <h3 id={`${id}-titulo`} className="text-base font-semibold text-marca">
           {titulo}
         </h3>
         {descricao && <p className="text-sm text-muted-foreground">{descricao}</p>}
