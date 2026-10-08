@@ -4,9 +4,15 @@ import { INSTITUCIONAL } from "./institucional";
 
 /** Rodape institucional, com os mesmos contatos do portal da Camara. */
 export function Rodape() {
+  const links = [
+    { rotulo: "Fale Conosco", href: INSTITUCIONAL.faleConosco(), externo: true },
+    { rotulo: "Ouvidoria", href: INSTITUCIONAL.ouvidoria(), externo: true },
+    { rotulo: "Acessibilidade", href: "/acessibilidade", externo: false },
+    { rotulo: "Site da Câmara", href: urlCamara(), externo: true },
+  ];
   return (
-    <footer className="mt-8 print:hidden bg-azul-cmr px-4 py-6 text-[13px] text-[#c6d8f3]">
-      <div className="mx-auto grid max-w-6xl gap-4 sm:grid-cols-2">
+    <footer data-fundo="escuro" className="mt-10 bg-azul-cmr px-4 py-8 text-sm text-[#c6d8f3] print:hidden">
+      <div className="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2">
         <address className="not-italic">
           <strong className="block text-white">{INSTITUCIONAL.nome}</strong>
           {INSTITUCIONAL.endereco}
@@ -18,27 +24,20 @@ export function Rodape() {
           )}
         </address>
         <nav aria-label="Rodapé">
-          <ul className="space-y-1">
-            <li>
-              <a className="text-white" href={INSTITUCIONAL.faleConosco()}>
-                Fale Conosco
-              </a>
-            </li>
-            <li>
-              <a className="text-white" href={INSTITUCIONAL.ouvidoria()}>
-                Ouvidoria
-              </a>
-            </li>
-            <li>
-              <Link className="text-white" href="/acessibilidade">
-                Acessibilidade
-              </Link>
-            </li>
-            <li>
-              <a className="text-white" href={urlCamara()}>
-                Site da Câmara
-              </a>
-            </li>
+          <ul className="flex flex-col gap-1.5">
+            {links.map((l) => (
+              <li key={l.rotulo}>
+                {l.externo ? (
+                  <a className="text-white underline" href={l.href}>
+                    {l.rotulo}
+                  </a>
+                ) : (
+                  <Link className="text-white underline" href={l.href}>
+                    {l.rotulo}
+                  </Link>
+                )}
+              </li>
+            ))}
           </ul>
         </nav>
       </div>

@@ -8,7 +8,7 @@ export function PularParaConteudo() {
   return (
     <a
       href="#conteudo"
-      className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:font-semibold focus:text-azul-cmr"
+      className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:font-semibold focus:text-azul-cmr focus:shadow-lg"
     >
       Ir ao conteúdo
     </a>

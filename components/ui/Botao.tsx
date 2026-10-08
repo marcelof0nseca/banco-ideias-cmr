@@ -1,50 +1,44 @@
 import Link from "next/link";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
+import { cn } from "@/lib/utils";
+import { Button, buttonVariants } from "./button";
 
 /**
- * Botao e link com aparencia de botao.
+ * Botao e link com aparencia de botao, sobre o Button do shadcn/ui.
+ * Mantem a API em portugues usada pelas telas (contrato com a Pessoa B).
  *
  * `BotaoLink` usa next/link, que ja aplica o basePath: passe a rota "crua"
  * ("/consulta"), nunca caminho("/consulta") - senao o prefixo duplica.
  */
 
-export type VarianteBotao = "primario" | "secundario" | "sucesso" | "perigo";
+export type VarianteBotao = "primario" | "secundario" | "sucesso" | "perigo" | "contorno";
 
-const VARIANTES: Record<VarianteBotao, string> = {
-  primario: "bg-azul-acao text-white hover:bg-[#1d4fd0]",
-  secundario: "bg-azul-suave text-azul-cmr hover:bg-[#d9e3f3]",
-  sucesso: "bg-verde-cmr text-white hover:bg-[#10583a]",
-  perigo: "bg-vermelho-cmr text-white hover:bg-[#981d14]",
-};
+const VARIANTE_SHADCN = {
+  primario: "default",
+  secundario: "secondary",
+  sucesso: "success",
+  perigo: "destructive",
+  contorno: "outline",
+} as const;
 
-export function classesBotao(
-  variante: VarianteBotao = "primario",
-  pequeno = false,
-): string {
-  const tamanho = pequeno ? "px-3 py-1.5 text-sm" : "px-4.5 py-2.5 text-[15px]";
-  return (
-    "inline-flex items-center justify-center gap-2 rounded-md font-semibold no-underline " +
-    "cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 " +
-    `${tamanho} ${VARIANTES[variante]}`
-  );
+export function classesBotao(variante: VarianteBotao = "primario", pequeno = false): string {
+  return buttonVariants({
+    variant: VARIANTE_SHADCN[variante],
+    size: pequeno ? "sm" : "default",
+  });
 }
 
-interface BotaoProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+type BotaoProps = Omit<ComponentProps<typeof Button>, "variant" | "size"> & {
   variante?: VarianteBotao;
   pequeno?: boolean;
-}
+};
 
-export function Botao({
-  variante,
-  pequeno,
-  className,
-  type = "button",
-  ...resto
-}: BotaoProps) {
+export function Botao({ variante = "primario", pequeno, type = "button", ...resto }: BotaoProps) {
   return (
-    <button
+    <Button
       type={type}
-      className={`${classesBotao(variante, pequeno)} ${className ?? ""}`}
+      variant={VARIANTE_SHADCN[variante]}
+      size={pequeno ? "sm" : "default"}
       {...resto}
     />
   );
@@ -58,18 +52,9 @@ interface BotaoLinkProps {
   className?: string;
 }
 
-export function BotaoLink({
-  href,
-  children,
-  variante,
-  pequeno,
-  className,
-}: BotaoLinkProps) {
+export function BotaoLink({ href, children, variante, pequeno, className }: BotaoLinkProps) {
   return (
-    <Link
-      href={href}
-      className={`${classesBotao(variante, pequeno)} ${className ?? ""}`}
-    >
+    <Link href={href} className={cn(classesBotao(variante, pequeno), "no-underline", className)}>
       {children}
     </Link>
   );

@@ -82,7 +82,7 @@ export function validarTransicao(params: {
     return {
       ok: false,
       httpStatus: 422,
-      motivo: `Transicao nao permitida: ${de} -> ${para}`,
+      motivo: `Transição não permitida: ${de} -> ${para}`,
     };
   }
 
@@ -90,7 +90,7 @@ export function validarTransicao(params: {
     return {
       ok: false,
       httpStatus: 403,
-      motivo: `Perfil ${perfil} nao pode executar a transicao ${de} -> ${para}`,
+      motivo: `Perfil ${perfil} não pode executar a transição ${de} -> ${para}`,
     };
   }
 

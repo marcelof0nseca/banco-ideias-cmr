@@ -27,7 +27,7 @@ export const APARENCIA_STATUS: Record<StatusIdeia, AparenciaStatus> = {
   RECEBIDA: {
     rotulo: "Recebida",
     forma: "triangulo",
-    classes: "text-cinza border-[#b7c0cd] bg-[#f1f4f8]",
+    classes: "text-cinza-selo border-[#b7c0cd] bg-cinza-fundo",
   },
   EM_TRIAGEM: {
     rotulo: "Em triagem",

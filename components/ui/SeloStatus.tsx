@@ -1,15 +1,14 @@
 import type { StatusIdeia } from "@/prisma/gen/client";
+import { cn } from "@/lib/utils";
+import { Badge } from "./badge";
 import { APARENCIA_STATUS, type FormaSelo } from "./status";
 
 /** Forma desenhada ao lado do texto. Decorativa: o texto ja diz tudo. */
 function Forma({ forma }: { forma: FormaSelo }) {
   const comum = {
-    width: 10,
-    height: 10,
     viewBox: "0 0 10 10",
     "aria-hidden": true,
     focusable: false,
-    className: "shrink-0",
   } as const;
 
   switch (forma) {
@@ -59,15 +58,13 @@ function Forma({ forma }: { forma: FormaSelo }) {
   }
 }
 
-/** Selo de situacao da ideia: cor + forma + texto. */
+/** Selo de situacao da ideia (Badge do shadcn): cor + forma + texto. */
 export function SeloStatus({ status }: { status: StatusIdeia }) {
   const { rotulo, forma, classes } = APARENCIA_STATUS[status];
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border-[1.5px] px-2.5 py-0.5 text-xs font-bold ${classes}`}
-    >
+    <Badge variant="outline" className={cn("h-6 border-[1.5px] px-2.5 font-semibold", classes)}>
       <Forma forma={forma} />
       {rotulo}
-    </span>
+    </Badge>
   );
 }
