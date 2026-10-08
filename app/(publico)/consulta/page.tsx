@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { SeloStatus } from "@/components/ui/SeloStatus";
 import { STATUS_PUBLICOS } from "@/lib/maquina-status";
+import { resumir } from "@/lib/consulta";
 import { prisma } from "@/lib/prisma";
 import { exibicaoAutor } from "@/lib/publico";
 import type { IdeiaPublicaResumo } from "@/types/publico";
@@ -45,7 +47,7 @@ export default async function ConsultaPage() {
       tipo: i.autor.tipo,
     },
     apoiosCount: i.apoiosCount,
-    resumo: i.descricao.slice(0, 190),
+    resumo: resumir(i.descricao),
     rpa: i.rpa,
     gabinetesInteressados: [],
     criadoEm: i.criadoEm.toISOString(),
@@ -65,7 +67,13 @@ export default async function ConsultaPage() {
             <Card>
               <CardHeader>
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <CardTitle className="text-lg font-bold text-marca">{i.titulo}</CardTitle>
+                  <CardTitle className="text-lg font-bold">
+                    <h2>
+                      <Link href={`/consulta/${i.protocolo}`} className="text-marca hover:text-primary">
+                        {i.titulo}
+                      </Link>
+                    </h2>
+                  </CardTitle>
                   <SeloStatus status={i.status} />
                 </div>
                 <CardDescription>
@@ -73,10 +81,7 @@ export default async function ConsultaPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p>
-                  {i.resumo}
-                  {i.resumo.length >= 190 && "…"}
-                </p>
+                <p>{i.resumo}</p>
               </CardContent>
               <CardFooter className="text-muted-foreground">
                 <span>
