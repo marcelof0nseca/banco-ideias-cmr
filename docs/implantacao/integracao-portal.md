@@ -21,7 +21,7 @@ link compartilhável e SEO. O sistema envia `X-Frame-Options: DENY`.
 ## O que ENTREGAMOS (nós dois)
 
 Parte A — aparência e ligações (Pessoa A):
-- Nenhum link/recurso com caminho fixo `/`: tudo via `next/link`, `next/image` ou `lib/url.ts`.
+- Nenhum link/recurso com caminho fixo `/`: tudo via `next/link`, `next/image` ou `lib/sistema/url.ts`.
 - Cabeçalho com faixa institucional e “Voltar ao site da Câmara”; rodapé com endereço,
   telefone, Fale Conosco e Ouvidoria iguais aos do portal.
 - URL canônica, `sitemap.xml` e Open Graph em cada `/consulta/{protocolo}`, para o link

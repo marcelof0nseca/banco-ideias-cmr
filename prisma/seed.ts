@@ -11,7 +11,7 @@ import { PrismaClient, StatusIdeia } from "./gen/client";
  * ideias do prototipo, para que o fluxo possa ser percorrido ponta a ponta
  * no dia 1, mesmo antes das rotas reais existirem.
  *
- * Observacao: para nao depender de lib/documento.ts (que exige as variaveis
+ * Observacao: para nao depender de lib/seguranca/documento.ts (que exige as variaveis
  * de ambiente de chave/pepper) nem de argon2 ainda nao instalado, o seed usa
  * hashes locais simples e senha de placeholder. Sao dados de teste.
  */
@@ -21,23 +21,23 @@ const prisma = new PrismaClient({ adapter });
 
 const TEMAS = [
   "Mobilidade Urbana",
-  "Saude Publica",
+  "Saúde Pública",
   "Meio Ambiente",
-  "Educacao",
-  "Seguranca",
-  "Assistencia Social",
+  "Educação",
+  "Segurança",
+  "Assistência Social",
   "Cultura e Esporte",
-  "Urbanismo e Habitacao",
+  "Urbanismo e Habitação",
   "Direitos Humanos",
-  "Desenvolvimento Economico",
+  "Desenvolvimento Econômico",
 ];
 
 const MOTIVOS = [
-  { codigo: "FORA_DA_COMPETENCIA", descricao: "Fora da competencia do Municipio" },
-  { codigo: "OFENSIVO", descricao: "Conteudo ofensivo ou discriminatorio" },
-  { codigo: "DUPLICADA", descricao: "Duplicidade de ideia ja registrada" },
-  { codigo: "IDENTIFICACAO", descricao: "Identificacao do autor invalida ou incompleta" },
-  { codigo: "INCOMPREENSIVEL", descricao: "Texto incompreensivel ou sem objeto definido" },
+  { codigo: "FORA_DA_COMPETENCIA", descricao: "Fora da competência do Município" },
+  { codigo: "OFENSIVO", descricao: "Conteúdo ofensivo ou discriminatório" },
+  { codigo: "DUPLICADA", descricao: "Duplicidade de ideia já registrada" },
+  { codigo: "IDENTIFICACAO", descricao: "Identificação do autor inválida ou incompleta" },
+  { codigo: "INCOMPREENSIVEL", descricao: "Texto incompreensível ou sem objeto definido" },
 ];
 
 function hashFake(valor: string): string {
@@ -78,7 +78,7 @@ async function main() {
     });
   }
 
-  console.log("Usuarios de teste (senha placeholder - trocar antes de usar)...");
+  console.log("Usuários de teste (senha provisória - trocar antes de usar)...");
   const SENHA_FAKE = "argon2id$placeholder$trocar-na-semana-2";
   await prisma.usuario.createMany({
     data: [
@@ -92,7 +92,7 @@ async function main() {
   const ano = new Date().getFullYear();
   await prisma.contadorProtocolo.create({ data: { ano, ultimo: 3 } });
 
-  console.log("Ideias de exemplo (as tres do prototipo)...");
+  console.log("Ideias de exemplo (as três do protótipo)...");
 
   // #1 - RECEBIDA (aguardando triagem)
   const autor1 = await prisma.autor.create({
@@ -101,7 +101,7 @@ async function main() {
       documentoCifrado: "seed:fake",
       documentoHash: hashFake("52998224725"),
       documentoMascarado: "529.***.***-25",
-      nome: "Joao Silva",
+      nome: "João Silva",
       email: "joao@exemplo.com",
       nomePublico: true,
       consentimentoEm: diasAtras(12),
@@ -113,10 +113,10 @@ async function main() {
       protocolo: `BIL-${ano}-000001`,
       tokenAcompHash: hashFake("token1"),
       autorId: autor1.id,
-      temaId: temas.get("Saude Publica")!,
-      titulo: "Farmacia 24h nas UPAs",
+      temaId: temas.get("Saúde Pública")!,
+      titulo: "Farmácia 24h nas UPAs",
       descricao:
-        "Manter farmacias abertas 24 horas nas Unidades de Pronto Atendimento, para que quem e atendido de madrugada consiga retirar o medicamento na hora.",
+        "Manter farmácias abertas 24 horas nas Unidades de Pronto Atendimento, para que quem é atendido de madrugada consiga retirar o medicamento na hora.",
       status: StatusIdeia.RECEBIDA,
       bairro: "Casa Amarela",
       rpa: 2,
@@ -150,11 +150,11 @@ async function main() {
       tokenAcompHash: hashFake("token2"),
       autorId: autor2.id,
       temaId: temas.get("Meio Ambiente")!,
-      titulo: "Hortas comunitarias nas escolas municipais",
+      titulo: "Hortas comunitárias nas escolas municipais",
       descricao:
-        "Implantar hortas nas escolas da rede municipal como pratica de educacao ambiental, integrando o cultivo ao conteudo de ciencias e a merenda escolar.",
+        "Implantar hortas nas escolas da rede municipal como prática de educação ambiental, integrando o cultivo ao conteúdo de ciências e à merenda escolar.",
       status: StatusIdeia.DISPONIVEL,
-      bairro: "Varzea",
+      bairro: "Várzea",
       rpa: 3,
       apoiosCount: 23,
       criadoEm: diasAtras(40),
@@ -163,8 +163,8 @@ async function main() {
       tramitacoes: {
         create: [
           { statusNovo: StatusIdeia.RECEBIDA, justificativa: "Ideia registrada pelo portal.", criadoEm: diasAtras(40) },
-          { statusAnterior: StatusIdeia.RECEBIDA, statusNovo: StatusIdeia.EM_TRIAGEM, justificativa: "Analise iniciada.", criadoEm: diasAtras(36) },
-          { statusAnterior: StatusIdeia.EM_TRIAGEM, statusNovo: StatusIdeia.DISPONIVEL, justificativa: "Materia de competencia municipal e identificacao regular.", criadoEm: diasAtras(34) },
+          { statusAnterior: StatusIdeia.RECEBIDA, statusNovo: StatusIdeia.EM_TRIAGEM, justificativa: "Análise iniciada.", criadoEm: diasAtras(36) },
+          { statusAnterior: StatusIdeia.EM_TRIAGEM, statusNovo: StatusIdeia.DISPONIVEL, justificativa: "Matéria de competência municipal e identificação regular.", criadoEm: diasAtras(34) },
         ],
       },
     },
@@ -192,7 +192,7 @@ async function main() {
       temaId: temas.get("Mobilidade Urbana")!,
       titulo: "Ciclovia protegida na Av. Norte",
       descricao:
-        "Implantar ciclovia com separacao fisica na Avenida Norte, reduzindo o risco de atropelamento de ciclistas no trajeto para o Centro.",
+        "Implantar ciclovia com separação física na Avenida Norte, reduzindo o risco de atropelamento de ciclistas no trajeto para o Centro.",
       status: StatusIdeia.EM_ANALISE,
       bairro: "Encruzilhada",
       rpa: 2,
@@ -206,15 +206,15 @@ async function main() {
       tramitacoes: {
         create: [
           { statusNovo: StatusIdeia.RECEBIDA, justificativa: "Ideia registrada pelo portal.", criadoEm: diasAtras(55) },
-          { statusAnterior: StatusIdeia.RECEBIDA, statusNovo: StatusIdeia.EM_TRIAGEM, justificativa: "Analise iniciada.", criadoEm: diasAtras(50) },
-          { statusAnterior: StatusIdeia.EM_TRIAGEM, statusNovo: StatusIdeia.DISPONIVEL, justificativa: "Aprovada para o acervo publico.", criadoEm: diasAtras(48) },
-          { statusAnterior: StatusIdeia.DISPONIVEL, statusNovo: StatusIdeia.EM_ANALISE, gabinete: "Gabinete Ver. Carlos", justificativa: "Gabinete assumiu a analise tecnica da proposta.", criadoEm: diasAtras(8) },
+          { statusAnterior: StatusIdeia.RECEBIDA, statusNovo: StatusIdeia.EM_TRIAGEM, justificativa: "Análise iniciada.", criadoEm: diasAtras(50) },
+          { statusAnterior: StatusIdeia.EM_TRIAGEM, statusNovo: StatusIdeia.DISPONIVEL, justificativa: "Aprovada para o acervo público.", criadoEm: diasAtras(48) },
+          { statusAnterior: StatusIdeia.DISPONIVEL, statusNovo: StatusIdeia.EM_ANALISE, gabinete: "Gabinete Ver. Carlos", justificativa: "Gabinete assumiu a análise técnica da proposta.", criadoEm: diasAtras(8) },
         ],
       },
     },
   });
 
-  console.log("Seed concluido.");
+  console.log("Seed concluído.");
 }
 
 main()

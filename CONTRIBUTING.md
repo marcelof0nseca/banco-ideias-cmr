@@ -7,10 +7,10 @@ Cada um revisa os PRs do outro (exigência da especificação, seção 8.7).
 
 | Pasta / arquivo | Dono |
 |---|---|
-| `app/(publico)/*`, `app/api/ideias`, `app/api/acompanhar`, `app/api/dados-abertos`, `app/api/indicadores` | **A** |
-| `components/ui`, `components/layout`, `types/publico.ts`, `lib/url.ts`, `lib/protocolo.ts` | **A** |
-| `app/(painel)/*`, `app/api/ideias/[id]/tramitar`, `app/api/ideias/[id]/revelar-documento`, `app/api/admin`, `middleware.ts` | **B** |
-| `prisma/*`, `lib/documento.ts`, `lib/maquina-status.ts`, `lib/tramitacao.ts`, `lib/limite.ts`, `lib/auth.ts` | **B** |
+| `app/(pages)/(publico)/*`, `app/api/ideias`, `app/api/acompanhar`, `app/api/dados-abertos`, `app/api/indicadores` | **A** |
+| `components/ui`, `components/layout`, `types/publico.ts`, `lib/sistema/url.ts`, `lib/ideias/protocolo.ts` | **A** |
+| `app/(pages)/(painel)/*`, `app/api/ideias/[id]/tramitar`, `app/api/ideias/[id]/revelar-documento`, `app/api/admin`, `middleware.ts` | **B** |
+| `prisma/*`, `lib/seguranca/documento.ts`, `lib/tramitacao/maquina-status.ts`, `lib/tramitacao/tramitacao.ts`, `lib/seguranca/limite.ts`, `lib/seguranca/auth.ts` | **B** |
 | `nginx/*`, `Dockerfile`, `docker-compose*.yml`, `.github/workflows` | **B** |
 | `e2e/*` (Playwright) | ambos |
 
@@ -31,13 +31,13 @@ explícito (`"... stub - implementacao pendente"`) para não passarem despercebi
 | Contrato | Arquivo | Dono | Estado |
 |---|---|---|---|
 | Esquema, migrações, carga fictícia | `prisma/schema.prisma`, `prisma/seed.ts` | B | **pronto** |
-| Documento (validar, cifrar, hash, máscara) | `lib/documento.ts` | B | **pronto + testado** |
-| Máquina de estados | `lib/maquina-status.ts` | B | **pronto + testado** |
-| Gravação de tramitação | `lib/tramitacao.ts` | B | `registrarCriacao` pronto; `transitar` stub |
-| Limite de taxa | `lib/limite.ts` | B | stub |
-| Geração de protocolo | `lib/protocolo.ts` | A | stub (helpers prontos) |
+| Documento (validar, cifrar, hash, máscara) | `lib/seguranca/documento.ts` | B | **pronto + testado** |
+| Máquina de estados | `lib/tramitacao/maquina-status.ts` | B | **pronto + testado** |
+| Gravação de tramitação | `lib/tramitacao/tramitacao.ts` | B | `registrarCriacao` pronto; `transitar` stub |
+| Limite de taxa | `lib/seguranca/limite.ts` | B | stub |
+| Geração de protocolo | `lib/ideias/protocolo.ts` | A | stub (helpers prontos) |
 | Tipos públicos sem dado pessoal | `types/publico.ts` | A | **pronto** |
-| Montagem de URLs / basePath | `lib/url.ts` | A | **pronto** |
+| Montagem de URLs / basePath | `lib/sistema/url.ts` | A | **pronto** |
 
 ## Comandos
 

@@ -1,24 +1,182 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Variantes `dark:` dos componentes so valem com a classe .dark, que o
+   sistema nao usa. Sem esta linha o Tailwind segue o modo escuro do sistema
+   operacional e os campos ficam cinza (tema.test.ts confere). */
+@custom-variant dark (&:is(.dark *));
 
 /*
-  Tokens de cor institucionais (especificacao, secao 12.2).
-  Derivados dos mockups; confirmar contra o manual de identidade da CMR
-  na fase de implementacao (contrato "Tokens de cor", dono: Pessoa A).
+  Identidade visual (especificacao, secao 12.2) sobre o tema do shadcn/ui.
+
+  Os tokens semanticos do shadcn (--primary, --muted-foreground...) apontam
+  para a paleta institucional da CMR (azul do portal + dourado do brasao). Confirmar contra
+  o manual de identidade da Camara (contrato "Tokens de cor", dono: Pessoa A).
+
+  Contraste (WCAG 2.1 AA), conferido em components/ui/tema.test.ts:
+    - texto x fundo >= 4,5:1
+    - bordas de campo e indicador de foco >= 3:1
+  Apenas tema claro: o sistema nao oferece modo escuro (o controle de alto
+  contraste da Fase 6 tera tokens proprios).
 */
-@theme {
-  --color-azul-cmr: #17356b;
-  --color-azul-medio: #2f5ca8;
-  --color-azul-acao: #2563eb;
-  --color-verde-cmr: #146c43;
-  --color-vermelho-cmr: #b42318;
-  --color-ambar-cmr: #b54708;
-}
 
 :root {
-  color-scheme: light;
+  --background: #f2f8fa;
+  --foreground: #16232a;
+  --card: #ffffff;
+  --card-foreground: #16232a;
+  --popover: #ffffff;
+  --popover-foreground: #16232a;
+  /* Azul da Camara (mesmo matiz do portal): acoes (botoes, links). */
+  --primary: #207792;
+  --primary-hover: #1a5f75;
+  --primary-foreground: #ffffff;
+  --secondary: #e2f3f9;
+  --secondary-foreground: #1a5f75;
+  --muted: #eaf5f8;
+  --muted-foreground: #56656b;
+  --accent: #e2f3f9;
+  --accent-foreground: #1a5f75;
+  --destructive: #b42318;
+  --border: #d0e5ec;
+  /* Borda de controles de formulario: >= 3:1 contra branco (WCAG 1.4.11). */
+  --input: #77878d;
+  --ring: #1a5f75;
+  --radius: 0.5rem;
+
+  --chart-1: #227d9a; /* validada: skill dataviz (croma, luminosidade, contraste) */
+  --chart-2: #146c43;
+  --chart-3: #b54708;
+  --chart-4: #6b3fa0;
+  --chart-5: #134453;
 }
 
-body {
-  background: #f2f5f9;
-  color: #1a1f2b;
+@theme inline {
+  --font-sans: "Segoe UI", Roboto, -apple-system, Helvetica, Arial, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-mono: Consolas, "Liberation Mono", Menlo, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Paleta institucional: azul do portal da Camara + dourado do brasao, para
+   o que nao tem token semantico (faixas, titulos, selos de situacao).
+
+   O portal (recife.pe.leg.br) usa #278fb0 (marca-claro), mas texto branco
+   sobre ele fica em 3,72:1 e reprova o WCAG AA. Os demais tons tem o mesmo
+   matiz (194 graus) e saturacao, so mais escuros:
+     faixa (cabecalho e rodape)  #227d9a  branco 4,70:1
+     marca (titulos)             #1a5f75  branco 7,15:1
+   marca-claro so pode ser usado como decoracao, nunca atras de texto. */
+@theme {
+  --color-faixa: #227d9a;
+  --color-marca: #1a5f75;
+  --color-marca-escuro: #1e6c86;
+  --color-marca-medio: #1f708a;
+  --color-marca-claro: #278fb0;
+  --color-marca-fundo: #e2f3f9;
+  --color-dourado: #ecb400;
+  --color-verde-cmr: #146c43;
+  --color-verde-fundo: #e8f5ee;
+  --color-vermelho-cmr: #b42318;
+  --color-vermelho-fundo: #fef3f2;
+  --color-ambar-cmr: #b54708;
+  --color-ambar-fundo: #fef6ee;
+  --color-roxo-cmr: #6b3fa0;
+  --color-roxo-fundo: #f3edfa;
+  --color-cinza-selo: #56656b;
+  --color-cinza-fundo: #eef2f3;
+  --color-foco-escuro: #ffd75e;
+}
+
+/*
+  Largura das barras dos graficos (components/ui/GraficoBarras.tsx):
+  barra-0 ... barra-100 = 0% ... 100%. Classe em vez de style="width" porque
+  a CSP do sistema proibe estilo inline. O @source inline garante que as 101
+  classes sejam geradas mesmo montadas dinamicamente.
+*/
+@utility barra-* {
+  width: calc(--value(integer) * 1%);
+}
+@source inline("barra-{0..100}");
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    line-height: 1.55;
+  }
+
+  a {
+    @apply text-primary underline-offset-4;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Alvo do "Ir ao conteudo" e titulos de passo recebem foco por script;
+     o contorno aparece so quando a navegacao e por teclado. */
+  [tabindex="-1"]:focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/*
+  Foco sempre visivel (eMAG 4.1 / WCAG 2.4.7 e 1.4.11). Fora de camada e com
+  !important de proposito: os componentes do shadcn usam `outline-none` +
+  anel translucido, que nao atinge 3:1. Este contorno vale para tudo.
+*/
+:focus-visible {
+  outline: 3px solid var(--ring) !important;
+  outline-offset: 2px !important;
+}
+
+/* Sobre a faixa azul (cabecalho/rodape), o contorno fica ambar. */
+[data-fundo="escuro"] :focus-visible {
+  outline-color: var(--color-foco-escuro) !important;
 }

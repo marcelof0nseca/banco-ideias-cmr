@@ -62,7 +62,7 @@ export type ResultadoTransicao =
 /**
  * Valida uma transicao pretendida contra o grafo, o perfil e a regra de
  * justificativa obrigatoria no arquivamento. NAO toca no banco: quem grava
- * a Tramitacao e persiste o novo status e lib/tramitacao.ts.
+ * a Tramitacao e persiste o novo status e lib/tramitacao/tramitacao.ts.
  *
  * Regras (secao 6.2):
  *  - transicao fora do grafo  -> 422
@@ -82,7 +82,7 @@ export function validarTransicao(params: {
     return {
       ok: false,
       httpStatus: 422,
-      motivo: `Transicao nao permitida: ${de} -> ${para}`,
+      motivo: `Transição não permitida: ${de} -> ${para}`,
     };
   }
 
@@ -90,7 +90,7 @@ export function validarTransicao(params: {
     return {
       ok: false,
       httpStatus: 403,
-      motivo: `Perfil ${perfil} nao pode executar a transicao ${de} -> ${para}`,
+      motivo: `Perfil ${perfil} não pode executar a transição ${de} -> ${para}`,
     };
   }
 
