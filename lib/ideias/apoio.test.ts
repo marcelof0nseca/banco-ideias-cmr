@@ -1,11 +1,11 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { apoiarIdeia, documentoDeApoioValido } from "./apoio";
 import { assinarInicio } from "./cadastro";
 import { resumir, STATUS_ACEITAM_APOIO } from "./consulta";
 
-beforeAll(() => {
-  process.env.DOCUMENTO_PEPPER ??= "pepper-de-teste";
-});
+// No topo, e nao em beforeAll: assinarInicio() roda ao montar os describe,
+// antes de qualquer hook. Sem isso o teste so passa onde existe .env (nao na CI).
+process.env.DOCUMENTO_PEPPER ??= "pepper-de-teste";
 
 describe("documentoDeApoioValido", () => {
   it("aceita CPF e CNPJ validos, com ou sem pontuacao", () => {
