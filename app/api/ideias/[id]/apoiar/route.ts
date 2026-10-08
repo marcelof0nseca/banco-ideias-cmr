@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { apoiarIdeia } from "@/lib/apoio";
-import { ipDe } from "@/lib/cadastro-registro";
+import { apoiarIdeia } from "@/lib/ideias/apoio";
+import { ipDe } from "@/lib/ideias/cadastro-registro";
 
 /**
  * POST /api/ideias/{protocolo}/apoiar - registra um apoio.

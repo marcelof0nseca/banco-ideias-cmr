@@ -1,4 +1,4 @@
-import type { Contagem } from "@/lib/indicadores";
+import type { Contagem } from "@/lib/indicadores/indicadores";
 import { Tabela } from "./Tabela";
 
 /**

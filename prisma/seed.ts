@@ -11,7 +11,7 @@ import { PrismaClient, StatusIdeia } from "./gen/client";
  * ideias do prototipo, para que o fluxo possa ser percorrido ponta a ponta
  * no dia 1, mesmo antes das rotas reais existirem.
  *
- * Observacao: para nao depender de lib/documento.ts (que exige as variaveis
+ * Observacao: para nao depender de lib/seguranca/documento.ts (que exige as variaveis
  * de ambiente de chave/pepper) nem de argon2 ainda nao instalado, o seed usa
  * hashes locais simples e senha de placeholder. Sao dados de teste.
  */

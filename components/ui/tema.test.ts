@@ -70,28 +70,21 @@ describe("contraste dos tokens (WCAG 2.1 AA)", () => {
     expect(contraste(cor(`color-${frente}`), cor(`color-${fundo}`))).toBeGreaterThanOrEqual(TEXTO);
   });
 
-  /** Mistura `frente` com opacidade `alfa` sobre `fundo` (ex.: text-white/80). */
-  function sobre(frente: string, alfa: number, fundo: string): string {
-    const canal = (h: string, i: number) => parseInt(h.slice(i, i + 2), 16);
-    const mix = [1, 3, 5].map((i) => Math.round(canal(frente, i) * alfa + canal(fundo, i) * (1 - alfa)));
-    return `#${mix.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
-  }
-
-  it("faixas azul-petroleo: texto branco, abas, rodape e foco ambar", () => {
+  it("faixas azuis: texto branco, abas, rodape e foco ambar", () => {
+    const faixa = cor("color-faixa");
     const marca = cor("color-marca");
-    const noite = cor("color-marca-noite");
-    // Titulo e abas inativas (e aba em hover).
-    for (const fundo of [marca, cor("color-marca-escuro"), cor("color-marca-medio")]) {
+    // Cabecalho e rodape (texto branco), abas inativas e aba em hover.
+    for (const fundo of [faixa, marca, cor("color-marca-escuro")]) {
       expect(contraste("#ffffff", fundo)).toBeGreaterThanOrEqual(TEXTO);
     }
-    // Subtitulo do cabecalho e texto do rodape usam text-white/80.
-    expect(contraste(sobre("#ffffff", 0.8, marca), marca)).toBeGreaterThanOrEqual(TEXTO);
-    expect(contraste(sobre("#ffffff", 0.8, noite), noite)).toBeGreaterThanOrEqual(TEXTO);
-    // Contorno de foco ambar nas faixas escuras.
-    expect(contraste(cor("color-foco-escuro"), marca)).toBeGreaterThanOrEqual(COMPONENTE);
-    expect(contraste(cor("color-foco-escuro"), noite)).toBeGreaterThanOrEqual(COMPONENTE);
-    // Aba ativa: texto da marca sobre o fundo da pagina.
+    // Contorno de foco ambar na faixa.
+    expect(contraste(cor("color-foco-escuro"), faixa)).toBeGreaterThanOrEqual(COMPONENTE);
+    // Aba ativa e titulos: texto da marca sobre o fundo da pagina.
     expect(contraste(marca, cor("background"))).toBeGreaterThanOrEqual(TEXTO);
+  });
+
+  it("cor exata do portal (marca-claro) nao serve de fundo para texto branco", () => {
+    expect(contraste("#ffffff", cor("color-marca-claro"))).toBeLessThan(TEXTO);
   });
 
   it("barras dos graficos se distinguem do cartao (>= 3:1)", () => {

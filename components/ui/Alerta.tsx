@@ -1,6 +1,6 @@
 import { CircleAlert, CircleCheck, Info, TriangleAlert, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/sistema/utils";
 import { Alert, AlertDescription, AlertTitle } from "./alert";
 
 /**

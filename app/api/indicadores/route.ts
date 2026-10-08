@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { carregarIndicadores } from "@/lib/indicadores-dados";
+import { carregarIndicadores } from "@/lib/indicadores/indicadores-dados";
 
 /**
  * GET /api/indicadores - series agregadas do programa (sem dado pessoal).

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/sistema/utils";
 
 /**
  * Menu das telas publicas. Componente de cliente so para ler a rota atual
@@ -40,7 +40,7 @@ export function NavPublica() {
                   "block rounded-t-lg border-t-4 px-4 py-2.5 text-sm font-semibold whitespace-nowrap no-underline transition-colors",
                   atual
                     ? "border-dourado bg-background text-marca"
-                    : "border-transparent bg-marca-escuro text-white hover:bg-marca-medio",
+                    : "border-transparent bg-marca-escuro text-white hover:bg-marca",
                 )}
               >
                 {item.rotulo}

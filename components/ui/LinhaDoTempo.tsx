@@ -1,5 +1,5 @@
 import type { EventoPublico } from "@/types/publico";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/sistema/utils";
 import { rotuloStatus } from "./status";
 
 /**

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { acompanharIdeia } from "@/lib/acompanhamento";
-import { ipDe } from "@/lib/cadastro-registro";
+import { acompanharIdeia } from "@/lib/ideias/acompanhamento";
+import { ipDe } from "@/lib/ideias/cadastro-registro";
 
 /**
  * POST /api/acompanhar - situacao da ideia para o proprio autor.

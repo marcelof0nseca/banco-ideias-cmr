@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { cadastrarIdeia, ipDe } from "@/lib/cadastro-registro";
+import { cadastrarIdeia, ipDe } from "@/lib/ideias/cadastro-registro";
 
 /**
  * POST /api/ideias - cadastro de ideia por cliente JSON.

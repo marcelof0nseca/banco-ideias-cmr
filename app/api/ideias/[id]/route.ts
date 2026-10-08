@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { carregarIdeiaPublica } from "@/lib/consulta";
+import { carregarIdeiaPublica } from "@/lib/ideias/consulta";
 
 /**
  * GET /api/ideias/{protocolo} - detalhe publico (IdeiaPublicaDetalhe).

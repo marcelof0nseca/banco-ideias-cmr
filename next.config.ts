@@ -11,7 +11,7 @@ import type { NextConfig } from "next";
  *
  * Nenhuma linha de codigo muda entre um cenario e outro. Por isso NENHUM
  * link ou recurso pode usar caminho fixo iniciado em "/": use next/link,
- * next/image ou lib/url.ts.
+ * next/image ou lib/sistema/url.ts.
  */
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 

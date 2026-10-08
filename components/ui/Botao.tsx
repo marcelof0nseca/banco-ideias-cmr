@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/sistema/utils";
 import { Button, buttonVariants } from "./button";
 
 /**

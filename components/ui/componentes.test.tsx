@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { StatusIdeia } from "@/prisma/gen/client";
-import { exibicaoAutor } from "@/lib/publico";
+import { exibicaoAutor } from "@/lib/ideias/publico";
 import { Alerta } from "./Alerta";
 import { Botao } from "./Botao";
 import { CampoSelecao, CampoTexto } from "./Campo";

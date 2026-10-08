@@ -11,7 +11,7 @@
   Identidade visual (especificacao, secao 12.2) sobre o tema do shadcn/ui.
 
   Os tokens semanticos do shadcn (--primary, --muted-foreground...) apontam
-  para a paleta institucional da CMR (azul-petroleo + dourado do brasao). Confirmar contra
+  para a paleta institucional da CMR (azul do portal + dourado do brasao). Confirmar contra
   o manual de identidade da Camara (contrato "Tokens de cor", dono: Pessoa A).
 
   Contraste (WCAG 2.1 AA), conferido em components/ui/tema.test.ts:
@@ -22,34 +22,34 @@
 */
 
 :root {
-  --background: #f1f6f7;
+  --background: #f2f8fa;
   --foreground: #16232a;
   --card: #ffffff;
   --card-foreground: #16232a;
   --popover: #ffffff;
   --popover-foreground: #16232a;
-  /* Azul-petroleo da Camara: acoes (botoes, links). */
-  --primary: #0b7285;
-  --primary-hover: #095c6b;
+  /* Azul da Camara (mesmo matiz do portal): acoes (botoes, links). */
+  --primary: #207792;
+  --primary-hover: #1a5f75;
   --primary-foreground: #ffffff;
-  --secondary: #e1eff2;
-  --secondary-foreground: #0b4f5e;
-  --muted: #eaf3f5;
+  --secondary: #e2f3f9;
+  --secondary-foreground: #1a5f75;
+  --muted: #eaf5f8;
   --muted-foreground: #56656b;
-  --accent: #e3f2f5;
-  --accent-foreground: #0b4f5e;
+  --accent: #e2f3f9;
+  --accent-foreground: #1a5f75;
   --destructive: #b42318;
-  --border: #d3e2e6;
+  --border: #d0e5ec;
   /* Borda de controles de formulario: >= 3:1 contra branco (WCAG 1.4.11). */
   --input: #77878d;
-  --ring: #0b4f5e;
+  --ring: #1a5f75;
   --radius: 0.5rem;
 
-  --chart-1: #00809c; /* validada: skill dataviz (croma, luminosidade, contraste) */
+  --chart-1: #227d9a; /* validada: skill dataviz (croma, luminosidade, contraste) */
   --chart-2: #146c43;
   --chart-3: #b54708;
   --chart-4: #6b3fa0;
-  --chart-5: #0b4f5e;
+  --chart-5: #134453;
 }
 
 @theme inline {
@@ -91,15 +91,22 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Paleta institucional: azul-petroleo da Camara + dourado do brasao, para o
-   que nao tem token semantico (faixa do cabecalho, selos de situacao). */
+/* Paleta institucional: azul do portal da Camara + dourado do brasao, para
+   o que nao tem token semantico (faixas, titulos, selos de situacao).
+
+   O portal (recife.pe.leg.br) usa #278fb0 (marca-claro), mas texto branco
+   sobre ele fica em 3,72:1 e reprova o WCAG AA. Os demais tons tem o mesmo
+   matiz (194 graus) e saturacao, so mais escuros:
+     faixa (cabecalho e rodape)  #227d9a  branco 4,70:1
+     marca (titulos)             #1a5f75  branco 7,15:1
+   marca-claro so pode ser usado como decoracao, nunca atras de texto. */
 @theme {
-  --color-marca: #0b4f5e;
-  --color-marca-noite: #07343f;
-  --color-marca-escuro: #0e6272;
-  --color-marca-medio: #0e6c7d;
-  --color-marca-claro: #3fa7b8;
-  --color-marca-fundo: #e3f2f5;
+  --color-faixa: #227d9a;
+  --color-marca: #1a5f75;
+  --color-marca-escuro: #1e6c86;
+  --color-marca-medio: #1f708a;
+  --color-marca-claro: #278fb0;
+  --color-marca-fundo: #e2f3f9;
   --color-dourado: #ecb400;
   --color-verde-cmr: #146c43;
   --color-verde-fundo: #e8f5ee;
@@ -111,7 +118,7 @@
   --color-roxo-fundo: #f3edfa;
   --color-cinza-selo: #56656b;
   --color-cinza-fundo: #eef2f3;
-  --color-foco-escuro: #ffb020;
+  --color-foco-escuro: #ffd75e;
 }
 
 /*

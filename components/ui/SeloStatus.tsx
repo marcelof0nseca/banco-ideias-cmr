@@ -1,5 +1,5 @@
 import type { StatusIdeia } from "@/prisma/gen/client";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/sistema/utils";
 import { Badge } from "./badge";
 import { APARENCIA_STATUS, type FormaSelo } from "./status";
 

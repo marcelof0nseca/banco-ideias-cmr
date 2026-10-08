@@ -56,12 +56,14 @@ Confira: `http://localhost:3000/consulta` deve listar as 3 ideias de exemplo.
 ## Organização
 
 Divisão de trabalho e regras da dupla em [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Regras e padrões do front-end (leitura obrigatória antes de alterar telas) em
+[`docs/frontend.md`](docs/frontend.md).
 Integração com o portal da Câmara em
 [`docs/implantacao/integracao-portal.md`](docs/implantacao/integracao-portal.md).
 
 ```
-app/(publico)/   telas sem login            (Pessoa A)
-app/(painel)/    triagem, gabinete, admin   (Pessoa B)
+app/(pages)/(publico)/   telas sem login            (Pessoa A)
+app/(pages)/(painel)/    triagem, gabinete, admin   (Pessoa B)
 lib/             regras de domínio e utilitários
 prisma/          schema, migrações, seed    (Pessoa B)
 types/publico.ts contrato de dados públicos (Pessoa A)
