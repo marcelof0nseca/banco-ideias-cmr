@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Banco de Ideias Legislativas — Especificação Técnica</title>
+<style>
+  :root{
+    --azul:#17356B; --azul2:#2F5CA8; --acao:#2563EB;
+    --verde:#146C43; --vermelho:#B42318; --ambar:#B54708;
+    --tinta:#1A1A1A; --cinza:#555; --linha:#C9D2E0; --fundo:#F4F6FA;
+  }
+  @page { size:A4; margin:18mm 16mm 16mm 16mm; }
+  @page:first { margin:0; }
+
+  *{box-sizing:border-box;}
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    font-size:10.2pt; line-height:1.55; color:var(--tinta);
+    margin:0; background:#fff;
+  }
+  h1,h2,h3,h4,.sans{ font-family:'Segoe UI',Calibri,Helvetica,Arial,sans-serif; }
+
+  /* ---------- CAPA ---------- */
+  .capa{
+    height:293mm; padding:38mm 22mm 20mm; page-break-after:always;
+    border-top:14mm solid var(--azul); position:relative;
+  }
+  .capa .orgao{ font-size:11pt; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--azul); font-weight:700; }
+  .capa .orgao small{ display:block; letter-spacing:.04em; text-transform:none;
+    font-weight:400; color:var(--cinza); font-size:9.5pt; margin-top:3px; }
+  .capa h1{ font-size:31pt; line-height:1.13; color:var(--azul);
+    margin:26mm 0 0; font-weight:700; letter-spacing:-.02em; }
+  .capa .sub{ font-size:13pt; color:var(--cinza); margin-top:8mm; line-height:1.45;
+    font-family:'Segoe UI',Calibri,sans-serif; max-width:135mm; }
+  .capa .regra{ width:52mm; height:5px; background:var(--acao); margin:9mm 0; }
+  .capa .meta{ position:absolute; bottom:24mm; left:22mm; right:22mm;
+    font-family:'Segoe UI',Calibri,sans-serif; font-size:9.5pt; }
+  .capa .meta table{ width:100%; border-collapse:collapse; }
+  .capa .meta td{ padding:4px 0; vertical-align:top; }
+  .capa .meta td:first-child{ width:42mm; color:var(--cinza); }
+  .capa .meta td:last-child{ font-weight:600; }
+  .capa .aviso{ margin-top:7mm; padding:8px 11px; background:var(--fundo);
+    border-left:4px solid var(--azul2); color:var(--cinza); font-size:8.6pt; line-height:1.45; }
+
+  /* ---------- TÍTULOS ---------- */
+  h2{
+    font-size:16.5pt; color:var(--azul); margin:0 0 10px;
+    padding-bottom:6px; border-bottom:2.5px solid var(--azul);
+    page-break-after:avoid; page-break-before:always;
+  }
+  h2:first-of-type{ page-break-before:avoid; }
+  h2 .n{ color:var(--acao); font-weight:700; margin-right:9px; }
+  h3{ font-size:11.8pt; color:var(--azul2); margin:19px 0 7px; page-break-after:avoid; }
+  h4{ font-size:10.3pt; color:var(--tinta); margin:14px 0 5px; page-break-after:avoid;
+      text-transform:uppercase; letter-spacing:.05em; }
+  p{ margin:0 0 9px; text-align:justify; }
+  ul,ol{ margin:0 0 10px; padding-left:19px; }
+  li{ margin-bottom:4px; }
+  strong{ color:#000; }
+  code{ font-family:Consolas,'Courier New',monospace; font-size:.88em;
+    background:var(--fundo); padding:1px 4px; border-radius:3px; color:#0B2A5B; }
+
+  /* ---------- SUMÁRIO ---------- */
+  .toc{ page-break-after:always; }
+  .toc ol{ list-style:none; padding:0; margin:0;
+    font-family:'Segoe UI',Calibri,sans-serif; font-size:10.4pt; counter-reset:s; }
+  .toc li{ counter-increment:s; padding:7px 0; border-bottom:1px dotted var(--linha); }
+  .toc li::before{ content:counter(s) "."; display:inline-block; width:22px;
+    color:var(--acao); font-weight:700; }
+  .toc li b{ font-weight:600; }
+  .toc li span{ display:block; margin-left:22px; color:var(--cinza); font-size:8.9pt; }
+
+  /* ---------- TABELAS ---------- */
+  table.d{ width:100%; border-collapse:collapse; margin:11px 0 14px;
+    font-family:'Segoe UI',Calibri,sans-serif; font-size:8.9pt;
+    page-break-inside:avoid; }
+  table.d th{ background:var(--azul); color:#fff; text-align:left;
+    padding:7px 9px; font-weight:600; border:1px solid var(--azul); }
+  table.d td{ padding:6px 9px; border:1px solid var(--linha); vertical-align:top; }
+  table.d tr:nth-child(even) td{ background:#FAFBFD; }
+  table.d td code{ font-size:.92em; }
+
+  /* ---------- BLOCOS ---------- */
+  pre{ font-family:Consolas,'Courier New',monospace; font-size:8.2pt; line-height:1.45;
+    background:#0F1D33; color:#E6EDF7; padding:11px 13px; border-radius:5px;
+    overflow:visible; white-space:pre-wrap; word-wrap:break-word;
+    margin:10px 0 13px; page-break-inside:avoid; }
+  pre .c{ color:#7E9CC4; font-style:italic; }
+  pre .k{ color:#7FC4FF; }
+  pre .s{ color:#9FE0A4; }
+
+  .box{ padding:10px 13px; margin:11px 0 13px; border-radius:4px;
+    font-size:9.4pt; page-break-inside:avoid; background:var(--fundo);
+    border-left:4px solid var(--azul2); }
+  .box b.rot{ display:block; font-family:'Segoe UI',Calibri,sans-serif;
+    text-transform:uppercase; letter-spacing:.07em; font-size:8.2pt;
+    color:var(--azul2); margin-bottom:4px; }
+  .box p:last-child{ margin-bottom:0; }
+  .box.alerta{ background:#FEF6EE; border-left-color:var(--ambar); }
+  .box.alerta b.rot{ color:var(--ambar); }
+  .box.ok{ background:#F0F8F3; border-left-color:var(--verde); }
+  .box.ok b.rot{ color:var(--verde); }
+  .box.crit{ background:#FEF3F2; border-left-color:var(--vermelho); }
+  .box.crit b.rot{ color:var(--vermelho); }
+
+  figure{ margin:14px 0 16px; page-break-inside:avoid; }
+  figure svg{ width:100%; height:auto; display:block; }
+  figcaption{ font-family:'Segoe UI',Calibri,sans-serif; font-size:8.4pt;
+    color:var(--cinza); margin-top:6px; padding-left:2px;
+    border-left:3px solid var(--linha); padding:3px 0 3px 8px; }
+
+  .cols2{ column-count:2; column-gap:9mm; }
+  .cols2 li{ break-inside:avoid; }
+  .nb{ page-break-inside:avoid; }
+
+  .sel{ font-family:'Segoe UI',Calibri,sans-serif; font-size:8.5pt;
+    display:inline-block; padding:1px 7px; border-radius:9px; font-weight:600;
+    border:1px solid; }
+  .sel.a{ color:var(--verde); border-color:var(--verde); background:#F0F8F3; }
+  .sel.b{ color:var(--ambar); border-color:var(--ambar); background:#FEF6EE; }
+  .sel.c{ color:var(--vermelho); border-color:var(--vermelho); background:#FEF3F2; }
+</style>
+</head>
+<body>
+
+<!-- ============ CAPA ============ -->
+<section class="capa">
+  <div class="orgao">Câmara Municipal do Recife
+    <small>Participação Popular · Resolução nº 2.690/2018</small></div>
+
+  <h1>Banco de Ideias<br>Legislativas</h1>
+  <div class="regra"></div>
+  <div class="sub">Especificação técnica, arquitetura, segurança da informação
+    e plano de implantação de um sistema web para registro, triagem, análise
+    parlamentar e consulta pública de ideias legislativas apresentadas pelo cidadão.</div>
+
+  <div class="meta">
+    <table>
+      <tr><td>Documento</td><td>Especificação Técnica — v1.0</td></tr>
+      <tr><td>Data</td><td>27 de agosto de 2026</td></tr>
+      <tr><td>Classificação</td><td>Interno — proposta para avaliação técnica</td></tr>
+      <tr><td>Destinatário</td><td>Coordenação / Diretoria de Tecnologia da Informação</td></tr>
+      <tr><td>Elaborado por</td><td>_______________________________________</td></tr>
+    </table>
+    <div class="aviso"><b>Natureza deste documento.</b> Trata-se de uma proposta técnica
+      submetida à avaliação. Nenhuma decisão aqui descrita foi implantada, e nenhum
+      componente descrito está em operação. Números de dimensionamento e de esforço são
+      estimativas, sinalizadas como tal no texto.</div>
+  </div>
+</section>
+
+<!-- ============ SUMÁRIO ============ -->
+<section class="toc">
+  <h2 style="page-break-before:avoid;">Sumário</h2>
+  <ol>
+    <li><b>Sumário executivo</b><span>O problema, a solução proposta e o que muda</span></li>
+    <li><b>Situação atual</b><span>Diagnóstico do formulário em produção e suas lacunas</span></li>
+    <li><b>Escopo funcional</b><span>Os quatro fluxos, telas novas e critérios de aceite</span></li>
+    <li><b>Arquitetura da solução</b><span>Camadas, stack e justificativa de cada escolha</span></li>
+    <li><b>Modelo de dados</b><span>Entidades, relacionamentos, índices e decisões de modelagem</span></li>
+    <li><b>Regras de tramitação</b><span>Máquina de estados e imutabilidade do histórico</span></li>
+    <li><b>Interface de programação (API)</b><span>Endpoints, contratos e dados abertos</span></li>
+    <li><b>Segurança da informação</b><span>AuthN/AuthZ, criptografia, OWASP Top 10, auditoria</span></li>
+    <li><b>Adequação à LGPD</b><span>Bases legais, inventário de dados, retenção e direitos</span></li>
+    <li><b>Acessibilidade e conformidade legal</b><span>eMAG, WCAG 2.1 AA, LAI</span></li>
+    <li><b>Infraestrutura, implantação e operação</b><span>Ambientes, CI/CD, backup, observabilidade</span></li>
+    <li><b>Integração com o portal institucional</b><span>Subdomínio, iframe ou proxy reverso</span></li>
+    <li><b>Plano de implantação</b><span>Fases, entregáveis, esforço e dependências</span></li>
+    <li><b>Riscos e mitigações</b><span>Matriz de riscos técnicos, legais e de adoção</span></li>
+    <li><b>Roadmap posterior (v2)</b><span>O que ficou fora do escopo inicial e por quê</span></li>
+    <li><b>Glossário</b><span>Termos legislativos e termos de tecnologia</span></li>
+  </ol>
+</section>
+
+<!-- ============ 1 ============ -->
+<h2><span class="n">1.</span>Sumário executivo</h2>
+
+<p>A Câmara Municipal do Recife instituiu, pela <strong>Resolução nº 2.690/2018</strong>
+(originada do Projeto de Resolução nº 23/2018), o <em>Banco de Ideias Legislativas</em> —
+canal pelo qual o cidadão apresenta sugestões que podem ser adotadas por vereadores e
+transformadas em proposições. A finalidade é legítima e o instrumento existe. O que não
+existe é <strong>o sistema que sustenta o ciclo completo</strong>.</p>
+
+<p>Hoje, o canal disponível no portal é um <strong>formulário de coleta</strong>: recebe
+os dados e os encaminha. Não gera número de protocolo, não registra a triagem, não oferece
+um painel aos gabinetes, não publica o acervo e — o ponto mais crítico — <strong>não devolve
+nada ao cidadão</strong>. Quem envia uma ideia não descobre se ela foi lida, aceita,
+encaminhada ou descartada, nem por quê.</p>
+
+<p>Este documento especifica a substituição desse formulário por um <strong>sistema de
+tramitação participativa</strong>, hospedado em subdomínio próprio, com identidade visual
+alinhada à do portal. Ele implementa quatro fluxos encadeados e auditáveis:</p>
+
+<table class="d">
+  <tr><th style="width:26mm">Etapa</th><th style="width:30mm">Ator</th><th>O que o sistema passa a fazer</th></tr>
+  <tr><td><b>1. Cadastro</b></td><td>Cidadão ou entidade</td>
+      <td>Registra a ideia com identificação obrigatória (CPF/CNPJ validado), emite
+          <b>número de protocolo</b> e comprovante, e verifica se já existe ideia semelhante</td></tr>
+  <tr><td><b>2. Triagem</b></td><td>Servidor da Secretaria</td>
+      <td>Analisa conteúdo e identificação; torna a ideia <b>Disponível</b> ou a
+          <b>Arquiva com justificativa obrigatória</b>, com prazo monitorado</td></tr>
+  <tr><td><b>3. Análise parlamentar</b></td><td>Gabinete ou comissão</td>
+      <td>Consulta o acervo disponível, declara <b>Em Análise</b> e, se for o caso,
+          <b>Adota</b> a ideia — tudo registrado com autoria e data</td></tr>
+  <tr><td><b>4. Consulta pública</b></td><td>Qualquer pessoa</td>
+      <td>Consulta todo o acervo triado, com página própria por ideia, linha do tempo
+          de tramitação e possibilidade de <b>apoiar</b></td></tr>
+</table>
+
+<h3>1.1 O que muda, na prática</h3>
+<ul>
+  <li><strong>Rastreabilidade.</strong> Toda mudança de situação grava um registro
+      permanente com autor, data e justificativa. Não existe alteração de status sem rastro.</li>
+  <li><strong>Devolutiva ao cidadão.</strong> Com protocolo e CPF, o autor acompanha o
+      andamento e, em caso de arquivamento, <strong>lê o motivo</strong>.</li>
+  <li><strong>Ganho operacional na Secretaria.</strong> Fila priorizada por prazo, filtros,
+      ações em lote e exportação substituem o controle manual por planilha e e-mail.</li>
+  <li><strong>Sinal de prioridade para os gabinetes.</strong> Ideias semelhantes deixam de
+      se multiplicar: o cidadão <em>apoia</em> a existente, e o volume de apoios ordena o painel.</li>
+  <li><strong>Transparência ativa.</strong> Painel de indicadores e endpoint de dados
+      abertos em JSON/CSV, sem dados pessoais, atendendo à Lei de Acesso à Informação.</li>
+</ul>
+
+<div class="box ok"><b class="rot">Ponto central para a avaliação técnica</b>
+<p>O desafio deste sistema <strong>não é escala</strong> — o volume esperado é de dezenas a
+poucas centenas de registros por mês, carga trivial para qualquer stack moderna. O desafio é
+<strong>conformidade</strong>: tratar CPF de cidadãos sob a LGPD, atender à acessibilidade
+digital exigida por lei, e produzir uma trilha de auditoria que resista a questionamento.
+As seções 8, 9 e 10 são, por isso, as mais densas deste documento.</p></div>
+
+<!-- ============ 2 ============ -->
+<h2><span class="n">2.</span>Situação atual</h2>
+
+<h3>2.1 O que existe em produção</h3>
+<p>O canal atual, publicado em <code>/participacao-popular/banco-de-ideias-legislativas</code>,
+é uma página do portal institucional (Plone/Zope, Python) contendo um formulário com os
+campos: nome, e-mail, área temática, título da ideia, descrição e detalhamento
+complementar. A submissão encerra a interação — não há retorno estruturado ao remetente
+nem estado persistido que descreva o que ocorre em seguida.</p>
+
+<h3>2.2 Lacunas identificadas</h3>
+<table class="d">
+  <tr><th style="width:44mm">Lacuna</th><th>Consequência prática</th></tr>
+  <tr><td><b>Sem número de protocolo</b></td>
+      <td>Não há identificador estável para o cidadão citar, para a Secretaria referenciar
+          nem para o gabinete rastrear. Toda comunicação posterior depende de busca por nome.</td></tr>
+  <tr><td><b>Sem registro de triagem</b></td>
+      <td>A análise, se ocorre, acontece fora do sistema (e-mail, planilha). Não é possível
+          responder oficialmente quem analisou, quando, e com que fundamento.</td></tr>
+  <tr><td><b>Sem painel para gabinetes</b></td>
+      <td>A distribuição das ideias aos vereadores depende de encaminhamento manual. Não há
+          registro de qual gabinete analisou ou adotou o quê.</td></tr>
+  <tr><td><b>Sem consulta pública</b></td>
+      <td>O acervo é invisível. O cidadão não sabe o que já foi proposto — o que produz
+          duplicidade e impede controle social sobre o programa.</td></tr>
+  <tr><td><b>Sem devolutiva</b></td>
+      <td>É a falha mais sensível reputacionalmente: o cidadão participa e recebe silêncio,
+          o que desestimula a participação seguinte.</td></tr>
+  <tr><td><b>Identificação frágil</b></td>
+      <td>A Resolução exige identificação do autor. Coletar apenas nome e e-mail, sem
+          documento validado, não sustenta a exigência nem impede envios em massa.</td></tr>
+  <tr><td><b>Sem indicadores</b></td>
+      <td>Não há como responder quantas ideias chegaram, sobre quais temas, de quais regiões,
+          nem quantas viraram proposição — informação necessária para prestação de contas.</td></tr>
+</table>
+
+<div class="box alerta"><b class="rot">Observação de escopo</b>
+<p>O diagnóstico acima foi construído a partir da <strong>observação externa da página
+pública</strong>. É possível que existam controles internos (planilhas, protocolo SEI,
+rotinas da Secretaria) não visíveis externamente. Recomenda-se validar esta seção com a
+Secretaria responsável antes da decisão final — se já houver protocolo institucional em uso,
+o sistema deve <em>referenciá-lo</em> em vez de criar numeração concorrente.</p></div>
+
+<!-- ============ 3 ============ -->
+<h2><span class="n">3.</span>Escopo funcional</h2>
+
+<h3>3.1 Perfis de acesso</h3>
+<table class="d">
+  <tr><th style="width:32mm">Perfil</th><th style="width:24mm">Autenticação</th><th>Permissões</th></tr>
+  <tr><td><b>Cidadão</b></td><td>Não autenticado</td>
+      <td>Cadastrar ideia, consultar acervo público, apoiar ideia, acompanhar a própria
+          ideia via protocolo + CPF</td></tr>
+  <tr><td><b>Servidor (Triagem)</b></td><td>Login interno</td>
+      <td>Ver fila de pendentes, revelar CPF sob registro, editar redação, aprovar
+          (Disponível) ou arquivar com justificativa, exportar relatórios</td></tr>
+  <tr><td><b>Gabinete</b></td><td>Login interno</td>
+      <td>Consultar acervo disponível, declarar Em Análise, Adotar, devolver ao acervo,
+          exportar a carteira do gabinete</td></tr>
+  <tr><td><b>Administrador</b></td><td>Login interno</td>
+      <td>Gerir usuários e temas, consultar trilha de auditoria, arquivar em qualquer
+          situação com justificativa, atender requisições de titulares (LGPD)</td></tr>
+</table>
+
+<h3>3.2 Etapa 1 — Cadastro da ideia pelo cidadão</h3>
+<p>O formulário único é substituído por um assistente de quatro passos. A motivação é
+concreta: formulário longo em página única tem abandono alto em telefone celular — origem
+provável da maioria dos acessos — e não previne duplicidade.</p>
+
+<table class="d">
+  <tr><th style="width:34mm">Passo</th><th>Conteúdo e regras</th></tr>
+  <tr><td><b>1. Sua ideia já existe?</b></td>
+      <td>Busca textual no acervo já publicado. Havendo semelhante, o sistema oferece
+          <b>“Apoiar esta ideia”</b> como alternativa a criar outro registro. É opcional
+          — o cidadão pode seguir e cadastrar assim mesmo.</td></tr>
+  <tr><td><b>2. A ideia</b></td>
+      <td>Tema (lista controlada), título (até 150 caracteres), descrição (até 5.000,
+          com contador visível), bairro e RPA. Rascunho preservado localmente entre passos.</td></tr>
+  <tr><td><b>3. Identificação</b></td>
+      <td>Tipo de autor (pessoa física / jurídica), CPF ou CNPJ com <b>validação de
+          dígito verificador</b> — não apenas máscara —, nome ou razão social, e-mail,
+          telefone opcional. Dois consentimentos <b>separados</b>: ciência do tratamento
+          de dados e autorização (opcional) para divulgação do nome.</td></tr>
+  <tr><td><b>4. Confirmação</b></td>
+      <td>Número de protocolo em destaque, token de acompanhamento, comprovante para
+          download e informação do prazo de triagem.</td></tr>
+</table>
+
+<h4>Critérios de aceite</h4>
+<ul>
+  <li>CPF ou CNPJ inválido no dígito verificador <strong>bloqueia</strong> o envio, com
+      mensagem de erro associada ao campo e anunciada a leitores de tela.</li>
+  <li>O protocolo é único, sequencial por ano e no formato <code>BIL-2026-000123</code>.</li>
+  <li>Reenvio do mesmo formulário (duplo clique, retorno do navegador) <strong>não</strong>
+      cria segundo registro — proteção por chave de idempotência.</li>
+  <li>O consentimento de divulgação do nome, quando não marcado, resulta em exibição
+      pública como “Cidadão(ã) do Recife”.</li>
+</ul>
+
+<h3>3.3 Etapa 2 — Triagem pelo servidor</h3>
+<p>Mantém a estrutura de tabela dos protótipos aprovados, acrescentando os controles que
+tornam a decisão auditável:</p>
+<ul>
+  <li><strong>Fila ordenada por prazo</strong>, com indicador de SLA (sugestão: 15 dias
+      úteis, parametrizável) e destaque para itens vencidos.</li>
+  <li><strong>Arquivamento exige motivo</strong>, escolhido em lista controlada — fora da
+      competência do município, conteúdo ofensivo, duplicidade, identificação inválida,
+      texto incompreensível — <strong>somado a</strong> justificativa em texto livre.</li>
+  <li><strong>Edição de redação</strong> para correção ortográfica e de clareza,
+      <strong>preservando o texto original</strong> no histórico.</li>
+  <li><strong>CPF mascarado por padrão</strong> (<code>111.***.***-44</code>); a revelação
+      é uma ação explícita que grava quem revelou, quando e sobre qual registro.</li>
+  <li>Busca, filtros por tema e período, ações em lote e exportação em CSV e PDF.</li>
+</ul>
+
+<h3>3.4 Etapa 3 — Painel do gabinete</h3>
+<ul>
+  <li>Ordenação por <strong>número de apoios</strong>, data ou tema — o volume de apoio
+      popular passa a orientar a priorização.</li>
+  <li><strong>Múltiplos gabinetes podem manifestar interesse na mesma ideia.</strong>
+      Decisão deliberada: reserva exclusiva por ordem de clique geraria disputa
+      e travaria o acervo.</li>
+  <li>Ao adotar, registra-se o gabinete responsável, a data e uma observação.</li>
+  <li>Visão “minhas ideias em análise” e exportação da carteira do gabinete.</li>
+</ul>
+
+<h3>3.5 Etapa 4 — Consulta pública</h3>
+<ul>
+  <li>Cada ideia recebe <strong>endereço próprio</strong>
+      (<code>/consulta/BIL-2026-000123</code>) com descrição completa, linha do tempo
+      da tramitação e botão de apoio.</li>
+  <li>Filtros por tema, situação, período e RPA; ordenação por mais recentes ou mais apoiadas.</li>
+  <li>Renderização no servidor, tornando as páginas indexáveis por buscadores e
+      legíveis por leitores de tela sem depender de JavaScript.</li>
+  <li>O motivo do arquivamento <strong>não</strong> é exibido publicamente — apenas ao
+      autor, na área de acompanhamento (ver seção 9).</li>
+</ul>
+
+<h3>3.6 Telas adicionais</h3>
+<table class="d">
+  <tr><th style="width:38mm">Tela</th><th>Função e justificativa</th></tr>
+  <tr><td><b>Acompanhar minha ideia</b></td>
+      <td>Autenticação leve por protocolo + CPF (ou token do comprovante). Exibe situação
+          atual, linha do tempo e, se arquivada, o motivo. Responde diretamente à lacuna
+          mais grave do canal atual.</td></tr>
+  <tr><td><b>Indicadores públicos</b></td>
+      <td>Ideias por tema e por RPA, tempo médio de triagem, taxa de aprovação e taxa de
+          adoção. Insumo pronto para prestação de contas e para a Comunicação.</td></tr>
+  <tr><td><b>Dados abertos</b></td>
+      <td>Endpoint em JSON e CSV, sem qualquer dado pessoal, permitindo reuso por
+          imprensa, academia e organizações da sociedade civil.</td></tr>
+</table>
+
+<!-- ============ 4 ============ -->
+<h2><span class="n">4.</span>Arquitetura da solução</h2>
+
+<h3>4.1 Visão em camadas</h3>
+
+<figure>
+<svg viewBox="0 0 760 486" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Diagrama de arquitetura em camadas, do navegador ao banco de dados">
+  <defs>
+    <marker id="sa" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,1 L8,4.5 L0,8 z" fill="#17356B"/></marker>
+  </defs>
+  <style>
+    .bx{fill:#fff;stroke:#17356B;stroke-width:1.6}
+    .bxa{fill:#EEF3FB;stroke:#2F5CA8;stroke-width:1.4}
+    .bxd{fill:#F7F9FC;stroke:#7A8CA6;stroke-width:1.2}
+    .t{font-family:'Segoe UI',Calibri,sans-serif;fill:#1A1A1A}
+    .tt{font-size:12.5px;font-weight:700;fill:#17356B}
+    .ts{font-size:10.5px;fill:#4A5568}
+    .tl{font-size:10.5px;fill:#2563EB;font-weight:600}
+    .ln{stroke:#17356B;stroke-width:1.5;fill:none;marker-end:url(#sa)}
+    .zona{fill:none;stroke:#B42318;stroke-width:1.4;stroke-dasharray:7 5}
+    .zl{font-size:10.5px;fill:#B42318;font-weight:700;
+        font-family:'Segoe UI',Calibri,sans-serif;letter-spacing:.06em}
+  </style>
+
+  <!-- clientes -->
+  <rect class="bx" x="30"  y="14" width="200" height="52" rx="4"/>
+  <text class="t tt" x="130" y="36" text-anchor="middle">Cidadão</text>
+  <text class="t ts" x="130" y="52" text-anchor="middle">navegador · sem autenticação</text>
+
+  <rect class="bx" x="280" y="14" width="200" height="52" rx="4"/>
+  <text class="t tt" x="380" y="36" text-anchor="middle">Servidor / Triagem</text>
+  <text class="t ts" x="380" y="52" text-anchor="middle">sessão autenticada</text>
+
+  <rect class="bx" x="530" y="14" width="200" height="52" rx="4"/>
+  <text class="t tt" x="630" y="36" text-anchor="middle">Gabinete / Admin</text>
+  <text class="t ts" x="630" y="52" text-anchor="middle">sessão autenticada</text>
+
+  <path class="ln" d="M130,66 L130,104"/>
+  <path class="ln" d="M380,66 L380,104"/>
+  <path class="ln" d="M630,66 L630,104"/>
+  <text class="t tl" x="392" y="88" text-anchor="start">HTTPS · TLS 1.3 · HSTS</text>
+
+  <!-- fronteira de confiança -->
+  <rect class="zona" x="14" y="112" width="732" height="352" rx="7"/>
+  <text class="zl" x="26" y="130">FRONTEIRA DE CONFIANÇA — REDE INTERNA / SERVIDOR</text>
+
+  <!-- nginx -->
+  <rect class="bxa" x="40" y="142" width="680" height="50" rx="4"/>
+  <text class="t tt" x="60" y="164">Proxy reverso (Nginx)</text>
+  <text class="t ts" x="60" y="181">Terminação TLS · cabeçalhos CSP, HSTS, X-Frame-Options · limitação de taxa por IP · logs de acesso</text>
+
+  <path class="ln" d="M380,192 L380,214"/>
+
+  <!-- app -->
+  <rect class="bxa" x="40" y="220" width="680" height="150" rx="4"/>
+  <text class="t tt" x="60" y="242">Aplicação — Next.js 15 (Node.js) · TypeScript</text>
+
+  <rect class="bxd" x="58" y="254" width="204" height="98" rx="3"/>
+  <text class="t tt" x="160" y="274" text-anchor="middle" style="font-size:11.5px">Middleware</text>
+  <text class="t ts" x="160" y="292" text-anchor="middle">verificação de sessão</text>
+  <text class="t ts" x="160" y="307" text-anchor="middle">roteamento por perfil</text>
+  <text class="t ts" x="160" y="322" text-anchor="middle">proteção CSRF</text>
+  <text class="t ts" x="160" y="340" text-anchor="middle">bloqueio de rota /painel</text>
+
+  <rect class="bxd" x="278" y="254" width="204" height="98" rx="3"/>
+  <text class="t tt" x="380" y="274" text-anchor="middle" style="font-size:11.5px">Server Components</text>
+  <text class="t ts" x="380" y="292" text-anchor="middle">páginas renderizadas</text>
+  <text class="t ts" x="380" y="307" text-anchor="middle">no servidor (SSR)</text>
+  <text class="t ts" x="380" y="322" text-anchor="middle">consulta pública indexável</text>
+  <text class="t ts" x="380" y="340" text-anchor="middle">funciona sem JavaScript</text>
+
+  <rect class="bxd" x="498" y="254" width="204" height="98" rx="3"/>
+  <text class="t tt" x="600" y="274" text-anchor="middle" style="font-size:11.5px">Route Handlers</text>
+  <text class="t ts" x="600" y="292" text-anchor="middle">API REST · JSON</text>
+  <text class="t ts" x="600" y="307" text-anchor="middle">regras de negócio</text>
+  <text class="t ts" x="600" y="322" text-anchor="middle">máquina de estados</text>
+  <text class="t ts" x="600" y="340" text-anchor="middle">cifra · hash · auditoria</text>
+
+  <path class="ln" d="M380,370 L380,394"/>
+  <text class="t tl" x="392" y="386" text-anchor="start">Prisma ORM · consultas parametrizadas</text>
+
+  <!-- banco -->
+  <rect class="bxa" x="40" y="400" width="470" height="50" rx="4"/>
+  <text class="t tt" x="60" y="422">PostgreSQL 16</text>
+  <text class="t ts" x="60" y="439">CPF/CNPJ cifrados na coluna · trilha de auditoria append-only · acesso restrito à rede interna</text>
+
+  <rect class="bxd" x="524" y="400" width="196" height="50" rx="4"/>
+  <text class="t tt" x="622" y="422" text-anchor="middle" style="font-size:11.5px">Backup diário</text>
+  <text class="t ts" x="622" y="439" text-anchor="middle">cifrado · retenção 30 dias</text>
+  <path class="ln" d="M510,425 L520,425"/>
+</svg>
+<figcaption><b>Figura 1.</b> O navegador nunca alcança o banco. Toda regra de negócio e toda
+decisão de autorização executam no servidor; o cliente é apenas apresentação.</figcaption>
+</figure>
+
+<h3>4.2 Stack proposta e justificativa</h3>
+<table class="d">
+  <tr><th style="width:38mm">Componente</th><th style="width:34mm">Escolha</th><th>Por quê</th></tr>
+  <tr><td>Framework web</td><td><b>Next.js 15</b> (App Router)</td>
+      <td>Renderização no servidor por padrão — requisito para que a consulta pública seja
+          indexável e acessível sem JavaScript. Um só projeto entrega páginas e API,
+          reduzindo superfície operacional.</td></tr>
+  <tr><td>Linguagem</td><td><b>TypeScript</b></td>
+      <td>Tipagem estática cobre a fronteira mais arriscada do sistema: os estados de
+          tramitação e os contratos de API. Erro de transição vira erro de compilação.</td></tr>
+  <tr><td>Banco de dados</td><td><b>PostgreSQL 16</b></td>
+      <td>Transacional, maduro, sem custo de licença, com tipos <code>enum</code> nativos
+          e restrições de unicidade que sustentam as regras deste domínio.</td></tr>
+  <tr><td>Acesso a dados</td><td><b>Prisma ORM</b></td>
+      <td>Consultas parametrizadas por construção (mitiga injeção de SQL) e migrações
+          versionadas em arquivo, auditáveis em revisão de código.</td></tr>
+  <tr><td>Estilo</td><td><b>Tailwind CSS</b></td>
+      <td>Design tokens centralizados — a paleta institucional é definida uma vez e
+          aplicada de forma consistente.</td></tr>
+  <tr><td>Autenticação</td><td><b>Auth.js</b> (credenciais) + <b>argon2id</b></td>
+      <td>Sessão em cookie assinado, sem token no armazenamento do navegador. Preparado
+          para receber provedor OIDC/LDAP na v2 sem reescrita.</td></tr>
+  <tr><td>Testes</td><td><b>Vitest</b> + <b>Playwright</b></td>
+      <td>Unitários nas regras críticas (validação de documento, máquina de estados)
+          e ponta a ponta no fluxo completo das quatro etapas.</td></tr>
+  <tr><td>Empacotamento</td><td><b>Docker</b> + Docker Compose</td>
+      <td>Ambiente reproduzível; elimina divergência entre a máquina do desenvolvedor
+          e o servidor da Câmara.</td></tr>
+</table>
+
+<div class="box alerta"><b class="rot">Contrapartida a considerar — leitura honesta do trade-off</b>
+<p>O portal institucional roda <strong>Plone (Python/Zope)</strong>. Adotar Next.js
+<strong>introduz Node.js no parque tecnológico</strong>, o que significa uma segunda cadeia
+de atualização de segurança, um segundo conjunto de competências na equipe e um segundo
+processo de <em>build</em>. Isso é um custo real e deve pesar na decisão.</p>
+<p>A alternativa — construir dentro do Plone — evitaria esse custo, mas herdaria o ciclo de
+publicação do CMS institucional, acoplaria a evolução do sistema à do portal e obrigaria a
+implementar em Zope um modelo de tramitação, papéis e auditoria que os frameworks modernos
+já oferecem. <strong>Se a Diretoria de TI preferir consolidar no ecossistema Python, a
+recomendação alternativa é Django</strong>: mantém a linguagem já dominada pela equipe,
+traz painel administrativo pronto (útil para a Triagem) e um sistema de permissões maduro.
+Toda a modelagem, as regras e os controles descritos nas seções 5 a 11 deste documento são
+<strong>independentes de framework</strong> e se aplicam integralmente a essa alternativa.</p></div>
+
+<!-- ============ 5 ============ -->
+<h2><span class="n">5.</span>Modelo de dados</h2>
+
+<figure>
+<svg viewBox="0 0 760 452" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Diagrama entidade-relacionamento com seis entidades">
+  <style>
+    .eb{fill:#fff;stroke:#17356B;stroke-width:1.5}
+    .eh{fill:#17356B}
+    .eht{font-family:'Segoe UI',Calibri,sans-serif;font-size:12px;font-weight:700;fill:#fff}
+    .ef{font-family:Consolas,monospace;font-size:9.6px;fill:#333}
+    .pk{font-family:Consolas,monospace;font-size:9.6px;fill:#B42318;font-weight:700}
+    .rl{stroke:#2F5CA8;stroke-width:1.5;fill:none}
+    .rt{font-family:'Segoe UI',Calibri,sans-serif;font-size:10px;fill:#2563EB;font-weight:700}
+  </style>
+
+  <!-- AUTOR -->
+  <rect class="eb" x="16" y="18" width="186" height="132" rx="3"/>
+  <rect class="eh" x="16" y="18" width="186" height="22" rx="3"/>
+  <text class="eht" x="26" y="34">Autor</text>
+  <text class="pk" x="26" y="56">id · tipo (PF|PJ)</text>
+  <text class="ef" x="26" y="70">documentoCifrado</text>
+  <text class="ef" x="26" y="84">documentoHash (único)</text>
+  <text class="ef" x="26" y="98">documentoMascarado</text>
+  <text class="ef" x="26" y="112">nome · email · telefone</text>
+  <text class="ef" x="26" y="126">bairro · rpa</text>
+  <text class="ef" x="26" y="140">nomePublico · consentEm</text>
+
+  <!-- IDEIA -->
+  <rect class="eb" x="288" y="18" width="186" height="160" rx="3"/>
+  <rect class="eh" x="288" y="18" width="186" height="22" rx="3"/>
+  <text class="eht" x="298" y="34">Ideia</text>
+  <text class="pk" x="298" y="56">id · protocolo (único)</text>
+  <text class="ef" x="298" y="70">autorId →</text>
+  <text class="ef" x="298" y="84">tema · titulo · descricao</text>
+  <text class="ef" x="298" y="98">textoOriginal</text>
+  <text class="ef" x="298" y="112">status (enum)</text>
+  <text class="ef" x="298" y="126">tokenAcompHash</text>
+  <text class="ef" x="298" y="140">apoiosCount</text>
+  <text class="ef" x="298" y="154">criadoEm · triadoEm</text>
+  <text class="ef" x="298" y="168">publicadoEm</text>
+
+  <!-- TRAMITACAO -->
+  <rect class="eb" x="560" y="18" width="186" height="146" rx="3"/>
+  <rect class="eh" x="560" y="18" width="186" height="22" rx="3"/>
+  <text class="eht" x="570" y="34">Tramitacao</text>
+  <text class="pk" x="570" y="56">id</text>
+  <text class="ef" x="570" y="70">ideiaId →</text>
+  <text class="ef" x="570" y="84">statusAnterior</text>
+  <text class="ef" x="570" y="98">statusNovo</text>
+  <text class="ef" x="570" y="112">justificativa</text>
+  <text class="ef" x="570" y="126">gabinete · usuarioId →</text>
+  <text class="ef" x="570" y="140">publica (bool)</text>
+  <text class="ef" x="570" y="154">criadoEm · ipHash</text>
+
+  <!-- INTERESSE -->
+  <rect class="eb" x="16" y="256" width="186" height="104" rx="3"/>
+  <rect class="eh" x="16" y="256" width="186" height="22" rx="3"/>
+  <text class="eht" x="26" y="272">InteresseGabinete</text>
+  <text class="pk" x="26" y="294">id</text>
+  <text class="ef" x="26" y="308">ideiaId → · usuarioId →</text>
+  <text class="ef" x="26" y="322">gabinete</text>
+  <text class="ef" x="26" y="336">tipo (ANALISE|ADOCAO)</text>
+  <text class="ef" x="26" y="350">criadoEm</text>
+
+  <!-- APOIO -->
+  <rect class="eb" x="288" y="256" width="186" height="104" rx="3"/>
+  <rect class="eh" x="288" y="256" width="186" height="22" rx="3"/>
+  <text class="eht" x="298" y="272">Apoio</text>
+  <text class="pk" x="298" y="294">id</text>
+  <text class="ef" x="298" y="308">ideiaId →</text>
+  <text class="ef" x="298" y="322">documentoHash</text>
+  <text class="ef" x="298" y="336">criadoEm</text>
+  <text class="pk" x="298" y="352">único: (ideiaId, hash)</text>
+
+  <!-- USUARIO -->
+  <rect class="eb" x="560" y="256" width="186" height="104" rx="3"/>
+  <rect class="eh" x="560" y="256" width="186" height="22" rx="3"/>
+  <text class="eht" x="570" y="272">Usuario</text>
+  <text class="pk" x="570" y="294">id · email (único)</text>
+  <text class="ef" x="570" y="308">nome</text>
+  <text class="ef" x="570" y="322">senhaHash (argon2id)</text>
+  <text class="ef" x="570" y="336">perfil (enum)</text>
+  <text class="ef" x="570" y="350">gabinete · ativo</text>
+
+  <!-- relações -->
+  <path class="rl" d="M202,84 L288,84"/>
+  <text class="rt" x="245" y="78" text-anchor="middle">1 : N</text>
+
+  <path class="rl" d="M474,84 L560,84"/>
+  <text class="rt" x="517" y="78" text-anchor="middle">1 : N</text>
+
+  <path class="rl" d="M381,178 L381,256"/>
+  <text class="rt" x="399" y="220" text-anchor="middle">1 : N</text>
+
+  <path class="rl" d="M288,140 L240,140 L240,290 L202,290"/>
+  <text class="rt" x="240" y="200" text-anchor="middle">1 : N</text>
+
+  <path class="rl" d="M653,256 L653,164"/>
+  <text class="rt" x="676" y="215" text-anchor="middle">1 : N</text>
+
+  <path class="rl" d="M560,300 L520,300 L520,404 L120,404 L120,360"/>
+  <text class="rt" x="330" y="418" text-anchor="middle">1 : N</text>
+</svg>
+<figcaption><b>Figura 2.</b> Seis entidades. Os dados pessoais concentram-se em
+<code>Autor</code>, o que simplifica atender a requisições de titulares e definir a
+política de retenção.</figcaption>
+</figure>
+
+<h3>5.1 Esquema (Prisma)</h3>
+<pre><span class="c">// Dados pessoais isolados em uma única entidade — facilita retenção e exclusão (LGPD).</span>
+<span class="k">model</span> Autor {
+  id                 String   @id @default(cuid())
+  tipo               TipoAutor              <span class="c">// FISICA | JURIDICA</span>
+  documentoCifrado   String                 <span class="c">// AES-256-GCM; chave fora do código</span>
+  documentoHash      String   @unique       <span class="c">// SHA-256 c/ pepper: dedupe sem decifrar</span>
+  documentoMascarado String                 <span class="c">// "111.***.***-44" — o que a tela mostra</span>
+  nome               String
+  email              String
+  telefone           String?
+  bairro             String?
+  rpa                Int?                   <span class="c">// 1..6 — Regiões Político-Administrativas</span>
+  nomePublico        Boolean  @default(false)  <span class="c">// consentimento explícito e revogável</span>
+  consentimentoEm    DateTime
+  ideias             Ideia[]
+}
+
+<span class="k">model</span> Ideia {
+  id             String      @id @default(cuid())
+  protocolo      String      @unique          <span class="c">// BIL-2026-000123</span>
+  tokenAcompHash String                       <span class="c">// hash do token do comprovante</span>
+  autorId        String
+  autor          Autor       @relation(fields: [autorId], references: [id])
+  tema           String
+  titulo         String      @db.VarChar(150)
+  descricao      String      @db.VarChar(5000)
+  textoOriginal  String?     @db.VarChar(5000) <span class="c">// preservado se a Triagem editar</span>
+  status         StatusIdeia @default(RECEBIDA)
+  apoiosCount    Int         @default(0)
+  criadoEm       DateTime    @default(now())
+  triadoEm       DateTime?
+  publicadoEm    DateTime?
+  tramitacoes    Tramitacao[]
+  apoios         Apoio[]
+  interesses     InteresseGabinete[]
+
+  @@index([status, publicadoEm])   <span class="c">// consulta pública</span>
+  @@index([status, criadoEm])      <span class="c">// fila de triagem por prazo</span>
+}
+
+<span class="c">// Linha do tempo pública E trilha de auditoria são a MESMA tabela — ver seção 6.3.</span>
+<span class="k">model</span> Tramitacao {
+  id             String       @id @default(cuid())
+  ideiaId        String
+  ideia          Ideia        @relation(fields: [ideiaId], references: [id])
+  statusAnterior StatusIdeia?
+  statusNovo     StatusIdeia
+  justificativa  String?                      <span class="c">// OBRIGATÓRIA no arquivamento</span>
+  gabinete       String?
+  usuarioId      String?
+  publica        Boolean      @default(true)  <span class="c">// false = só auditoria interna</span>
+  ipHash         String?
+  criadoEm       DateTime     @default(now())
+
+  @@index([ideiaId, criadoEm])
+}
+
+<span class="k">model</span> Apoio {
+  id            String   @id @default(cuid())
+  ideiaId       String
+  ideia         Ideia    @relation(fields: [ideiaId], references: [id])
+  documentoHash String                        <span class="c">// nunca o CPF em claro</span>
+  criadoEm      DateTime @default(now())
+
+  @@unique([ideiaId, documentoHash])          <span class="c">// um apoio por documento por ideia</span>
+}
+
+<span class="k">model</span> Usuario {
+  id        String  @id @default(cuid())
+  nome      String
+  email     String  @unique
+  senhaHash String                            <span class="c">// argon2id</span>
+  perfil    Perfil                            <span class="c">// TRIAGEM | GABINETE | ADMIN</span>
+  gabinete  String?
+  ativo     Boolean @default(true)
+}
+
+<span class="k">enum</span> StatusIdeia { RECEBIDA EM_TRIAGEM DISPONIVEL EM_ANALISE ADOTADA ARQUIVADA }
+<span class="k">enum</span> Perfil      { TRIAGEM GABINETE ADMIN }
+<span class="k">enum</span> TipoAutor   { FISICA JURIDICA }</pre>
+
+<h3>5.2 Decisões de modelagem que merecem atenção</h3>
+<table class="d">
+  <tr><th style="width:46mm">Decisão</th><th>Fundamento</th></tr>
+  <tr><td><b>Três colunas para um documento</b><br>(cifrado, hash, mascarado)</td>
+      <td>Cada uma serve a um uso distinto: o <b>cifrado</b> só é decifrado sob ação
+          explícita e registrada; o <b>hash</b> permite verificar duplicidade e apoio
+          repetido sem decifrar nada; a <b>máscara</b> atende à tela da Triagem no dia a dia.
+          Resultado: o CPF em claro quase nunca é manipulado.</td></tr>
+  <tr><td><b><code>apoiosCount</code> desnormalizado</b></td>
+      <td>Evita <code>COUNT</code> em toda listagem pública. Atualizado na mesma transação
+          do <code>INSERT</code> em <code>Apoio</code>, o que preserva a consistência.</td></tr>
+  <tr><td><b><code>textoOriginal</code> preservado</b></td>
+      <td>Se a Triagem corrige a redação, a versão enviada pelo cidadão permanece
+          registrada. Protege a Câmara de alegação de alteração indevida de conteúdo.</td></tr>
+  <tr><td><b><code>ipHash</code>, não IP</b></td>
+      <td>Permite detectar envio automatizado em massa sem manter endereço IP em claro,
+          reduzindo o volume de dado pessoal retido.</td></tr>
+  <tr><td><b>Sem exclusão física de ideias</b></td>
+      <td>Arquivar é mudança de estado, não remoção. Registro de participação popular
+          não deve desaparecer do acervo.</td></tr>
+</table>
+
+<!-- ============ 6 ============ -->
+<h2><span class="n">6.</span>Regras de tramitação</h2>
+
+<figure>
+<svg viewBox="0 0 760 296" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Máquina de estados do ciclo de vida de uma ideia">
+  <defs>
+    <marker id="ma" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,1 L8,4.5 L0,8 z" fill="#17356B"/></marker>
+    <marker id="mr" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,1 L8,4.5 L0,8 z" fill="#B42318"/></marker>
+  </defs>
+  <style>
+    .s1{fill:#EEF3FB;stroke:#17356B;stroke-width:1.7}
+    .s2{fill:#F0F8F3;stroke:#146C43;stroke-width:1.9}
+    .s3{fill:#FEF3F2;stroke:#B42318;stroke-width:1.7}
+    .st{font-family:'Segoe UI',Calibri,sans-serif;font-size:11.5px;font-weight:700;fill:#17356B}
+    .st3{font-family:'Segoe UI',Calibri,sans-serif;font-size:11.5px;font-weight:700;fill:#B42318}
+    .st2{font-family:'Segoe UI',Calibri,sans-serif;font-size:11.5px;font-weight:700;fill:#146C43}
+    .ea{stroke:#17356B;stroke-width:1.6;fill:none;marker-end:url(#ma)}
+    .er{stroke:#B42318;stroke-width:1.6;fill:none;marker-end:url(#mr)}
+    .ed{stroke:#B42318;stroke-width:1.4;fill:none;stroke-dasharray:6 4;marker-end:url(#mr)}
+    .el{font-family:'Segoe UI',Calibri,sans-serif;font-size:10px;fill:#1A1A1A;font-weight:600}
+    .ea2{font-family:'Segoe UI',Calibri,sans-serif;font-size:9.5px;fill:#666;font-style:italic}
+  </style>
+
+  <rect class="s1" x="18"  y="58" width="112" height="44" rx="4"/>
+  <text class="st" x="74"  y="85" text-anchor="middle">RECEBIDA</text>
+
+  <rect class="s1" x="170" y="58" width="112" height="44" rx="4"/>
+  <text class="st" x="226" y="85" text-anchor="middle">EM TRIAGEM</text>
+
+  <rect class="s1" x="322" y="58" width="112" height="44" rx="4"/>
+  <text class="st" x="378" y="85" text-anchor="middle">DISPONÍVEL</text>
+
+  <rect class="s1" x="474" y="58" width="112" height="44" rx="4"/>
+  <text class="st" x="530" y="85" text-anchor="middle">EM ANÁLISE</text>
+
+  <rect class="s2" x="626" y="58" width="112" height="44" rx="4"/>
+  <text class="st2" x="682" y="85" text-anchor="middle">ADOTADA</text>
+
+  <rect class="s3" x="304" y="228" width="148" height="44" rx="4"/>
+  <text class="st3" x="378" y="255" text-anchor="middle">ARQUIVADA</text>
+
+  <path class="ea" d="M130,80 L166,80"/>
+  <text class="el"  x="148" y="44" text-anchor="middle">assume</text>
+  <text class="ea2" x="148" y="120" text-anchor="middle">servidor</text>
+
+  <path class="ea" d="M282,80 L318,80"/>
+  <text class="el"  x="300" y="44" text-anchor="middle">aprova</text>
+  <text class="ea2" x="300" y="120" text-anchor="middle">servidor</text>
+
+  <path class="ea" d="M434,80 L470,80"/>
+  <text class="el"  x="452" y="44" text-anchor="middle">assume</text>
+  <text class="ea2" x="452" y="120" text-anchor="middle">gabinete</text>
+
+  <path class="ea" d="M586,80 L622,80"/>
+  <text class="el"  x="604" y="44" text-anchor="middle">adota</text>
+  <text class="ea2" x="604" y="120" text-anchor="middle">gabinete</text>
+
+  <!-- devolve -->
+  <path class="ea" d="M530,102 L530,150 L378,150 L378,104"/>
+  <text class="el"  x="454" y="166" text-anchor="middle">devolve ao acervo — gabinete</text>
+
+  <!-- arquiva -->
+  <path class="er" d="M226,102 L226,250 L300,250"/>
+  <text class="el"  x="150" y="186" text-anchor="middle">arquiva</text>
+  <text class="ea2" x="150" y="200" text-anchor="middle">exige justificativa</text>
+
+  <!-- admin -->
+  <path class="ed" d="M682,102 L682,250 L456,250"/>
+  <text class="el"  x="664" y="200" text-anchor="end">arquivamento por ADMIN</text>
+  <text class="ea2" x="664" y="214" text-anchor="end">de qualquer situação, com justificativa</text>
+</svg>
+<figcaption><b>Figura 3.</b> Nenhuma outra transição é aceita. Tentativa de transição fora
+deste grafo retorna <code>422</code> e é registrada como evento de auditoria.</figcaption>
+</figure>
+
+<h3>6.1 Situações e seus significados</h3>
+<table class="d">
+  <tr><th style="width:32mm">Situação</th><th style="width:26mm">Visível ao público?</th><th>Significado</th></tr>
+  <tr><td><b>RECEBIDA</b></td><td>Não</td><td>Registrada, aguardando início da triagem</td></tr>
+  <tr><td><b>EM TRIAGEM</b></td><td>Não</td><td>Servidor assumiu a análise (evita dois servidores no mesmo item)</td></tr>
+  <tr><td><b>DISPONÍVEL</b></td><td>Sim</td><td>Aprovada, publicada no acervo e ofertada aos gabinetes</td></tr>
+  <tr><td><b>EM ANÁLISE</b></td><td>Sim</td><td>Um ou mais gabinetes manifestaram interesse formal</td></tr>
+  <tr><td><b>ADOTADA</b></td><td>Sim</td><td>Gabinete assumiu a ideia para conversão em proposição</td></tr>
+  <tr><td><b>ARQUIVADA</b></td><td>Parcial</td><td>Não prossegue. O motivo é exibido <b>ao autor</b>, não ao público</td></tr>
+</table>
+
+<h3>6.2 Validação no servidor</h3>
+<p>A máquina de estados é implementada em <code>lib/maquina-status.ts</code> e verificada em
+<strong>toda</strong> rota de mutação. A interface esconde botões inválidos por
+conveniência, nunca como mecanismo de segurança:</p>
+<pre><span class="k">const</span> TRANSICOES: Record&lt;StatusIdeia, { para: StatusIdeia[]; perfis: Perfil[] }&gt; = {
+  RECEBIDA:   { para: [<span class="s">'EM_TRIAGEM'</span>],                    perfis: [<span class="s">'TRIAGEM'</span>,<span class="s">'ADMIN'</span>] },
+  EM_TRIAGEM: { para: [<span class="s">'DISPONIVEL'</span>,<span class="s">'ARQUIVADA'</span>],       perfis: [<span class="s">'TRIAGEM'</span>,<span class="s">'ADMIN'</span>] },
+  DISPONIVEL: { para: [<span class="s">'EM_ANALISE'</span>,<span class="s">'ARQUIVADA'</span>],       perfis: [<span class="s">'GABINETE'</span>,<span class="s">'ADMIN'</span>] },
+  EM_ANALISE: { para: [<span class="s">'ADOTADA'</span>,<span class="s">'DISPONIVEL'</span>,<span class="s">'ARQUIVADA'</span>], perfis: [<span class="s">'GABINETE'</span>,<span class="s">'ADMIN'</span>] },
+  ADOTADA:    { para: [<span class="s">'ARQUIVADA'</span>],                     perfis: [<span class="s">'ADMIN'</span>] },
+  ARQUIVADA:  { para: [],                                perfis: [] },
+};
+
+<span class="c">// Regra dura: arquivar sem justificativa é rejeitado antes de tocar o banco.</span>
+<span class="k">if</span> (destino === <span class="s">'ARQUIVADA'</span> &amp;&amp; !justificativa?.trim()) <span class="k">throw new</span> ErroValidacao(422);</pre>
+
+<h3>6.3 Por que a linha do tempo pública e a auditoria são a mesma tabela</h3>
+<div class="box ok"><b class="rot">Decisão de projeto</b>
+<p>Sistemas de tramitação costumam manter um histórico exibido ao público e um log de
+auditoria separado. Isso permite que os dois divirjam — e, quando divergem, nenhum dos dois
+tem valor probatório.</p>
+<p>Aqui, <strong>a única forma de alterar o status de uma ideia é gravando uma linha em
+<code>Tramitacao</code></strong>, na mesma transação. A flag <code>publica</code> controla
+apenas o que aparece na tela, jamais se o registro existe. Consequência: <strong>não existe
+mudança de situação sem rastro</strong>, e o que o cidadão vê é literalmente derivado do
+mesmo registro que a auditoria interna consulta.</p>
+<p>Reforço no banco: revogação de <code>UPDATE</code> e <code>DELETE</code> sobre
+<code>Tramitacao</code> para o usuário da aplicação, que recebe apenas
+<code>INSERT</code> e <code>SELECT</code>. A tabela torna-se, na prática, <em>append-only</em>.</p></div>
+
+<!-- ============ 7 ============ -->
+<h2><span class="n">7.</span>Interface de programação (API)</h2>
+
+<h3>7.1 Endpoints</h3>
+<table class="d">
+  <tr><th style="width:16mm">Método</th><th style="width:56mm">Rota</th><th style="width:22mm">Perfil</th><th>Função</th></tr>
+  <tr><td>POST</td><td><code>/api/ideias</code></td><td>Público</td>
+      <td>Cadastra ideia; retorna protocolo e token. Limitado por taxa e idempotente</td></tr>
+  <tr><td>GET</td><td><code>/api/ideias</code></td><td>Público</td>
+      <td>Lista o acervo triado, com filtros e paginação. Nunca retorna dado pessoal</td></tr>
+  <tr><td>GET</td><td><code>/api/ideias/{protocolo}</code></td><td>Público</td>
+      <td>Detalhe da ideia com a linha do tempo pública</td></tr>
+  <tr><td>POST</td><td><code>/api/ideias/{id}/apoiar</code></td><td>Público</td>
+      <td>Registra apoio; recusa repetição do mesmo documento na mesma ideia</td></tr>
+  <tr><td>POST</td><td><code>/api/acompanhar</code></td><td>Público</td>
+      <td>Consulta por protocolo + CPF; devolve situação e motivo de arquivamento</td></tr>
+  <tr><td>POST</td><td><code>/api/ideias/{id}/tramitar</code></td><td>Interno</td>
+      <td>Executa transição de estado. Valida grafo, perfil e justificativa</td></tr>
+  <tr><td>POST</td><td><code>/api/ideias/{id}/revelar-documento</code></td><td>Triagem/Admin</td>
+      <td>Decifra e retorna o documento; grava evento de auditoria obrigatoriamente</td></tr>
+  <tr><td>GET</td><td><code>/api/dados-abertos</code></td><td>Público</td>
+      <td>Acervo completo em JSON ou CSV, sem qualquer dado pessoal (LAI)</td></tr>
+  <tr><td>GET</td><td><code>/api/indicadores</code></td><td>Público</td>
+      <td>Séries agregadas para o painel de indicadores</td></tr>
+</table>
+
+<h3>7.2 Contrato de exemplo</h3>
+<pre><span class="c">// POST /api/ideias/{id}/tramitar</span>
+<span class="c">// Cabeçalhos: Cookie de sessão + X-CSRF-Token</span>
+{ <span class="s">"destino"</span>: <span class="s">"ARQUIVADA"</span>,
+  <span class="s">"motivo"</span>: <span class="s">"FORA_DA_COMPETENCIA_MUNICIPAL"</span>,
+  <span class="s">"justificativa"</span>: <span class="s">"Matéria de competência estadual (Art. 30, CF)."</span> }
+
+<span class="c">// 200 OK</span>
+{ <span class="s">"protocolo"</span>: <span class="s">"BIL-2026-000123"</span>, <span class="s">"status"</span>: <span class="s">"ARQUIVADA"</span>,
+  <span class="s">"tramitacaoId"</span>: <span class="s">"ckv…"</span>, <span class="s">"registradoEm"</span>: <span class="s">"2026-08-27T14:12:03Z"</span> }
+
+<span class="c">// Erros previstos</span>
+<span class="c">// 401 sem sessão · 403 perfil sem permissão · 409 alterada por outro usuário</span>
+<span class="c">// 422 transição fora do grafo, ou arquivamento sem justificativa</span>
+<span class="c">// 429 limite de requisições excedido</span></pre>
+
+<div class="box"><b class="rot">Concorrência</b>
+<p>Dois servidores podem abrir o mesmo item ao mesmo tempo. A transição envia a versão
+conhecida do registro; se a situação no banco já mudou, a resposta é <code>409</code> com a
+situação atual, e a interface pede recarregamento — em vez de sobrescrever silenciosamente
+a decisão do colega.</p></div>
+
+<!-- ============ 8 ============ -->
+<h2><span class="n">8.</span>Segurança da informação</h2>
+
+<h3>8.1 Autenticação</h3>
+<table class="d">
+  <tr><th style="width:40mm">Controle</th><th>Especificação</th></tr>
+  <tr><td>Derivação de senha</td>
+      <td><b>argon2id</b>, memória 19 MiB, 2 iterações, paralelismo 1 (parâmetros mínimos
+          recomendados pela OWASP). Sal único por usuário, gerado por CSPRNG.</td></tr>
+  <tr><td>Sessão</td>
+      <td>Cookie assinado com <code>HttpOnly</code>, <code>Secure</code>,
+          <code>SameSite=Lax</code>, <code>Path=/</code>. <b>Nenhum token em
+          <code>localStorage</code></b> — o que neutraliza roubo de sessão via XSS.</td></tr>
+  <tr><td>Expiração</td>
+      <td>Sessão inativa expira em 30 minutos; absoluta em 8 horas. Renovação do
+          identificador de sessão no login (previne <i>session fixation</i>).</td></tr>
+  <tr><td>Política de senha</td>
+      <td>Mínimo 12 caracteres, verificação contra lista de senhas vazadas
+          (k-anonymity, sem enviar a senha). Sem expiração compulsória — alinhado ao
+          NIST SP 800-63B.</td></tr>
+  <tr><td>Força bruta</td>
+      <td>Atraso progressivo e bloqueio temporário por conta e por IP. Mensagem de erro
+          genérica, que não revela se o e-mail existe.</td></tr>
+  <tr><td>Acesso do cidadão</td>
+      <td>Sem conta. O acompanhamento usa <b>protocolo + CPF</b> — dois fatores que só o
+          autor detém — com limitação de tentativas para impedir varredura de protocolos.</td></tr>
+</table>
+
+<h3>8.2 Autorização</h3>
+<p>Controle de acesso baseado em papéis, verificado <strong>no servidor, em cada rota</strong>.
+Três camadas independentes, de modo que a falha de uma não abre o sistema:</p>
+<ol>
+  <li><strong>Middleware</strong> — bloqueia qualquer rota sob <code>/painel</code> sem
+      sessão válida, antes de a página existir.</li>
+  <li><strong>Route Handler</strong> — revalida o perfil contra a operação pedida. Uma
+      requisição forjada direto à API encontra a mesma checagem que a interface.</li>
+  <li><strong>Máquina de estados</strong> — cada transição declara quais perfis podem
+      executá-la (seção 6.2). Gabinete não arquiva; Triagem não adota.</li>
+</ol>
+<div class="box crit"><b class="rot">Risco número 1 nesta classe de sistema</b>
+<p><em>Broken Access Control</em> é a categoria mais explorada segundo a OWASP, e a forma
+mais comum é a rota de API que confia na interface. Por isso a regra adotada aqui é
+categórica: <strong>toda rota de mutação verifica sessão e perfil por conta própria</strong>,
+sem depender de qualquer verificação feita antes. O teste de aceite correspondente está na
+seção 13.</p></div>
+
+<h3>8.3 Proteção do dado sensível — o caminho do CPF</h3>
+
+<figure>
+<svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" role="img"
+     aria-label="Fluxo do CPF: validação, cifragem, hash e mascaramento até o banco">
+  <defs>
+    <marker id="fa" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+      <path d="M0,1 L8,4.5 L0,8 z" fill="#17356B"/></marker>
+  </defs>
+  <style>
+    .f1{fill:#fff;stroke:#17356B;stroke-width:1.6}
+    .f2{fill:#EEF3FB;stroke:#2F5CA8;stroke-width:1.5}
+    .f3{fill:#F0F8F3;stroke:#146C43;stroke-width:1.6}
+    .ft{font-family:'Segoe UI',Calibri,sans-serif;font-size:11.5px;font-weight:700;fill:#17356B}
+    .fs{font-family:Consolas,monospace;font-size:9.6px;fill:#444}
+    .fn{font-family:'Segoe UI',Calibri,sans-serif;font-size:10px;fill:#4A5568}
+    .fa{stroke:#17356B;stroke-width:1.5;fill:none;marker-end:url(#fa)}
+    .sep{stroke:#C9D2E0;stroke-width:1.2;stroke-dasharray:5 4}
+    .lab{font-family:'Segoe UI',Calibri,sans-serif;font-size:10px;fill:#2563EB;
+         font-weight:700;letter-spacing:.08em}
+  </style>
+
+  <text class="lab" x="14" y="14">GRAVAÇÃO</text>
+
+  <rect class="f1" x="14" y="94" width="152" height="52" rx="4"/>
+  <text class="ft" x="90" y="116" text-anchor="middle">Formulário</text>
+  <text class="fn" x="90" y="133" text-anchor="middle">CPF digitado · HTTPS</text>
+
+  <rect class="f2" x="198" y="94" width="152" height="52" rx="4"/>
+  <text class="ft" x="274" y="112" text-anchor="middle">Servidor</text>
+  <text class="fn" x="274" y="128" text-anchor="middle">valida dígito verificador</text>
+  <text class="fn" x="274" y="141" text-anchor="middle">normaliza (só dígitos)</text>
+
+  <path class="fa" d="M166,120 L194,120"/>
+
+  <rect class="f2" x="386" y="18" width="184" height="48" rx="4"/>
+  <text class="ft" x="478" y="38" text-anchor="middle">AES-256-GCM</text>
+  <text class="fs" x="478" y="55" text-anchor="middle">→ documentoCifrado</text>
+
+  <rect class="f2" x="386" y="96" width="184" height="48" rx="4"/>
+  <text class="ft" x="478" y="116" text-anchor="middle">SHA-256 + pepper</text>
+  <text class="fs" x="478" y="133" text-anchor="middle">→ documentoHash</text>
+
+  <rect class="f2" x="386" y="174" width="184" height="48" rx="4"/>
+  <text class="ft" x="478" y="194" text-anchor="middle">Mascaramento</text>
+  <text class="fs" x="478" y="211" text-anchor="middle">→ 111.***.***-44</text>
+
+  <path class="fa" d="M350,112 C368,112 368,42 382,42"/>
+  <path class="fa" d="M350,120 L382,120"/>
+  <path class="fa" d="M350,128 C368,128 368,198 382,198"/>
+
+  <rect class="f3" x="606" y="18" width="140" height="204" rx="4"/>
+  <text class="ft" x="676" y="42" text-anchor="middle" style="fill:#146C43">PostgreSQL</text>
+  <text class="fn" x="676" y="62" text-anchor="middle">as três colunas</text>
+  <text class="fn" x="676" y="77" text-anchor="middle">na entidade Autor</text>
+  <text class="fn" x="676" y="102" text-anchor="middle">O CPF em claro</text>
+  <text class="fn" x="676" y="117" text-anchor="middle">NÃO é persistido</text>
+  <text class="fn" x="676" y="142" text-anchor="middle">Acesso restrito</text>
+  <text class="fn" x="676" y="157" text-anchor="middle">à rede interna</text>
+  <text class="fn" x="676" y="182" text-anchor="middle">Backup cifrado</text>
+
+  <path class="fa" d="M570,42 L602,42"/>
+  <path class="fa" d="M570,120 L602,120"/>
+  <path class="fa" d="M570,198 L602,198"/>
+
+  <line class="sep" x1="14" y1="242" x2="746" y2="242"/>
+  <text class="lab" x="14" y="262">LEITURA</text>
+
+  <rect class="f1" x="14" y="274" width="228" height="44" rx="4"/>
+  <text class="ft" x="128" y="293" text-anchor="middle" style="font-size:11px">Tela da Triagem</text>
+  <text class="fn" x="128" y="309" text-anchor="middle">lê apenas a máscara — rotina diária</text>
+
+  <rect class="f1" x="266" y="274" width="228" height="44" rx="4"/>
+  <text class="ft" x="380" y="293" text-anchor="middle" style="font-size:11px">Revelar documento</text>
+  <text class="fn" x="380" y="309" text-anchor="middle">decifra · grava quem, quando, qual</text>
+
+  <rect class="f1" x="518" y="274" width="228" height="44" rx="4"/>
+  <text class="ft" x="632" y="293" text-anchor="middle" style="font-size:11px">Apoio e duplicidade</text>
+  <text class="fn" x="632" y="309" text-anchor="middle">compara hashes — nunca decifra</text>
+</svg>
+<figcaption><b>Figura 4.</b> O CPF em claro existe apenas em memória, durante a requisição
+de gravação e durante uma revelação explícita e registrada. Nenhuma outra operação do
+sistema precisa dele.</figcaption>
+</figure>
+
+<table class="d">
+  <tr><th style="width:40mm">Controle</th><th>Especificação</th></tr>
+  <tr><td>Cifra em repouso</td>
+      <td><b>AES-256-GCM</b> (cifra autenticada — detecta adulteração do texto cifrado),
+          nonce único por registro, aplicada na aplicação antes da persistência.</td></tr>
+  <tr><td>Chave de cifra</td>
+      <td>Fora do código e fora do repositório: variável de ambiente injetada na
+          implantação, idealmente de cofre. Procedimento de rotação documentado, com
+          recifragem em lote.</td></tr>
+  <tr><td>Hash de busca</td>
+      <td><b>SHA-256 com <i>pepper</i></b> em segredo de aplicação. Sem o pepper, um
+          dump do banco não permite testar CPFs candidatos — o espaço de CPFs é pequeno
+          o bastante para ser enumerado sem essa proteção.</td></tr>
+  <tr><td>Cifra em trânsito</td>
+      <td>TLS 1.3 obrigatório, HSTS com <code>max-age</code> de 1 ano, redirecionamento
+          permanente de HTTP para HTTPS.</td></tr>
+  <tr><td>Minimização</td>
+      <td>Respostas públicas e endpoint de dados abertos <b>não contêm</b> documento,
+          e-mail, telefone nem IP. Verificado por teste automatizado (seção 13).</td></tr>
+</table>
+
+<h3>8.4 OWASP Top 10 (2021) — tratamento item a item</h3>
+<table class="d">
+  <tr><th style="width:44mm">Categoria</th><th>Controle adotado</th></tr>
+  <tr><td><b>A01</b> Broken Access Control</td>
+      <td>Autorização em três camadas (8.2); máquina de estados restringe transição por
+          perfil; identificadores <code>cuid()</code> não sequenciais; teste automatizado
+          que chama rotas internas sem sessão e com perfil incorreto</td></tr>
+  <tr><td><b>A02</b> Cryptographic Failures</td>
+      <td>AES-256-GCM em repouso, TLS 1.3 em trânsito, argon2id para senhas, pepper no
+          hash de busca, segredos fora do repositório</td></tr>
+  <tr><td><b>A03</b> Injection</td>
+      <td>Consultas parametrizadas pelo Prisma; validação de esquema com Zod na borda;
+          saída escapada por padrão pelo React; ausência de SQL concatenado</td></tr>
+  <tr><td><b>A04</b> Insecure Design</td>
+      <td>Máquina de estados explícita; limite de taxa desenhado desde o início;
+          justificativa obrigatória no arquivamento como regra de domínio, não de tela</td></tr>
+  <tr><td><b>A05</b> Security Misconfiguration</td>
+      <td>CSP restritiva sem <code>unsafe-inline</code>; <code>X-Frame-Options: DENY</code>;
+          <code>X-Content-Type-Options: nosniff</code>; <code>Referrer-Policy</code>;
+          páginas de erro sem <i>stack trace</i>; contas padrão inexistentes</td></tr>
+  <tr><td><b>A06</b> Vulnerable Components</td>
+      <td><code>npm audit</code> e Dependabot no pipeline; build falha em vulnerabilidade
+          alta ou crítica; versões fixadas por <i>lockfile</i></td></tr>
+  <tr><td><b>A07</b> Authentication Failures</td>
+      <td>Bloqueio progressivo, mensagens genéricas, rotação de sessão no login,
+          expiração por inatividade (8.1)</td></tr>
+  <tr><td><b>A08</b> Data Integrity Failures</td>
+      <td><code>Tramitacao</code> append-only com <code>UPDATE</code>/<code>DELETE</code>
+          revogados no banco; imagens de container com origem fixada; migrações versionadas</td></tr>
+  <tr><td><b>A09</b> Logging &amp; Monitoring Failures</td>
+      <td>Registro estruturado de login, falha de login, transição de estado, revelação de
+          documento e erro 5xx; retenção de 12 meses; alerta em picos anômalos</td></tr>
+  <tr><td><b>A10</b> SSRF</td>
+      <td>A aplicação não realiza requisições a URLs fornecidas pelo usuário. Superfície
+          inexistente por projeto</td></tr>
+</table>
+
+<h3>8.5 Prevenção a abuso e envio automatizado</h3>
+<ul class="cols2">
+  <li>Limite por IP: 5 cadastros por hora</li>
+  <li>Limite por documento: 3 ideias por dia</li>
+  <li>Campo-armadilha invisível (<i>honeypot</i>)</li>
+  <li>Tempo mínimo de preenchimento do formulário</li>
+  <li>Validação de dígito verificador de CPF e CNPJ</li>
+  <li>Chave de idempotência contra reenvio duplicado</li>
+  <li>Apoio único por documento por ideia (restrição no banco)</li>
+  <li>Limite de tentativas em “Acompanhar minha ideia”</li>
+</ul>
+<div class="box"><b class="rot">Sobre CAPTCHA</b>
+<p>Um CAPTCHA de terceiros criaria dependência de serviço externo, transferiria dados de
+navegação de cidadãos a um fornecedor privado e prejudicaria a acessibilidade. A recomendação
+é <strong>começar sem CAPTCHA</strong>, com os controles acima, e reavaliar com base em
+métricas reais de abuso. Se necessário, priorizar solução autoexecutável e acessível
+(por exemplo, desafio de prova de trabalho) em vez de reconhecimento de imagem.</p></div>
+
+<h3>8.6 Trilha de auditoria</h3>
+<p>São registrados, de forma permanente: autenticação e falha de autenticação; toda transição
+de estado com autor, data, justificativa e situação anterior; <strong>toda revelação de
+CPF</strong>, com o servidor responsável e o registro acessado; criação, alteração e
+desativação de usuários; e exportações de dados. A consulta à trilha é restrita ao perfil
+Administrador e é ela própria registrada.</p>
+
+<h3>8.7 Gestão de segredos e ciclo de desenvolvimento</h3>
+<ul>
+  <li>Nenhum segredo no repositório; <code>.env.example</code> documenta as variáveis sem
+      valores. Varredura de segredos no pipeline.</li>
+  <li>Segredos distintos por ambiente. Credencial de produção jamais em máquina de desenvolvimento.</li>
+  <li>Banco de desenvolvimento populado com <strong>dados fictícios</strong>; cópia de
+      produção nunca é usada para desenvolver ou testar.</li>
+  <li>Revisão de código obrigatória antes da integração; nenhum envio direto ao ramo principal.</li>
+  <li>Recomenda-se <strong>teste de intrusão</strong> antes da entrada em produção,
+      pela própria equipe de segurança da Câmara ou por terceiro contratado.</li>
+</ul>
+
+<!-- ============ 9 ============ -->
+<h2><span class="n">9.</span>Adequação à LGPD (Lei nº 13.709/2018)</h2>
+
+<h3>9.1 Bases legais — a distinção que sustenta o desenho</h3>
+<div class="box ok"><b class="rot">Ponto jurídico central</b>
+<p>Há duas operações distintas com bases legais <strong>diferentes</strong>, e tratá-las
+como uma só seria o erro mais provável neste projeto:</p>
+<p><b>(a) Coletar CPF/CNPJ e identificar o autor.</b> Decorre de <strong>obrigação
+normativa</strong> — a Resolução nº 2.690/2018 exige identificação — e da execução de
+política pública de participação popular. Enquadra-se nos <strong>arts. 7º, II e III, e 23
+da LGPD</strong>. <em>Não é</em> baseada em consentimento; por isso o cidadão não pode
+“desmarcar” a identificação e ainda assim participar, e a Câmara não fica refém de
+revogação para manter o registro do ato.</p>
+<p><b>(b) Divulgar publicamente o nome do autor.</b> Não é exigida por norma alguma e não é
+necessária para a finalidade. Portanto é tratamento por <strong>consentimento (art. 7º,
+I)</strong>: opcional, específico, destacado dos demais textos e <strong>revogável a
+qualquer tempo</strong>. Sem consentimento, a consulta pública exibe “Cidadão(ã) do Recife”.</p></div>
+
+<h3>9.2 Inventário de dados pessoais</h3>
+<table class="d">
+  <tr><th style="width:30mm">Dado</th><th style="width:36mm">Finalidade</th><th style="width:22mm">Base legal</th><th style="width:26mm">Quem acessa</th><th>Publicidade</th></tr>
+  <tr><td>CPF / CNPJ</td><td>Identificação exigida pela Resolução; unicidade de apoio</td>
+      <td>Arts. 7º, II/III e 23</td><td>Triagem e Admin, sob registro</td>
+      <td><span class="sel c">Nunca público</span></td></tr>
+  <tr><td>Nome / razão social</td><td>Identificação do autor</td><td>Arts. 7º, II/III e 23</td>
+      <td>Triagem, Gabinete, Admin</td><td><span class="sel b">Só com consentimento</span></td></tr>
+  <tr><td>E-mail</td><td>Contato sobre a ideia</td><td>Art. 7º, III</td>
+      <td>Triagem e Admin</td><td><span class="sel c">Nunca público</span></td></tr>
+  <tr><td>Telefone (opcional)</td><td>Contato alternativo</td><td>Consentimento</td>
+      <td>Triagem e Admin</td><td><span class="sel c">Nunca público</span></td></tr>
+  <tr><td>Bairro / RPA</td><td>Análise territorial da participação</td><td>Art. 7º, III</td>
+      <td>Todos os perfis internos</td><td><span class="sel a">Público (agregado)</span></td></tr>
+  <tr><td>Conteúdo da ideia</td><td>Objeto do programa</td><td>Arts. 7º, III e 23</td>
+      <td>Todos</td><td><span class="sel a">Público após triagem</span></td></tr>
+  <tr><td>Hash de IP</td><td>Detecção de abuso</td><td>Art. 7º, IX (legítimo interesse)</td>
+      <td>Admin</td><td><span class="sel c">Nunca público</span></td></tr>
+</table>
+
+<h3>9.3 Aviso de privacidade e coleta de consentimento</h3>
+<ul>
+  <li>Aviso em linguagem simples, acessível <strong>no próprio passo de identificação</strong>,
+      informando: quais dados, para quê, por quanto tempo, quem acessa, e como exercer direitos.</li>
+  <li>Os dois consentimentos são <strong>caixas separadas e não pré-marcadas</strong>.
+      Agrupá-los invalidaria o consentimento por falta de especificidade.</li>
+  <li>Data, hora e versão do texto do aviso são registradas junto ao consentimento — sem
+      isso, não há como comprovar o que exatamente foi consentido.</li>
+</ul>
+
+<h3>9.4 Retenção e eliminação</h3>
+<table class="d">
+  <tr><th style="width:52mm">Categoria</th><th style="width:30mm">Prazo sugerido</th><th>Tratamento ao fim do prazo</th></tr>
+  <tr><td>Identificação do autor (CPF, e-mail, telefone)</td><td>5 anos após o encerramento da ideia</td>
+      <td>Anonimização: apagam-se as três colunas do documento e os contatos; o registro
+          da ideia e sua tramitação <b>permanecem</b></td></tr>
+  <tr><td>Conteúdo da ideia e tramitação</td><td>Permanente</td>
+      <td>Preservado como acervo de participação popular e memória legislativa</td></tr>
+  <tr><td>Hash de IP</td><td>6 meses</td><td>Eliminação</td></tr>
+  <tr><td>Registros de acesso da aplicação</td><td>12 meses</td><td>Eliminação</td></tr>
+</table>
+<div class="box alerta"><b class="rot">Requer validação institucional</b>
+<p>Os prazos acima são <strong>sugestões técnicas</strong>. Devem ser homologados pela
+Procuradoria e pelo Encarregado de Dados (DPO) da Câmara, observadas a tabela de
+temporalidade documental e as normas de arquivo aplicáveis ao Poder Legislativo municipal.
+O sistema implementa os prazos como <strong>parâmetros configuráveis</strong>, justamente
+para absorver essa definição sem alteração de código.</p></div>
+
+<h3>9.5 Direitos do titular (art. 18)</h3>
+<table class="d">
+  <tr><th style="width:44mm">Direito</th><th>Como o sistema atende</th></tr>
+  <tr><td>Confirmação e acesso</td><td>Tela “Acompanhar minha ideia” com protocolo + CPF; exportação dos dados do titular pelo Admin</td></tr>
+  <tr><td>Correção</td><td>Solicitação pelo canal do Encarregado; correção pelo Admin, com registro na trilha de auditoria</td></tr>
+  <tr><td>Anonimização / eliminação</td><td>Rotina do Admin que apaga as colunas do documento e os contatos, preservando a ideia como registro público desidentificado</td></tr>
+  <tr><td>Revogação de consentimento</td><td>Retirada da autorização de divulgação do nome: o nome deixa de aparecer na consulta pública <b>imediatamente</b></td></tr>
+  <tr><td>Informação sobre compartilhamento</td><td>Não há compartilhamento com terceiros. Não há rastreadores, análise de audiência de terceiros nem recursos externos carregados nas páginas</td></tr>
+</table>
+
+<h3>9.6 Incidentes de segurança</h3>
+<p>Plano de resposta documentado com: detecção via alertas de registro, contenção,
+avaliação de risco aos titulares e <strong>comunicação à ANPD e aos titulares em prazo
+razoável</strong> (art. 48), quando houver risco relevante. O Encarregado de Dados da Câmara
+é o ponto focal. A trilha de auditoria é insumo essencial para dimensionar o alcance de um
+eventual incidente.</p>
+
+<!-- ============ 10 ============ -->
+<h2><span class="n">10.</span>Acessibilidade e conformidade legal</h2>
+
+<div class="box crit"><b class="rot">Obrigação, não diferencial</b>
+<p>A <strong>Lei Brasileira de Inclusão (Lei nº 13.146/2015, art. 63)</strong> torna
+obrigatória a acessibilidade de sítios da administração pública. O <strong>Decreto nº
+5.296/2004</strong> e o <strong>eMAG</strong> (Modelo de Acessibilidade em Governo
+Eletrônico) fixam os parâmetros. Um sistema de participação popular inacessível exclui
+justamente a parcela da população que mais depende do canal — e expõe a Câmara a
+questionamento do Ministério Público.</p></div>
+
+<h3>10.1 Requisitos técnicos adotados</h3>
+<table class="d">
+  <tr><th style="width:38mm">Requisito</th><th>Implementação</th></tr>
+  <tr><td>Meta de conformidade</td><td><b>WCAG 2.1 nível AA</b> e diretrizes do eMAG</td></tr>
+  <tr><td>Estrutura semântica</td>
+      <td>HTML semântico com marcos de região, hierarquia correta de títulos, listas e
+          tabelas com cabeçalhos associados</td></tr>
+  <tr><td>Navegação por teclado</td>
+      <td>Todo o fluxo — inclusive triagem e painel do gabinete — operável sem mouse,
+          com foco sempre visível e ordem de tabulação lógica</td></tr>
+  <tr><td>Contraste</td>
+      <td>Mínimo 4,5:1 em texto e 3:1 em componentes. <b>Nenhuma informação transmitida
+          apenas por cor</b>: cada situação combina cor, rótulo textual e forma do selo</td></tr>
+  <tr><td>Formulários</td>
+      <td><code>label</code> associado a cada campo; erros ligados por
+          <code>aria-describedby</code> e anunciados em região <code>aria-live</code>;
+          instruções antes do campo, não depois</td></tr>
+  <tr><td>Independência de JavaScript</td>
+      <td>Consulta pública e detalhe da ideia renderizados no servidor: legíveis mesmo com
+          script desabilitado ou falho</td></tr>
+  <tr><td>Recursos padrão de governo</td>
+      <td><b>VLibras</b> (tradução para Libras), atalho “Ir ao conteúdo”, controles de
+          contraste e de tamanho de fonte, página de acessibilidade com os atalhos</td></tr>
+  <tr><td>Adaptação de tela</td>
+      <td>Desenho a partir do celular; legível a 320 px de largura e com zoom de 200%
+          sem rolagem horizontal</td></tr>
+</table>
+
+<h3>10.2 Verificação</h3>
+<p>Auditoria automatizada com <strong>axe-core</strong> integrada ao pipeline (falha do
+build em violação séria ou crítica), <strong>Lighthouse</strong> com meta de pontuação
+igual ou superior a 95 em acessibilidade, e — indispensável, porque ferramenta automática
+detecta apenas parte dos problemas — <strong>teste manual com leitor de tela</strong>
+(NVDA) e navegação exclusivamente por teclado em cada uma das telas.</p>
+
+<h3>10.3 Lei de Acesso à Informação</h3>
+<p>O endpoint <code>/api/dados-abertos</code> publica o acervo em JSON e CSV, sem dados
+pessoais, com licença de uso livre — atendendo à transparência ativa prevista na
+<strong>Lei nº 12.527/2011</strong> e permitindo reuso por imprensa, universidades e
+organizações da sociedade civil sem necessidade de pedido formal.</p>
+
+<!-- ============ 11 ============ -->
+<h2><span class="n">11.</span>Infraestrutura, implantação e operação</h2>
+
+<h3>11.1 Dimensionamento</h3>
+<p>O volume esperado é <strong>baixo</strong>: estimativa da ordem de dezenas a poucas
+centenas de cadastros por mês, com picos durante campanhas de divulgação, e acessos de
+leitura concentrados na consulta pública. Trata-se de carga modesta para hardware atual.</p>
+<table class="d">
+  <tr><th style="width:34mm">Recurso</th><th style="width:44mm">Recomendado</th><th>Observação</th></tr>
+  <tr><td>Aplicação</td><td>2 vCPU · 4 GB RAM</td><td>Container Node.js 22 LTS</td></tr>
+  <tr><td>Banco de dados</td><td>2 vCPU · 4 GB RAM · 50 GB SSD</td><td>PostgreSQL 16; 50 GB comportam anos de operação com folga</td></tr>
+  <tr><td>Proxy reverso</td><td>Compartilhado</td><td>Pode reaproveitar o Nginx já existente na Câmara</td></tr>
+  <tr><td>Consolidação</td><td>1 VM de 4 vCPU · 8 GB</td><td>Viável hospedar tudo em uma máquina; separar apenas se houver política interna que exija</td></tr>
+  <tr><td>Certificado TLS</td><td>Let's Encrypt ou certificado institucional</td><td>Renovação automática</td></tr>
+</table>
+
+<h3>11.2 Ambientes</h3>
+<table class="d">
+  <tr><th style="width:30mm">Ambiente</th><th style="width:34mm">Finalidade</th><th>Dados</th></tr>
+  <tr><td>Desenvolvimento</td><td>Máquina do desenvolvedor</td><td>Fictícios, gerados por rotina de carga inicial</td></tr>
+  <tr><td>Homologação</td><td>Validação pela Secretaria e pelos gabinetes</td><td>Fictícios. <b>Nunca cópia de produção</b></td></tr>
+  <tr><td>Produção</td><td>Operação real</td><td>Reais, com todos os controles das seções 8 e 9</td></tr>
+</table>
+
+<h3>11.3 Integração e entrega contínua</h3>
+<pre><span class="c"># Pipeline executado a cada proposta de alteração</span>
+1. Lint + verificação de tipos (TypeScript em modo estrito)
+2. Testes unitários      <span class="c"># validação de documento, máquina de estados, cifra</span>
+3. Testes ponta a ponta  <span class="c"># cadastro → triagem → gabinete → consulta</span>
+4. Auditoria axe-core    <span class="c"># falha em violação séria ou crítica</span>
+5. npm audit             <span class="c"># falha em vulnerabilidade alta ou crítica</span>
+6. Varredura de segredos
+7. Build da imagem Docker (imutável, versionada)
+<span class="c"># Publicação em produção: aprovação manual + janela acordada com a TI</span></pre>
+
+<h3>11.4 Cópia de segurança e recuperação</h3>
+<table class="d">
+  <tr><th style="width:30mm">Item</th><th>Definição</th></tr>
+  <tr><td>Frequência</td><td>Cópia completa diária (madrugada) + arquivamento contínuo de WAL</td></tr>
+  <tr><td>Retenção</td><td>30 dias em ciclo diário; 12 meses em ciclo mensal</td></tr>
+  <tr><td>Armazenamento</td><td>Cifrado, em local distinto do servidor de aplicação</td></tr>
+  <tr><td><b>RPO</b> (perda máxima aceitável)</td><td>15 minutos, com arquivamento de WAL</td></tr>
+  <tr><td><b>RTO</b> (tempo máximo de retorno)</td><td>4 horas</td></tr>
+  <tr><td>Teste de restauração</td>
+      <td><b>Trimestral e documentado.</b> Cópia não testada não é cópia — é suposição</td></tr>
+</table>
+
+<h3>11.5 Observabilidade</h3>
+<ul>
+  <li><strong>Registros estruturados</strong> em JSON, com identificador de correlação por
+      requisição. Proibido registrar CPF, senha ou token — verificado por revisão de código.</li>
+  <li><strong>Verificação de saúde</strong> em <code>/api/health</code>, consultada pelo
+      monitoramento da Câmara.</li>
+  <li><strong>Alertas</strong> para: indisponibilidade, taxa de erro 5xx acima do normal,
+      pico de falhas de autenticação, falha de rotina de cópia de segurança.</li>
+  <li><strong>Indicadores operacionais</strong>: tempo de resposta, fila de triagem vencida,
+      volume diário de cadastros.</li>
+</ul>
+
+<h3>11.6 Atualização e manutenção</h3>
+<p>Node.js em versão LTS, com atualização planejada a cada ciclo; correções de segurança
+aplicadas em até 30 dias para severidade alta e em até 7 dias para crítica; PostgreSQL
+atualizado conforme a política da Câmara. <strong>Este é o custo recorrente real da
+adoção de Node.js</strong> — e precisa estar previsto, não descoberto depois.</p>
+
+<!-- ============ 12 ============ -->
+<h2><span class="n">12.</span>Integração com o portal institucional</h2>
+
+<h3>12.1 Comparação das opções</h3>
+<table class="d">
+  <tr><th style="width:32mm">Opção</th><th style="width:20mm">Avaliação</th><th>Análise</th></tr>
+  <tr><td><b>Subdomínio</b><br><code>bancodeideias.recife.pe.leg.br</code></td>
+      <td><span class="sel a">Recomendado</span></td>
+      <td>Isolamento operacional completo: implantação, atualização e eventual
+          indisponibilidade não afetam o portal. Cabeçalhos de segurança próprios.
+          Cookie de sessão restrito ao subdomínio. Endereço limpo e compartilhável.
+          <b>Custo:</b> uma entrada de DNS e um certificado.</td></tr>
+  <tr><td><b>Rota via proxy reverso</b><br><code>/participacao-popular/banco-de-ideias</code></td>
+      <td><span class="sel b">Viável</span></td>
+      <td>Preserva o domínio único, o que pode ser preferível institucionalmente.
+          Exige regra no Nginx e atenção ao escopo de cookies, já que o domínio passa a ser
+          compartilhado com o Plone. Escolha legítima se houver política de domínio único.</td></tr>
+  <tr><td><b>Iframe dentro do Plone</b></td>
+      <td><span class="sel c">Desaconselhado</span></td>
+      <td>Ver quadro abaixo.</td></tr>
+</table>
+
+<div class="box crit"><b class="rot">Por que não usar iframe</b>
+<ul style="margin-bottom:0">
+  <li><b>Acessibilidade.</b> A navegação por teclado e por leitor de tela através da
+      fronteira do iframe é notoriamente problemática — e acessibilidade aqui é
+      exigência legal (seção 10), não preferência.</li>
+  <li><b>Endereço não compartilhável.</b> A URL da barra não muda ao navegar dentro do
+      iframe. O cidadão não consegue enviar o link de uma ideia por WhatsApp — o que
+      elimina o principal vetor de divulgação orgânica do programa.</li>
+  <li><b>Indexação.</b> Buscadores associam mal o conteúdo de iframes à página que os
+      contém; o acervo perde alcance.</li>
+  <li><b>Segurança.</b> Obriga a afrouxar <code>X-Frame-Options</code> e
+      <code>frame-ancestors</code>, reduzindo a proteção contra <i>clickjacking</i>.</li>
+  <li><b>Experiência.</b> Rolagem aninhada e altura fixa quebram no celular.</li>
+</ul></div>
+
+<h3>12.2 Continuidade visual e institucional</h3>
+<p>Estar em subdomínio não pode dar ao cidadão a sensação de ter saído da Câmara. Medidas:</p>
+<ul>
+  <li>Cabeçalho com faixa institucional e identidade visual alinhada à do portal, incluindo
+      link permanente “voltar ao site da Câmara”.</li>
+  <li>Rodapé com endereço, telefone, Fale Conosco e Ouvidoria, iguais aos do portal.</li>
+  <li>A página atual do Plone é convertida em <strong>página de apresentação</strong> do
+      programa — o que é, para que serve, base normativa, como funciona a triagem — com
+      botão de acesso ao sistema. Ganha-se explicação de processo, hoje inexistente.</li>
+  <li>Tokens de cor derivados da identidade institucional, a serem confirmados contra o
+      manual de identidade visual ou os arquivos de estilo oficiais na fase de implementação.</li>
+</ul>
+
+<!-- ============ 13 ============ -->
+<h2><span class="n">13.</span>Plano de implantação</h2>
+
+<h3>13.1 Fases</h3>
+<table class="d">
+  <tr><th style="width:12mm">Fase</th><th style="width:44mm">Entregável</th><th style="width:26mm">Esforço estimado</th><th>Dependências</th></tr>
+  <tr><td><b>0</b></td><td>Protótipo navegável para validação com a Secretaria e a Mesa Diretora</td>
+      <td>Concluído</td><td>—</td></tr>
+  <tr><td><b>1</b></td><td>Projeto base, modelo de dados, migrações, carga inicial, identidade visual</td>
+      <td>1 a 2 semanas</td><td>Definição de temas e da lista de motivos de arquivamento</td></tr>
+  <tr><td><b>2</b></td><td>Fluxo público: assistente de cadastro, protocolo, consulta pública, acompanhamento</td>
+      <td>2 a 3 semanas</td><td>Homologação do texto do aviso de privacidade</td></tr>
+  <tr><td><b>3</b></td><td>Painel interno: autenticação, perfis, triagem com prazo, painel do gabinete</td>
+      <td>2 a 3 semanas</td><td>Lista de gabinetes e servidores a cadastrar</td></tr>
+  <tr><td><b>4</b></td><td>Apoios, prevenção de duplicidade, indicadores, dados abertos</td>
+      <td>1 a 2 semanas</td><td>—</td></tr>
+  <tr><td><b>5</b></td><td>Acessibilidade, testes, reforço de segurança, homologação e implantação</td>
+      <td>2 a 3 semanas</td><td>Ambiente provisionado pela TI; parecer da Procuradoria/DPO</td></tr>
+</table>
+<p style="font-size:9.4pt;color:#555">Estimativa total: <strong>8 a 13 semanas</strong> para
+uma pessoa desenvolvedora em dedicação integral. Valores são estimativas de projeto e devem
+ser recalibrados após a definição do responsável pela execução.</p>
+
+<h3>13.2 Dependências da Câmara</h3>
+<ul class="cols2">
+  <li>Provisionamento da VM e do PostgreSQL</li>
+  <li>Entrada de DNS e certificado TLS</li>
+  <li>Regra no proxy reverso</li>
+  <li>Homologação de prazos de retenção (Procuradoria/DPO)</li>
+  <li>Validação do aviso de privacidade</li>
+  <li>Lista oficial de temas e de gabinetes</li>
+  <li>Manual de identidade visual</li>
+  <li>Definição do responsável pela operação da Triagem</li>
+  <li>Confirmação sobre protocolo institucional já existente</li>
+  <li>Janela de implantação e plano de comunicação</li>
+</ul>
+
+<h3>13.3 Critérios de aceite para entrada em produção</h3>
+<table class="d">
+  <tr><th style="width:8mm">#</th><th style="width:40mm">Verificação</th><th>Resultado esperado</th></tr>
+  <tr><td>1</td><td>Fluxo ponta a ponta</td>
+      <td>Cadastrar → triar → gabinete assumir → aparecer na consulta pública, com o mesmo protocolo em todas as etapas</td></tr>
+  <tr><td>2</td><td>Autorização</td>
+      <td><code>POST /api/ideias/{id}/tramitar</code> <b>sem sessão</b> retorna <code>401</code>;
+          com perfil incorreto retorna <code>403</code></td></tr>
+  <tr><td>3</td><td>Máquina de estados</td>
+      <td>Transição fora do grafo (ex.: RECEBIDA → ADOTADA) retorna <code>422</code></td></tr>
+  <tr><td>4</td><td>Justificativa</td>
+      <td>Arquivar sem justificativa retorna <code>422</code>; com justificativa, o autor a lê em “Acompanhar”</td></tr>
+  <tr><td>5</td><td>Vazamento de dado pessoal</td>
+      <td>HTML da consulta pública, <code>/api/ideias</code> e <code>/api/dados-abertos</code>
+          <b>não contêm</b> CPF, e-mail, telefone nem IP</td></tr>
+  <tr><td>6</td><td>Consentimento</td>
+      <td>Autor sem autorização de divulgação aparece como “Cidadão(ã) do Recife”</td></tr>
+  <tr><td>7</td><td>Auditoria</td>
+      <td>Toda transição e toda revelação de CPF geram registro consultável pelo Admin</td></tr>
+  <tr><td>8</td><td>Acessibilidade</td>
+      <td>Lighthouse ≥ 95; axe-core sem violação séria; fluxo completo por teclado e com NVDA</td></tr>
+  <tr><td>9</td><td>Validação de documento</td>
+      <td>CPF com dígito verificador inválido é rejeitado com mensagem no campo</td></tr>
+  <tr><td>10</td><td>Recuperação</td>
+      <td>Restauração da cópia de segurança em ambiente limpo, executada e documentada</td></tr>
+</table>
+
+<!-- ============ 14 ============ -->
+<h2><span class="n">14.</span>Riscos e mitigações</h2>
+<table class="d">
+  <tr><th style="width:44mm">Risco</th><th style="width:16mm">Prob.</th><th style="width:16mm">Impacto</th><th>Mitigação</th></tr>
+  <tr><td><b>Vazamento de CPF</b> por falha ou acesso indevido</td>
+      <td>Baixa</td><td><span class="sel c">Crítico</span></td>
+      <td>Cifra AES-256-GCM, chave fora do código, máscara por padrão, revelação registrada,
+          minimização nas respostas, teste automatizado de vazamento (aceite nº 5)</td></tr>
+  <tr><td><b>Ausência de equipe para operar a Triagem</b>, gerando fila parada</td>
+      <td><span class="sel c">Alta</span></td><td>Alto</td>
+      <td>Indicador de prazo visível, painel de vencidos, alerta operacional. <b>É risco de
+          processo, não de tecnologia</b>: exige designação formal de responsável antes da
+          entrada em produção</td></tr>
+  <tr><td><b>Baixa adesão dos gabinetes</b> ao painel</td>
+      <td>Média</td><td>Alto</td>
+      <td>Treinamento, ordenação por apoios (mostra relevância política), exportação da
+          carteira, indicador público de adoção por gabinete</td></tr>
+  <tr><td><b>Node.js fora do domínio técnico da equipe</b></td>
+      <td>Média</td><td>Médio</td>
+      <td>Docker padroniza a operação; documentação de implantação; alternativa em Django
+          formalmente disponível (seção 4.2)</td></tr>
+  <tr><td><b>Envio automatizado em massa</b> ou uso político indevido</td>
+      <td>Média</td><td>Médio</td>
+      <td>Limites por IP e por documento, validação de dígito verificador, campo-armadilha,
+          apoio único por documento, monitoramento de picos</td></tr>
+  <tr><td><b>Conteúdo ofensivo, ilegal ou difamatório</b> publicado</td>
+      <td>Média</td><td>Alto</td>
+      <td>Publicação <b>somente após triagem humana</b> — nada vai ao ar automaticamente.
+          Motivo de arquivamento específico e possibilidade de despublicação pelo Admin</td></tr>
+  <tr><td><b>Prazos de retenção não homologados</b> a tempo</td>
+      <td>Média</td><td>Médio</td>
+      <td>Prazos implementados como parâmetro configurável; a definição jurídica não bloqueia
+          a entrada em produção</td></tr>
+  <tr><td><b>Divergência com protocolo institucional</b> já existente</td>
+      <td>Média</td><td>Médio</td>
+      <td>Confirmar com a Secretaria na Fase 1; se houver, o sistema passa a
+          <b>referenciar</b> o número oficial em vez de criar numeração paralela</td></tr>
+  <tr><td><b>Expectativa não atendida</b>: cidadão espera que a ideia vire lei</td>
+      <td><span class="sel c">Alta</span></td><td>Médio</td>
+      <td>Comunicação explícita, em cada etapa, de que a adoção é decisão discricionária do
+          parlamentar; linha do tempo honesta; motivo de arquivamento sempre informado</td></tr>
+</table>
+
+<!-- ============ 15 ============ -->
+<h2><span class="n">15.</span>Roadmap posterior (v2)</h2>
+<p>Itens deliberadamente <strong>fora</strong> do escopo inicial, para reduzir o tempo até a
+primeira entrega em produção. Nenhum deles exige reescrita — todos foram considerados na
+modelagem.</p>
+<table class="d">
+  <tr><th style="width:46mm">Item</th><th>Descrição e razão do adiamento</th></tr>
+  <tr><td><b>Vínculo com a proposição</b></td>
+      <td>Ao adotar, registrar o número do Projeto de Lei gerado, e o público passa a ver
+          “originou o Projeto de Lei nº X/2026”. <b>É o item de maior impacto simbólico</b>
+          — fecha o ciclo e prova que participar produz resultado. Adiado por depender de
+          integração com o sistema de proposições da Câmara. Sugere-se
+          <b>priorizá-lo na v2</b></td></tr>
+  <tr><td><b>Notificações por e-mail</b></td>
+      <td>Aviso automático ao autor a cada mudança de situação. Depende de servidor de
+          e-mail institucional, política antispam e reputação de domínio</td></tr>
+  <tr><td><b>Autenticação gov.br</b></td>
+      <td>CPF verificado na origem, eliminando fraude de identificação e erro de digitação.
+          Depende de processo de credenciamento junto ao gov.br, de prazo não controlável</td></tr>
+  <tr><td><b>Integração com SSO/LDAP</b></td>
+      <td>Elimina senha duplicada para servidores e gabinetes. A camada de autenticação já
+          foi desenhada para receber provedor externo sem reescrita</td></tr>
+  <tr><td><b>Anexos</b></td>
+      <td>Fotos e documentos junto à ideia. Exige varredura antivírus, limites de tamanho,
+          política de retenção própria e moderação de imagem</td></tr>
+  <tr><td><b>Painel geográfico</b></td>
+      <td>Mapa de calor das ideias por RPA e bairro. Os dados já são coletados na v1</td></tr>
+</table>
+
+<!-- ============ 16 ============ -->
+<h2><span class="n">16.</span>Glossário</h2>
+
+<h3>16.1 Termos legislativos, para leitores de tecnologia</h3>
+<table class="d">
+  <tr><th style="width:38mm">Termo</th><th>Significado</th></tr>
+  <tr><td><b>Proposição</b></td><td>Matéria submetida à apreciação da Câmara — projeto de lei, indicação, requerimento</td></tr>
+  <tr><td><b>Gabinete</b></td><td>Estrutura de apoio de cada vereador; no sistema, é quem analisa e adota ideias</td></tr>
+  <tr><td><b>Triagem</b></td><td>Análise prévia pela Secretaria, que verifica conteúdo e identificação antes da publicação</td></tr>
+  <tr><td><b>Adoção</b></td><td>Ato pelo qual um gabinete assume a ideia para convertê-la em proposição</td></tr>
+  <tr><td><b>Tramitação</b></td><td>Percurso formal do registro entre as situações previstas</td></tr>
+  <tr><td><b>RPA</b></td><td>Região Político-Administrativa — o Recife possui 6, usadas para análise territorial</td></tr>
+  <tr><td><b>Resolução</b></td><td>Norma interna da Câmara; a de nº 2.690/2018 instituiu este Banco de Ideias</td></tr>
+</table>
+
+<h3>16.2 Termos de tecnologia, para leitores do Legislativo</h3>
+<table class="d">
+  <tr><th style="width:38mm">Termo</th><th>Significado</th></tr>
+  <tr><td><b>API</b></td><td>Interface pela qual sistemas trocam dados diretamente, sem tela</td></tr>
+  <tr><td><b>Hash</b></td><td>Resumo irreversível de um dado. Serve para comparar sem armazenar o original</td></tr>
+  <tr><td><b>Cifra (criptografia)</b></td><td>Transformação reversível do dado, legível apenas com a chave correta</td></tr>
+  <tr><td><b>Máquina de estados</b></td><td>Conjunto fechado de situações e de transições permitidas entre elas</td></tr>
+  <tr><td><b>Trilha de auditoria</b></td><td>Registro permanente de quem fez o quê, quando e por quê</td></tr>
+  <tr><td><b>RPO / RTO</b></td><td>Perda máxima de dados aceitável / tempo máximo para restabelecer o serviço</td></tr>
+  <tr><td><b>WCAG / eMAG</b></td><td>Padrões internacional e do governo brasileiro para acessibilidade digital</td></tr>
+  <tr><td><b>LGPD</b></td><td>Lei Geral de Proteção de Dados (Lei nº 13.709/2018)</td></tr>
+  <tr><td><b>SSR</b></td><td>Renderização no servidor: a página chega pronta, sem depender de script no navegador</td></tr>
+</table>
+
+<div class="box" style="margin-top:22px">
+  <b class="rot">Encerramento</b>
+  <p>Este documento descreve <strong>uma proposta submetida a avaliação</strong>. As decisões
+  de arquitetura registradas nas seções 4 a 7 e os controles das seções 8 a 11 estão abertos
+  a revisão pela área de Tecnologia da Informação da Câmara, que detém o conhecimento do
+  parque tecnológico, das políticas internas de segurança e das restrições operacionais que
+  este documento só pode presumir.</p>
+  <p style="margin-bottom:0">Acompanha esta especificação um <strong>protótipo navegável</strong>
+  em arquivo único, que demonstra o fluxo completo das quatro etapas com persistência real
+  entre as telas. Ele serve para validar o processo com a Secretaria e os gabinetes antes de
+  qualquer decisão de implementação.</p>
+</div>
+
+
+
+
+</body>
+</html>

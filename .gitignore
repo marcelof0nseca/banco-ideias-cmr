@@ -1,0 +1,49 @@
+# dependencias
+node_modules/
+.pnp
+.pnp.js
+
+# build
+.next/
+out/
+build/
+dist/
+
+# prisma - cliente gerado
+prisma/gen/
+generated/
+
+# ambiente - NUNCA versionar segredos (secao 8.7 da especificacao)
+.env
+.env.local
+.env.production
+.env.*.local
+!.env.example
+
+# testes
+coverage/
+test-results/
+playwright-report/
+.vitest/
+
+# sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# logs
+*.log
+npm-debug.log*
+
+# temporarios
+*.tmp
+.cache/
+
+# gerados pelo build/TS
+*.tsbuildinfo
+next-env.d.ts

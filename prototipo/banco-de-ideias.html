@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Protótipo — Banco de Ideias Legislativas</title>
+<style>
+:root{
+  --azul:#17356B; --azul2:#2F5CA8; --azul3:#3E6FC4; --acao:#2563EB;
+  --verde:#146C43; --verde-bg:#E8F5EE;
+  --verm:#B42318; --verm-bg:#FEF3F2;
+  --amb:#B54708;  --amb-bg:#FEF6EE;
+  --tinta:#1A1F2B; --cinza:#5A6472; --linha:#D7DEE9;
+  --fundo:#F2F5F9; --card:#FFFFFF;
+  --sombra:0 1px 3px rgba(23,53,107,.10), 0 6px 18px rgba(23,53,107,.06);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Segoe UI',Roboto,-apple-system,Helvetica,Arial,sans-serif;
+  background:var(--fundo); color:var(--tinta); font-size:15px; line-height:1.55;
+}
+a{color:var(--acao);}
+:focus-visible{ outline:3px solid #FFB020; outline-offset:2px; border-radius:3px; }
+
+/* ---------- FAIXA DE PROTÓTIPO ---------- */
+.faixa{
+  background:#7A3E00; color:#FFF3E4; font-size:13px; padding:7px 16px;
+  text-align:center; position:sticky; top:0; z-index:60; line-height:1.4;
+}
+.faixa b{color:#FFD9A8;}
+
+/* ---------- CABEÇALHO ---------- */
+header.inst{ background:var(--azul); color:#fff; padding:16px 16px 0; }
+.wrap{ max-width:1120px; margin:0 auto; }
+.inst .org{ font-size:12px; letter-spacing:.13em; text-transform:uppercase;
+  color:#A9C4EC; font-weight:600; }
+.inst h1{ font-size:20px; margin:2px 0 0; font-weight:700; letter-spacing:-.01em; }
+.inst .norma{ font-size:12.5px; color:#C6D8F3; margin:2px 0 14px; }
+
+nav.abas{ display:flex; flex-wrap:wrap; gap:2px; }
+nav.abas button{
+  font:inherit; font-size:13.5px; font-weight:600; cursor:pointer;
+  background:#1E4488; color:#C9DBF5; border:0; border-top:4px solid transparent;
+  padding:11px 15px 10px; border-radius:5px 5px 0 0; white-space:nowrap;
+}
+nav.abas button:hover{ background:#2A5299; color:#fff; }
+nav.abas button[aria-current="page"]{
+  background:var(--fundo); color:var(--azul); border-top-color:var(--azul3);
+}
+nav.abas .lock{ font-size:10px; letter-spacing:.06em; opacity:.75; margin-left:5px; }
+
+main{ max-width:1120px; margin:0 auto; padding:20px 16px 56px; }
+.painel[hidden]{ display:none; }
+
+/* ---------- CARTÃO ---------- */
+.card{ background:var(--card); border:1px solid var(--linha); border-radius:8px;
+  box-shadow:var(--sombra); padding:22px; margin-bottom:18px; }
+.card > h2{ font-size:19px; color:var(--azul); margin:0 0 4px; }
+.card > .desc{ color:var(--cinza); font-size:13.5px; margin:0 0 6px;
+  padding-bottom:12px; border-bottom:2px solid var(--azul); }
+
+h3{ font-size:15px; color:var(--azul2); margin:20px 0 8px; }
+.etapa h3{ display:inline-block; }
+h3[tabindex]:focus-visible{ outline:2px dashed var(--acao); outline-offset:5px; }
+
+/* ---------- FORMULÁRIO ---------- */
+.grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 18px; }
+.campo{ display:flex; flex-direction:column; }
+.campo.full{ grid-column:1/-1; }
+label{ font-size:13.5px; font-weight:600; margin-bottom:5px; }
+label .req{ color:var(--verm); }
+.dica{ display:block; font-size:12px; color:var(--cinza); font-weight:400; margin-top:3px; }
+input,select,textarea{
+  font:inherit; font-size:14.5px; padding:9px 11px; border:1.5px solid var(--linha);
+  border-radius:6px; background:#FBFCFE; color:var(--tinta); width:100%;
+}
+textarea{ min-height:110px; resize:vertical; }
+input:focus,select:focus,textarea:focus{ border-color:var(--acao); background:#fff; }
+input[aria-invalid="true"],select[aria-invalid="true"],textarea[aria-invalid="true"]{
+  border-color:var(--verm); background:var(--verm-bg); }
+.erro{ font-size:12.5px; color:var(--verm); font-weight:600; margin-top:4px; }
+.erro:empty{ display:none; }
+.conta{ font-size:12px; color:var(--cinza); text-align:right; margin-top:3px; }
+
+.check{ display:flex; gap:10px; align-items:flex-start; padding:11px 13px;
+  border:1.5px solid var(--linha); border-radius:6px; background:#FBFCFE; margin-bottom:9px; }
+.check input{ width:auto; margin-top:3px; flex:none; }
+.check span{ font-size:13.5px; line-height:1.5; }
+.check b{ display:block; }
+
+/* ---------- BOTÕES ---------- */
+button.b{ font:inherit; font-size:14px; font-weight:600; cursor:pointer;
+  border:0; border-radius:6px; padding:10px 18px; background:var(--acao); color:#fff; }
+button.b:hover{ filter:brightness(1.08); }
+button.b.sec{ background:#E7EDF7; color:var(--azul); }
+button.b.ok{ background:var(--verde); }
+button.b.no{ background:var(--verm); }
+button.b.pq{ padding:6px 12px; font-size:13px; }
+button.b:disabled{ opacity:.5; cursor:not-allowed; }
+.linha-bt{ display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;
+  padding-top:16px; border-top:1px solid var(--linha); }
+.espaco{ flex:1; }
+
+/* ---------- PASSOS ---------- */
+ol.passos{ display:flex; list-style:none; margin:0 0 22px; padding:0; gap:6px; flex-wrap:wrap; }
+ol.passos li{ flex:1; min-width:120px; font-size:12.5px; color:var(--cinza);
+  border-top:4px solid var(--linha); padding-top:7px; font-weight:600; }
+ol.passos li[data-on]{ color:var(--azul); border-top-color:var(--acao); }
+ol.passos li[data-feito]{ color:var(--verde); border-top-color:var(--verde); }
+ol.passos li small{ display:block; font-weight:400; font-size:11.5px; }
+
+/* ---------- TABELA ---------- */
+.rolagem{ overflow-x:auto; }
+table.t{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:660px; }
+table.t th{ background:#EEF2F9; color:var(--azul); text-align:left; padding:10px 12px;
+  border-bottom:2px solid var(--linha); font-size:12.5px;
+  text-transform:uppercase; letter-spacing:.04em; }
+table.t td{ padding:11px 12px; border-bottom:1px solid var(--linha); vertical-align:top; }
+table.t tr:hover td{ background:#F8FAFD; }
+table.t .prot{ font-weight:700; color:var(--azul); white-space:nowrap; }
+table.t .sub{ font-size:12px; color:var(--cinza); }
+
+/* ---------- SELOS ---------- */
+.selo{ display:inline-block; font-size:11.5px; font-weight:700; padding:3px 9px;
+  border-radius:11px; border:1.5px solid; white-space:nowrap; letter-spacing:.02em; }
+.s-RECEBIDA{ color:var(--cinza); border-color:#B7C0CD; background:#F1F4F8; }
+.s-EM_TRIAGEM{ color:var(--amb); border-color:var(--amb); background:var(--amb-bg); }
+.s-DISPONIVEL{ color:var(--azul2); border-color:var(--azul2); background:#EAF1FB; }
+.s-EM_ANALISE{ color:#6B3FA0; border-color:#6B3FA0; background:#F3EDFA; }
+.s-ADOTADA{ color:var(--verde); border-color:var(--verde); background:var(--verde-bg); }
+.s-ARQUIVADA{ color:var(--verm); border-color:var(--verm); background:var(--verm-bg); }
+.prazo{ font-size:11.5px; font-weight:700; }
+.prazo.venc{ color:var(--verm); }
+.prazo.ok{ color:var(--verde); }
+
+/* ---------- AVISOS ---------- */
+.aviso{ padding:12px 15px; border-radius:6px; font-size:13.5px; margin:14px 0;
+  border-left:4px solid; }
+.aviso.info{ background:#EEF3FB; border-color:var(--azul2); }
+.aviso.bom{ background:var(--verde-bg); border-color:var(--verde); }
+.aviso.mau{ background:var(--verm-bg); border-color:var(--verm); }
+.aviso.alerta{ background:var(--amb-bg); border-color:var(--amb); }
+.aviso > b{ display:block; margin-bottom:2px; }
+.aviso p{ margin:0; }
+
+/* ---------- PROTOCOLO ---------- */
+.protocolo{ text-align:center; padding:26px 18px; background:var(--verde-bg);
+  border:2px dashed var(--verde); border-radius:8px; margin:18px 0; }
+.protocolo .n{ font-size:31px; font-weight:800; color:var(--verde);
+  letter-spacing:.05em; font-family:Consolas,monospace; margin:6px 0; }
+.protocolo .lab{ font-size:12.5px; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--cinza); font-weight:700; }
+.protocolo .tok{ font-family:Consolas,monospace; font-size:14px;
+  background:#fff; border:1px solid var(--linha); border-radius:5px;
+  padding:5px 12px; display:inline-block; margin-top:8px; }
+
+/* ---------- CARDS DE CONSULTA ---------- */
+.ideia{ border:1px solid var(--linha); border-radius:8px; padding:16px 18px;
+  margin-bottom:12px; background:#fff; }
+.ideia:hover{ border-color:var(--azul3); }
+.ideia .topo{ display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
+.ideia h4{ margin:0 0 6px; font-size:16.5px; }
+.ideia h4 button{ background:none; border:0; padding:0; font:inherit; color:var(--azul);
+  cursor:pointer; text-align:left; font-weight:700; }
+.ideia h4 button:hover{ color:var(--acao); text-decoration:underline; }
+.ideia .meta{ font-size:12.5px; color:var(--cinza); margin-bottom:8px; }
+.ideia .meta b{ color:var(--tinta); }
+.ideia p.txt{ margin:0 0 10px; font-size:14px; }
+.ideia .rodape{ display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+  border-top:1px solid var(--linha); padding-top:10px; }
+.apoios{ font-size:13px; color:var(--cinza); }
+.apoios b{ color:var(--azul); font-size:15px; }
+
+/* ---------- LINHA DO TEMPO ---------- */
+ol.tempo{ list-style:none; margin:14px 0 0; padding:0 0 0 22px;
+  border-left:3px solid var(--linha); }
+ol.tempo li{ position:relative; padding:0 0 18px 12px; }
+ol.tempo li::before{ content:""; position:absolute; left:-31px; top:4px;
+  width:13px; height:13px; border-radius:50%; background:#fff;
+  border:3px solid var(--azul2); }
+ol.tempo li[data-fim]::before{ border-color:var(--verde); background:var(--verde); }
+ol.tempo li[data-arq]::before{ border-color:var(--verm); background:var(--verm); }
+ol.tempo .quando{ font-size:12px; color:var(--cinza); }
+ol.tempo .oque{ font-weight:700; font-size:14px; }
+ol.tempo .porque{ font-size:13.5px; margin-top:3px; }
+
+/* ---------- FILTROS ---------- */
+.filtros{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;
+  padding:14px; background:#F7F9FC; border:1px solid var(--linha);
+  border-radius:7px; margin-bottom:16px; }
+.filtros .campo{ flex:1; min-width:150px; margin:0; }
+
+/* ---------- INDICADORES ---------- */
+.kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+.kpi{ background:#F7F9FC; border:1px solid var(--linha); border-radius:7px;
+  padding:14px 16px; border-top:4px solid var(--azul2); }
+.kpi .v{ font-size:27px; font-weight:800; color:var(--azul); line-height:1.15; }
+.kpi .l{ font-size:12.5px; color:var(--cinza); font-weight:600; }
+.barras{ margin-top:6px; }
+.barra{ display:grid; grid-template-columns:150px 1fr 44px; gap:10px;
+  align-items:center; margin-bottom:7px; font-size:13px; }
+.barra .tr{ background:#E7EDF7; border-radius:4px; height:19px; overflow:hidden; }
+.barra .tr i{ display:block; height:100%; background:var(--azul2); border-radius:4px; }
+.barra .q{ text-align:right; font-weight:700; color:var(--azul); }
+
+/* ---------- MODAL ---------- */
+.modal[hidden]{ display:none; }
+.modal{ position:fixed; inset:0; background:rgba(15,29,51,.55); z-index:80;
+  display:flex; align-items:center; justify-content:center; padding:16px; }
+.modal .cx{ background:#fff; border-radius:9px; padding:22px; max-width:520px;
+  width:100%; max-height:90vh; overflow:auto; }
+.modal h3{ margin-top:0; }
+
+footer.inst{ background:var(--azul); color:#C6D8F3; font-size:12.5px;
+  padding:20px 16px; margin-top:30px; }
+footer.inst a{ color:#fff; }
+.slr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+
+@media (max-width:720px){
+  .grid{ grid-template-columns:1fr; }
+  .barra{ grid-template-columns:96px 1fr 36px; }
+  nav.abas button{ font-size:12.5px; padding:9px 11px; }
+  .inst h1{ font-size:17px; }
+}
+</style>
+</head>
+<body>
+
+<div class="faixa">
+  <b>PROTÓTIPO NAVEGÁVEL</b> — demonstração de fluxo. Não é o sistema oficial da Câmara
+  Municipal do Recife. Os dados ficam somente neste navegador.
+</div>
+
+<header class="inst">
+  <div class="wrap">
+    <div class="org">Câmara Municipal do Recife</div>
+    <h1>Banco de Ideias Legislativas</h1>
+    <div class="norma">Participação Popular · Resolução nº 2.690/2018</div>
+    <nav class="abas" aria-label="Etapas do sistema">
+      <button data-aba="cadastro"  aria-current="page">1. Cadastro <span class="lock">CIDADÃO</span></button>
+      <button data-aba="triagem">2. Triagem <span class="lock">INTERNO</span></button>
+      <button data-aba="gabinete">3. Painel <span class="lock">INTERNO</span></button>
+      <button data-aba="consulta">4. Consulta Pública</button>
+      <button data-aba="acompanhar">Acompanhar</button>
+      <button data-aba="indicadores">Indicadores</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div id="anuncio" role="status" aria-live="polite" class="slr"></div>
+
+<!-- ============================= 1. CADASTRO ============================= -->
+<section class="painel" id="p-cadastro" aria-label="Cadastro de ideia">
+  <div class="card">
+    <h2>Enviar uma ideia legislativa</h2>
+    <p class="desc">A identificação do autor é obrigatória (Resolução nº 2.690/2018).
+      Seu CPF nunca aparece publicamente.</p>
+
+    <ol class="passos" id="passos">
+      <li data-p="1"><span>1. Já existe?</span><small>Evitar duplicidade</small></li>
+      <li data-p="2"><span>2. A ideia</span><small>Tema e descrição</small></li>
+      <li data-p="3"><span>3. Identificação</span><small>CPF/CNPJ e consentimentos</small></li>
+      <li data-p="4"><span>4. Confirmação</span><small>Protocolo</small></li>
+    </ol>
+
+    <!-- passo 1 -->
+    <div class="etapa" data-e="1">
+      <h3>Sua ideia já foi proposta por outra pessoa?</h3>
+      <p style="font-size:14px;color:var(--cinza);margin-top:0">
+        Pesquise antes de enviar. Se já existir algo parecido, <b>apoiar</b> a ideia
+        existente dá mais força a ela do que criar um registro repetido.</p>
+      <div class="campo">
+        <label for="busca-dup">Palavra-chave</label>
+        <input id="busca-dup" type="search" placeholder="Ex.: ciclovia, horta, farmácia...">
+      </div>
+      <div id="res-dup" style="margin-top:14px"></div>
+      <div class="linha-bt">
+        <span class="espaco"></span>
+        <button class="b" data-ir="2">Não encontrei — continuar</button>
+      </div>
+    </div>
+
+    <!-- passo 2 -->
+    <div class="etapa" data-e="2" hidden>
+      <h3>Descreva sua ideia</h3>
+      <div class="grid">
+        <div class="campo">
+          <label for="f-tema">Tema <span class="req">*</span></label>
+          <select id="f-tema"></select>
+          <p class="erro" id="e-tema"></p>
+        </div>
+        <div class="campo">
+          <label for="f-rpa">Região (RPA)<span class="dica">Opcional — usado só em estatística</span></label>
+          <select id="f-rpa">
+            <option value="">Não informar</option>
+            <option>RPA 1 — Centro</option><option>RPA 2 — Norte</option>
+            <option>RPA 3 — Noroeste</option><option>RPA 4 — Oeste</option>
+            <option>RPA 5 — Sudoeste</option><option>RPA 6 — Sul</option>
+          </select>
+        </div>
+        <div class="campo full">
+          <label for="f-titulo">Título da ideia <span class="req">*</span></label>
+          <input id="f-titulo" maxlength="150" placeholder="Ex.: Criação de ecopontos nos bairros">
+          <div class="conta"><span id="c-titulo">0</span>/150</div>
+          <p class="erro" id="e-titulo"></p>
+        </div>
+        <div class="campo full">
+          <label for="f-desc">Descrição <span class="req">*</span>
+            <span class="dica">Explique o problema e a solução que você propõe. Mínimo de 30 caracteres.</span></label>
+          <textarea id="f-desc" maxlength="5000" placeholder="Descreva sua ideia legislativa..."></textarea>
+          <div class="conta"><span id="c-desc">0</span>/5000</div>
+          <p class="erro" id="e-desc"></p>
+        </div>
+        <div class="campo full">
+          <label for="f-bairro">Bairro<span class="dica">Opcional</span></label>
+          <input id="f-bairro" placeholder="Ex.: Boa Viagem">
+        </div>
+      </div>
+      <div class="linha-bt">
+        <button class="b sec" data-ir="1">Voltar</button>
+        <span class="espaco"></span>
+        <button class="b" id="bt-p2">Continuar</button>
+      </div>
+    </div>
+
+    <!-- passo 3 -->
+    <div class="etapa" data-e="3" hidden>
+      <h3>Identificação do autor</h3>
+      <div class="grid">
+        <div class="campo">
+          <label for="f-tipo">Tipo de autor <span class="req">*</span></label>
+          <select id="f-tipo">
+            <option value="FISICA">Pessoa Física (Cidadão)</option>
+            <option value="JURIDICA">Pessoa Jurídica (Entidade)</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label for="f-doc"><span id="lab-doc">CPF</span> <span class="req">*</span>
+            <span class="dica" id="dica-doc">Para testar, use o CPF válido 529.982.247-25</span></label>
+          <input id="f-doc" inputmode="numeric" placeholder="000.000.000-00">
+          <p class="erro" id="e-doc"></p>
+        </div>
+        <div class="campo full">
+          <label for="f-nome"><span id="lab-nome">Nome completo</span> <span class="req">*</span></label>
+          <input id="f-nome" placeholder="Digite seu nome">
+          <p class="erro" id="e-nome"></p>
+        </div>
+        <div class="campo">
+          <label for="f-email">E-mail <span class="req">*</span></label>
+          <input id="f-email" type="email" placeholder="voce@exemplo.com">
+          <p class="erro" id="e-email"></p>
+        </div>
+        <div class="campo">
+          <label for="f-tel">Telefone<span class="dica">Opcional</span></label>
+          <input id="f-tel" placeholder="(81) 90000-0000">
+        </div>
+      </div>
+
+      <h3>Privacidade</h3>
+      <div class="aviso info">
+        <b>Como seus dados são tratados</b>
+        <p>Seu CPF é obrigatório porque a Resolução nº 2.690/2018 exige a identificação do
+        autor, e é usado apenas para conferência interna e para acompanhamento da sua ideia.
+        <b>Ele nunca aparece na consulta pública.</b> Nesta demonstração, nada sai do seu
+        navegador.</p>
+      </div>
+      <label class="check">
+        <input type="checkbox" id="f-lgpd">
+        <span><b>Estou ciente do tratamento dos meus dados <span class="req">*</span></b>
+          Li o aviso acima e concordo que a Câmara trate meus dados para analisar
+          e dar andamento a esta ideia.</span>
+      </label>
+      <label class="check">
+        <input type="checkbox" id="f-nomepub">
+        <span><b>Autorizo divulgar meu nome (opcional)</b>
+          Se marcar, seu nome aparece como autor na consulta pública. Se não marcar,
+          aparecerá “Cidadão(ã) do Recife”. Pode ser revogado depois.</span>
+      </label>
+      <p class="erro" id="e-lgpd"></p>
+
+      <div class="linha-bt">
+        <button class="b sec" data-ir="2">Voltar</button>
+        <span class="espaco"></span>
+        <button class="b" id="bt-enviar">Enviar ideia para a Câmara</button>
+      </div>
+    </div>
+
+    <!-- passo 4 -->
+    <div class="etapa" data-e="4" hidden>
+      <div class="aviso bom"><b>Ideia registrada com sucesso</b>
+        <p>Guarde o número de protocolo. Com ele e seu CPF você acompanha o andamento na
+        aba <b>Acompanhar</b>.</p></div>
+      <div class="protocolo">
+        <div class="lab">Número de protocolo</div>
+        <div class="n" id="ok-prot">—</div>
+        <div class="lab">Token de acompanhamento</div>
+        <div class="tok" id="ok-token">—</div>
+      </div>
+      <div class="aviso alerta"><b>Próximo passo: triagem</b>
+        <p>Sua ideia será analisada pela Secretaria em até <b>15 dias úteis</b>. Se for
+        aprovada, passa a constar na consulta pública e fica disponível aos gabinetes.
+        Se for arquivada, <b>você poderá ler o motivo</b>.</p></div>
+      <div class="linha-bt">
+        <button class="b sec" id="bt-nova">Enviar outra ideia</button>
+        <span class="espaco"></span>
+        <button class="b" data-vai="triagem">Ver como fica na Triagem →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= 2. TRIAGEM ============================= -->
+<section class="painel" id="p-triagem" hidden aria-label="Triagem">
+  <div class="card">
+    <h2>Painel da Secretaria — Triagem e moderação</h2>
+    <p class="desc">Avalie as ideias pendentes e libere-as para a consulta pública e para os
+      gabinetes. Arquivar exige justificativa.</p>
+    <div class="aviso info">
+      <b>Acesso interno</b>
+      <p>No sistema real esta tela exige login com perfil <b>Servidor/Triagem</b>. Toda
+      ação registra quem fez, quando e por quê. O CPF aparece mascarado; revelá-lo é uma
+      ação registrada.</p>
+    </div>
+    <div class="kpis" id="tri-kpis" style="margin-bottom:18px"></div>
+    <div class="rolagem">
+      <table class="t">
+        <thead><tr>
+          <th>Protocolo</th><th>Autor / Documento</th><th>Tema</th><th>Ideia</th>
+          <th>Prazo</th><th>Situação</th><th>Ações</th>
+        </tr></thead>
+        <tbody id="tri-corpo"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= 3. GABINETE ============================= -->
+<section class="painel" id="p-gabinete" hidden aria-label="Painel parlamentar">
+  <div class="card">
+    <h2>Painel parlamentar — Gabinetes e comissões</h2>
+    <p class="desc">Filtre as ideias disponíveis para análise ou declare a adoção de uma
+      proposta. Ordenado por número de apoios.</p>
+    <div class="aviso info"><b>Acesso interno</b>
+      <p>Mais de um gabinete pode manifestar interesse na mesma ideia — não há reserva
+      exclusiva por ordem de clique.</p></div>
+    <div class="filtros">
+      <div class="campo"><label for="g-tema">Tema</label><select id="g-tema"></select></div>
+      <div class="campo"><label for="g-busca">Palavra-chave</label>
+        <input id="g-busca" type="search" placeholder="Buscar..."></div>
+      <div class="campo" style="flex:none;min-width:auto">
+        <label for="g-ordem">Ordenar por</label>
+        <select id="g-ordem">
+          <option value="apoios">Mais apoiadas</option>
+          <option value="data">Mais recentes</option>
+        </select></div>
+    </div>
+    <div class="rolagem">
+      <table class="t">
+        <thead><tr>
+          <th>Protocolo</th><th>Tema</th><th>Título</th><th>Apoios</th>
+          <th>Situação</th><th>Interessados</th><th>Ação</th>
+        </tr></thead>
+        <tbody id="gab-corpo"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= 4. CONSULTA ============================= -->
+<section class="painel" id="p-consulta" hidden aria-label="Consulta pública">
+  <div id="lista-consulta">
+    <div class="card">
+      <h2>Portal de consulta pública de ideias</h2>
+      <p class="desc">Todas as ideias que passaram pela triagem. Apoie as que você
+        considera importantes.</p>
+      <div class="filtros">
+        <div class="campo"><label for="c-busca">Pesquisar</label>
+          <input id="c-busca" type="search" placeholder="Pesquisar propostas..."></div>
+        <div class="campo"><label for="c-tema">Tema</label><select id="c-tema"></select></div>
+        <div class="campo"><label for="c-status">Situação</label>
+          <select id="c-status">
+            <option value="">Todas</option>
+            <option value="DISPONIVEL">Disponível</option>
+            <option value="EM_ANALISE">Em análise</option>
+            <option value="ADOTADA">Adotada</option>
+          </select></div>
+      </div>
+      <div id="con-corpo"></div>
+    </div>
+  </div>
+  <div id="detalhe-consulta" hidden></div>
+</section>
+
+<!-- ============================= 5. ACOMPANHAR ============================= -->
+<section class="painel" id="p-acompanhar" hidden aria-label="Acompanhar ideia">
+  <div class="card">
+    <h2>Acompanhar minha ideia</h2>
+    <p class="desc">Informe o protocolo e o documento do autor. Só o autor vê o motivo de
+      um eventual arquivamento.</p>
+    <div class="grid">
+      <div class="campo">
+        <label for="a-prot">Número de protocolo <span class="req">*</span></label>
+        <input id="a-prot" placeholder="BIL-2026-000001">
+      </div>
+      <div class="campo">
+        <label for="a-doc">CPF ou CNPJ do autor <span class="req">*</span></label>
+        <input id="a-doc" inputmode="numeric" placeholder="000.000.000-00">
+      </div>
+    </div>
+    <div class="linha-bt"><button class="b" id="bt-acomp">Consultar</button></div>
+    <div id="acomp-res"></div>
+  </div>
+</section>
+
+<!-- ============================= 6. INDICADORES ============================= -->
+<section class="painel" id="p-indicadores" hidden aria-label="Indicadores">
+  <div class="card">
+    <h2>Indicadores públicos</h2>
+    <p class="desc">Dados agregados, sem informação pessoal. No sistema real, também
+      disponíveis em JSON e CSV para reuso livre.</p>
+    <div class="kpis" id="ind-kpis"></div>
+    <h3>Ideias por tema</h3>
+    <div class="barras" id="ind-tema"></div>
+    <h3>Ideias por situação</h3>
+    <div class="barras" id="ind-status"></div>
+    <h3>Ideias por região (RPA)</h3>
+    <div class="barras" id="ind-rpa"></div>
+  </div>
+</section>
+</main>
+
+<!-- ============================= MODAL ============================= -->
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="m-tit">
+  <div class="cx">
+    <h3 id="m-tit">Ação</h3>
+    <div id="m-corpo"></div>
+    <div class="linha-bt">
+      <button class="b sec" id="m-cancelar">Cancelar</button>
+      <span class="espaco"></span>
+      <button class="b" id="m-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<footer class="inst">
+  <div class="wrap">
+    <b>Protótipo — Banco de Ideias Legislativas</b><br>
+    Demonstração de fluxo para avaliação interna. Não representa sistema em operação.
+    Nenhum dado é enviado a servidor: tudo fica no armazenamento local deste navegador.<br>
+    <button class="b sec pq" id="bt-reset" style="margin-top:10px">Reiniciar demonstração</button>
+  </div>
+</footer>
+
+<script>
+"use strict";
+
+/* ======================= CONSTANTES DE DOMÍNIO ======================= */
+const TEMAS = ["Mobilidade Urbana","Saúde Pública","Meio Ambiente","Educação",
+  "Segurança","Assistência Social","Cultura e Esporte","Urbanismo e Habitação",
+  "Direitos Humanos","Desenvolvimento Econômico"];
+
+const ROTULO = { RECEBIDA:"Recebida", EM_TRIAGEM:"Em triagem", DISPONIVEL:"Disponível",
+  EM_ANALISE:"Em análise", ADOTADA:"Adotada", ARQUIVADA:"Arquivada" };
+
+const PUBLICOS = ["DISPONIVEL","EM_ANALISE","ADOTADA"];
+
+/* Máquina de estados — espelha lib/maquina-status.ts da especificação */
+const TRANSICOES = {
+  RECEBIDA:   { para:["EM_TRIAGEM"],                          perfis:["TRIAGEM","ADMIN"] },
+  EM_TRIAGEM: { para:["DISPONIVEL","ARQUIVADA"],              perfis:["TRIAGEM","ADMIN"] },
+  DISPONIVEL: { para:["EM_ANALISE","ARQUIVADA"],              perfis:["GABINETE","ADMIN"] },
+  EM_ANALISE: { para:["ADOTADA","DISPONIVEL","ARQUIVADA"],    perfis:["GABINETE","ADMIN"] },
+  ADOTADA:    { para:["ARQUIVADA"],                           perfis:["ADMIN"] },
+  ARQUIVADA:  { para:[],                                      perfis:[] }
+};
+
+const MOTIVOS = {
+  FORA_DA_COMPETENCIA: "Fora da competência do Município",
+  OFENSIVO:            "Conteúdo ofensivo ou discriminatório",
+  DUPLICADA:           "Duplicidade de ideia já registrada",
+  IDENTIFICACAO:       "Identificação do autor inválida ou incompleta",
+  INCOMPREENSIVEL:     "Texto incompreensível ou sem objeto definido"
+};
+
+const SLA_DIAS = 15;
+
+/* ======================= VALIDAÇÃO DE DOCUMENTO ======================= */
+function soDigitos(v){ return (v||"").replace(/\D/g,""); }
+
+function validaCPF(v){
+  const c = soDigitos(v);
+  if (c.length !== 11 || /^(\d)\1{10}$/.test(c)) return false;
+  for (let t = 9; t < 11; t++){
+    let s = 0;
+    for (let i = 0; i < t; i++) s += parseInt(c[i]) * ((t + 1) - i);
+    let d = (s * 10) % 11; if (d === 10) d = 0;
+    if (d !== parseInt(c[t])) return false;
+  }
+  return true;
+}
+
+function validaCNPJ(v){
+  const c = soDigitos(v);
+  if (c.length !== 14 || /^(\d)\1{13}$/.test(c)) return false;
+  const calc = (base) => {
+    let p = base.length - 7, s = 0;
+    for (let i = 0; i < base.length; i++){
+      s += parseInt(base[i]) * p--; if (p < 2) p = 9;
+    }
+    const r = s % 11; return r < 2 ? 0 : 11 - r;
+  };
+  if (calc(c.slice(0,12)) !== parseInt(c[12])) return false;
+  return calc(c.slice(0,13)) === parseInt(c[13]);
+}
+
+function formataDoc(v, tipo){
+  const c = soDigitos(v);
+  if (tipo === "JURIDICA")
+    return c.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{0,2}).*/,"$1.$2.$3/$4-$5")
+            .replace(/[.\/-]+$/,"");
+  return c.replace(/^(\d{3})(\d{3})(\d{3})(\d{0,2}).*/,"$1.$2.$3-$4").replace(/[.-]+$/,"");
+}
+
+/* Mascaramento: o que a Triagem vê antes de revelar */
+function mascaraDoc(v, tipo){
+  const c = soDigitos(v);
+  if (tipo === "JURIDICA") return c.slice(0,2)+".***.***/****-"+c.slice(-2);
+  return c.slice(0,3)+".***.***-"+c.slice(-2);
+}
+
+/* ======================= ARMAZENAMENTO ======================= */
+const CHAVE = "bil_proto_v2";
+let BD = null;
+
+function agora(){ return new Date().toISOString(); }
+function diasAtras(n){ const d = new Date(); d.setDate(d.getDate()-n); return d.toISOString(); }
+function token(){ return Math.random().toString(36).slice(2,7).toUpperCase()+"-"+
+                        Math.random().toString(36).slice(2,7).toUpperCase(); }
+
+function semente(){
+  const mk = (o) => Object.assign({
+    apoios:0, apoiadores:[], interesses:[], bairro:"", rpa:"", nomePublico:true,
+    textoOriginal:null, tramitacoes:[]
+  }, o);
+  return {
+    seq: 3,
+    ideias: [
+      mk({ id:"i1", protocolo:"BIL-2026-000001", token:"A1B2C-D3E4F",
+        tipo:"FISICA", doc:"52998224725", nome:"João Silva", email:"joao@exemplo.com",
+        tema:"Saúde Pública", titulo:"Farmácia 24h nas UPAs",
+        descricao:"Manter farmácias abertas 24 horas nas Unidades de Pronto Atendimento, "+
+          "para que quem é atendido de madrugada consiga retirar o medicamento na hora.",
+        status:"RECEBIDA", rpa:"RPA 2 — Norte", bairro:"Casa Amarela", apoios:4,
+        criadoEm:diasAtras(12),
+        tramitacoes:[{ de:null, para:"RECEBIDA", quando:diasAtras(12),
+          quem:"Cidadão", just:"Ideia registrada pelo portal.", publica:true }] }),
+
+      mk({ id:"i2", protocolo:"BIL-2026-000002", token:"G5H6I-J7K8L",
+        tipo:"JURIDICA", doc:"11222333000181", nome:"ONG Recife Verde",
+        email:"contato@recifeverde.org", tema:"Meio Ambiente",
+        titulo:"Hortas comunitárias nas escolas municipais",
+        descricao:"Implantar hortas nas escolas da rede municipal como prática de educação "+
+          "ambiental, integrando o cultivo ao conteúdo de ciências e à merenda escolar.",
+        status:"DISPONIVEL", rpa:"RPA 3 — Noroeste", bairro:"Várzea", apoios:23,
+        criadoEm:diasAtras(40),
+        tramitacoes:[
+          { de:null, para:"RECEBIDA", quando:diasAtras(40), quem:"Cidadão",
+            just:"Ideia registrada pelo portal.", publica:true },
+          { de:"RECEBIDA", para:"EM_TRIAGEM", quando:diasAtras(36),
+            quem:"Servidor · Secretaria", just:"Análise iniciada.", publica:true },
+          { de:"EM_TRIAGEM", para:"DISPONIVEL", quando:diasAtras(34),
+            quem:"Servidor · Secretaria",
+            just:"Matéria de competência municipal e identificação regular.", publica:true }
+        ] }),
+
+      mk({ id:"i3", protocolo:"BIL-2026-000003", token:"M9N0O-P1Q2R",
+        tipo:"FISICA", doc:"16899535009", nome:"Maria Santos", email:"maria@exemplo.com",
+        tema:"Mobilidade Urbana", titulo:"Ciclovia protegida na Av. Norte",
+        descricao:"Implantar ciclovia com separação física na Avenida Norte, "+
+          "reduzindo o risco de atropelamento de ciclistas no trajeto para o Centro.",
+        status:"EM_ANALISE", rpa:"RPA 2 — Norte", bairro:"Encruzilhada", apoios:57,
+        nomePublico:true, criadoEm:diasAtras(55),
+        interesses:[{ gabinete:"Gabinete Ver. Carlos", tipo:"ANALISE", quando:diasAtras(8) }],
+        tramitacoes:[
+          { de:null, para:"RECEBIDA", quando:diasAtras(55), quem:"Cidadão",
+            just:"Ideia registrada pelo portal.", publica:true },
+          { de:"RECEBIDA", para:"EM_TRIAGEM", quando:diasAtras(50),
+            quem:"Servidor · Secretaria", just:"Análise iniciada.", publica:true },
+          { de:"EM_TRIAGEM", para:"DISPONIVEL", quando:diasAtras(48),
+            quem:"Servidor · Secretaria", just:"Aprovada para o acervo público.", publica:true },
+          { de:"DISPONIVEL", para:"EM_ANALISE", quando:diasAtras(8),
+            quem:"Gabinete Ver. Carlos",
+            just:"Gabinete assumiu a análise técnica da proposta.", publica:true }
+        ] })
+    ],
+    auditoria: []
+  };
+}
+
+function carregar(){
+  try{
+    const b = localStorage.getItem(CHAVE);
+    BD = b ? JSON.parse(b) : semente();
+  }catch(e){ BD = semente(); }
+}
+function salvar(){
+  try{ localStorage.setItem(CHAVE, JSON.stringify(BD)); }
+  catch(e){ /* modo privado: segue só em memória */ }
+}
+
+/* ======================= REGRAS ======================= */
+function transicionar(ideia, destino, quem, just, perfil){
+  const regra = TRANSICOES[ideia.status];
+  if (!regra.para.includes(destino))
+    throw new Error("Transição não permitida: "+ideia.status+" → "+destino);
+  if (!regra.perfis.includes(perfil))
+    throw new Error("Perfil "+perfil+" não pode executar esta transição.");
+  if (destino === "ARQUIVADA" && !(just||"").trim())
+    throw new Error("Arquivamento exige justificativa.");
+
+  ideia.tramitacoes.push({ de:ideia.status, para:destino, quando:agora(),
+    quem, just:just||"", publica:true });
+  ideia.status = destino;
+  salvar();
+}
+
+function auditar(acao, alvo, quem){
+  BD.auditoria.push({ acao, alvo, quem, quando:agora() });
+  salvar();
+}
+
+function diasCorridos(iso){
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+}
+function autorPublico(i){
+  return i.nomePublico ? i.nome
+       : (i.tipo === "JURIDICA" ? "Entidade não identificada" : "Cidadão(ã) do Recife");
+}
+function esc(s){
+  return String(s||"").replace(/[&<>"']/g, c =>
+    ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+function dataBR(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString("pt-BR") + " às " +
+         d.toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"});
+}
+function anunciar(msg){ document.getElementById("anuncio").textContent = msg; }
+function selo(s){ return '<span class="selo s-'+s+'">'+ROTULO[s].toUpperCase()+'</span>'; }
+
+/* ======================= NAVEGAÇÃO ======================= */
+const ABAS = ["cadastro","triagem","gabinete","consulta","acompanhar","indicadores"];
+
+function irPara(aba){
+  ABAS.forEach(a => document.getElementById("p-"+a).hidden = (a !== aba));
+  document.querySelectorAll("nav.abas button").forEach(b => {
+    if (b.dataset.aba === aba) b.setAttribute("aria-current","page");
+    else b.removeAttribute("aria-current");
+  });
+  if (aba === "triagem")     renderTriagem();
+  if (aba === "gabinete")    renderGabinete();
+  if (aba === "consulta")    { fecharDetalhe(); renderConsulta(); }
+  if (aba === "indicadores") renderIndicadores();
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+
+document.querySelectorAll("nav.abas button").forEach(b =>
+  b.addEventListener("click", () => irPara(b.dataset.aba)));
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-vai]");
+  if (t) irPara(t.dataset.vai);
+});
+
+/* ======================= PASSO 1..4 DO CADASTRO ======================= */
+let passo = 1;
+function mostrarPasso(n){
+  passo = n;
+  document.querySelectorAll(".etapa").forEach(el => el.hidden = (+el.dataset.e !== n));
+  document.querySelectorAll("#passos li").forEach(li => {
+    const p = +li.dataset.p;
+    li.removeAttribute("data-on"); li.removeAttribute("data-feito");
+    if (p === n) li.setAttribute("data-on","");
+    else if (p < n) li.setAttribute("data-feito","");
+  });
+  const alvo = document.querySelector('.etapa[data-e="'+n+'"]');
+  const h = alvo && alvo.querySelector("h3");
+  if (h){ h.setAttribute("tabindex","-1"); h.focus(); }
+}
+document.querySelectorAll("[data-ir]").forEach(b =>
+  b.addEventListener("click", () => mostrarPasso(+b.dataset.ir)));
+
+/* busca de duplicadas */
+document.getElementById("busca-dup").addEventListener("input", e => {
+  const q = e.target.value.trim().toLowerCase();
+  const cx = document.getElementById("res-dup");
+  if (q.length < 3){ cx.innerHTML = ""; return; }
+  const achou = BD.ideias.filter(i => PUBLICOS.includes(i.status) &&
+    (i.titulo+" "+i.descricao+" "+i.tema).toLowerCase().includes(q));
+  if (!achou.length){
+    cx.innerHTML = '<div class="aviso bom"><b>Nenhuma ideia parecida encontrada</b>'+
+      '<p>Pode seguir e cadastrar a sua.</p></div>'; return;
+  }
+  cx.innerHTML = '<div class="aviso alerta"><b>'+achou.length+
+    ' ideia(s) parecida(s) já no acervo</b><p>Apoiar uma existente dá mais peso a ela '+
+    'do que criar um registro repetido.</p></div>' +
+    achou.map(i => '<div class="ideia"><div class="topo"><div>'+
+      '<h4>'+esc(i.titulo)+'</h4>'+
+      '<div class="meta">'+esc(i.protocolo)+' · '+esc(i.tema)+'</div></div>'+
+      selo(i.status)+'</div>'+
+      '<p class="txt">'+esc(i.descricao.slice(0,150))+'…</p>'+
+      '<div class="rodape"><span class="apoios"><b>'+i.apoios+'</b> apoios</span>'+
+      '<button class="b ok pq" data-apoiar="'+i.id+'">Apoiar esta ideia</button></div></div>').join("");
+});
+
+/* contadores */
+const liga = (campo, cont) => {
+  const el = document.getElementById(campo);
+  el.addEventListener("input", () =>
+    document.getElementById(cont).textContent = el.value.length);
+};
+liga("f-titulo","c-titulo"); liga("f-desc","c-desc");
+
+/* tipo de autor troca rótulos */
+document.getElementById("f-tipo").addEventListener("change", e => {
+  const pj = e.target.value === "JURIDICA";
+  document.getElementById("lab-doc").textContent  = pj ? "CNPJ" : "CPF";
+  document.getElementById("lab-nome").textContent = pj ? "Razão social" : "Nome completo";
+  document.getElementById("dica-doc").textContent = pj
+    ? "Para testar, use o CNPJ válido 11.222.333/0001-81"
+    : "Para testar, use o CPF válido 529.982.247-25";
+  document.getElementById("f-doc").placeholder = pj ? "00.000.000/0000-00" : "000.000.000-00";
+  document.getElementById("f-doc").value = "";
+});
+document.getElementById("f-doc").addEventListener("input", e => {
+  e.target.value = formataDoc(e.target.value, document.getElementById("f-tipo").value);
+});
+
+function erro(campo, msg){
+  const el = document.getElementById("f-"+campo);
+  const ex = document.getElementById("e-"+campo);
+  if (ex) ex.textContent = msg || "";
+  if (el){
+    if (msg) el.setAttribute("aria-invalid","true");
+    else el.removeAttribute("aria-invalid");
+  }
+  return !msg;
+}
+
+document.getElementById("bt-p2").addEventListener("click", () => {
+  let ok = true;
+  ok = erro("titulo", document.getElementById("f-titulo").value.trim().length < 5
+        ? "Informe um título com pelo menos 5 caracteres." : "") && ok;
+  ok = erro("desc", document.getElementById("f-desc").value.trim().length < 30
+        ? "Descreva sua ideia com pelo menos 30 caracteres." : "") && ok;
+  if (ok) mostrarPasso(3);
+  else { anunciar("Há campos com erro no formulário.");
+         document.querySelector('[aria-invalid="true"]').focus(); }
+});
+
+document.getElementById("bt-enviar").addEventListener("click", () => {
+  const tipo = document.getElementById("f-tipo").value;
+  const doc  = document.getElementById("f-doc").value;
+  const pj   = tipo === "JURIDICA";
+  let ok = true;
+
+  ok = erro("nome", document.getElementById("f-nome").value.trim().length < 3
+        ? "Informe o nome completo." : "") && ok;
+  ok = erro("doc", !(pj ? validaCNPJ(doc) : validaCPF(doc))
+        ? (pj ? "CNPJ inválido — confira os dígitos verificadores."
+              : "CPF inválido — confira os dígitos verificadores.") : "") && ok;
+  ok = erro("email", !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(document.getElementById("f-email").value)
+        ? "Informe um e-mail válido." : "") && ok;
+
+  const lgpd = document.getElementById("f-lgpd").checked;
+  document.getElementById("e-lgpd").textContent = lgpd ? "" :
+    "É necessário estar ciente do tratamento dos dados para enviar a ideia.";
+  ok = lgpd && ok;
+
+  if (!ok){
+    anunciar("Há campos com erro no formulário.");
+    const p = document.querySelector('#p-cadastro [aria-invalid="true"]');
+    if (p) p.focus(); else document.getElementById("f-lgpd").focus();
+    return;
+  }
+
+  BD.seq++;
+  const nova = {
+    id:"i"+Date.now(),
+    protocolo:"BIL-2026-"+String(BD.seq).padStart(6,"0"),
+    token: token(), tipo, doc: soDigitos(doc),
+    nome: document.getElementById("f-nome").value.trim(),
+    email: document.getElementById("f-email").value.trim(),
+    tema: document.getElementById("f-tema").value,
+    titulo: document.getElementById("f-titulo").value.trim(),
+    descricao: document.getElementById("f-desc").value.trim(),
+    bairro: document.getElementById("f-bairro").value.trim(),
+    rpa: document.getElementById("f-rpa").value,
+    nomePublico: document.getElementById("f-nomepub").checked,
+    status:"RECEBIDA", apoios:0, apoiadores:[], interesses:[],
+    textoOriginal:null, criadoEm:agora(),
+    tramitacoes:[{ de:null, para:"RECEBIDA", quando:agora(), quem:"Cidadão",
+      just:"Ideia registrada pelo portal.", publica:true }]
+  };
+  BD.ideias.push(nova); salvar();
+
+  document.getElementById("ok-prot").textContent  = nova.protocolo;
+  document.getElementById("ok-token").textContent = nova.token;
+  mostrarPasso(4);
+  anunciar("Ideia registrada sob o protocolo "+nova.protocolo);
+});
+
+document.getElementById("bt-nova").addEventListener("click", () => {
+  ["f-titulo","f-desc","f-bairro","f-doc","f-nome","f-email","f-tel","busca-dup"]
+    .forEach(id => document.getElementById(id).value = "");
+  ["f-lgpd","f-nomepub"].forEach(id => document.getElementById(id).checked = false);
+  ["c-titulo","c-desc"].forEach(id => document.getElementById(id).textContent = "0");
+  document.getElementById("res-dup").innerHTML = "";
+  ["titulo","desc","nome","doc","email"].forEach(c => erro(c,""));
+  document.getElementById("e-lgpd").textContent = "";
+  mostrarPasso(1);
+});
+
+/* ======================= APOIAR ======================= */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-apoiar]");
+  if (!b) return;
+  const i = BD.ideias.find(x => x.id === b.dataset.apoiar);
+  const doc = prompt("Para apoiar, informe seu CPF (um apoio por CPF por ideia).\n"+
+                     "CPF válido para teste: 529.982.247-25");
+  if (doc === null) return;
+  if (!validaCPF(doc)){ alert("CPF inválido — confira os dígitos verificadores."); return; }
+  const h = soDigitos(doc);
+  if (i.apoiadores.includes(h)){
+    alert("Este CPF já apoiou a ideia "+i.protocolo+"."); return;
+  }
+  i.apoiadores.push(h); i.apoios++; salvar();
+  anunciar("Apoio registrado na ideia "+i.protocolo);
+  alert("Apoio registrado. A ideia "+i.protocolo+" agora tem "+i.apoios+" apoios.");
+  renderConsulta(); renderGabinete();
+  if (!document.getElementById("detalhe-consulta").hidden) abrirDetalhe(i.id);
+  const bd = document.getElementById("busca-dup");
+  if (bd.value) bd.dispatchEvent(new Event("input"));
+});
+
+/* ======================= MODAL ======================= */
+let acaoModal = null, focoAnterior = null;
+function abrirModal(titulo, html, onOk){
+  focoAnterior = document.activeElement;
+  document.getElementById("m-tit").textContent = titulo;
+  document.getElementById("m-corpo").innerHTML = html;
+  document.getElementById("modal").hidden = false;
+  acaoModal = onOk;
+  const p = document.querySelector("#m-corpo select, #m-corpo input, #m-corpo textarea");
+  if (p) p.focus();
+}
+function fecharModal(){
+  document.getElementById("modal").hidden = true;
+  acaoModal = null;
+  if (focoAnterior) focoAnterior.focus();
+}
+document.getElementById("m-cancelar").addEventListener("click", fecharModal);
+document.getElementById("m-ok").addEventListener("click", () => {
+  if (acaoModal && acaoModal() !== false) fecharModal();
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !document.getElementById("modal").hidden) fecharModal();
+});
+
+/* ======================= TRIAGEM ======================= */
+function renderTriagem(){
+  const pend = BD.ideias.filter(i => ["RECEBIDA","EM_TRIAGEM"].includes(i.status));
+  const venc = pend.filter(i => diasCorridos(i.criadoEm) > SLA_DIAS);
+  document.getElementById("tri-kpis").innerHTML =
+    kpi(pend.length,"Aguardando triagem") +
+    kpi(venc.length,"Fora do prazo de "+SLA_DIAS+" dias") +
+    kpi(BD.ideias.filter(i => i.status === "DISPONIVEL").length,"Liberadas ao acervo") +
+    kpi(BD.ideias.filter(i => i.status === "ARQUIVADA").length,"Arquivadas");
+
+  const ord = [...BD.ideias].sort((a,b) => {
+    const pa = ["RECEBIDA","EM_TRIAGEM"].includes(a.status) ? 0 : 1;
+    const pb = ["RECEBIDA","EM_TRIAGEM"].includes(b.status) ? 0 : 1;
+    return pa - pb || new Date(a.criadoEm) - new Date(b.criadoEm);
+  });
+
+  document.getElementById("tri-corpo").innerHTML = ord.map(i => {
+    const d = diasCorridos(i.criadoEm);
+    const pend = ["RECEBIDA","EM_TRIAGEM"].includes(i.status);
+    const prazo = pend
+      ? '<span class="prazo '+(d > SLA_DIAS ? "venc" : "ok")+'">'+
+        (d > SLA_DIAS ? "Vencida há "+(d-SLA_DIAS)+"d" : (SLA_DIAS-d)+"d restantes")+'</span>'
+      : '<span class="sub">—</span>';
+
+    let acoes = '<span class="sub">Triagem concluída</span>';
+    if (i.status === "RECEBIDA")
+      acoes = '<button class="b pq" data-assumir="'+i.id+'">Assumir análise</button>';
+    else if (i.status === "EM_TRIAGEM")
+      acoes = '<button class="b ok pq" data-aprovar="'+i.id+'">Aprovar</button> '+
+              '<button class="b no pq" data-arquivar="'+i.id+'">Arquivar</button>';
+
+    return '<tr><td class="prot">'+esc(i.protocolo)+'<div class="sub">'+
+      new Date(i.criadoEm).toLocaleDateString("pt-BR")+'</div></td>'+
+      '<td>'+esc(i.nome)+'<div class="sub" id="doc-'+i.id+'">'+
+        esc(mascaraDoc(i.doc,i.tipo))+
+        ' <button class="b sec pq" data-revelar="'+i.id+'" style="padding:1px 7px;font-size:11px">revelar</button>'+
+      '</div></td>'+
+      '<td>'+esc(i.tema)+'</td>'+
+      '<td>'+esc(i.titulo)+'<div class="sub">'+esc(i.descricao.slice(0,60))+'…</div></td>'+
+      '<td>'+prazo+'</td><td>'+selo(i.status)+'</td><td>'+acoes+'</td></tr>';
+  }).join("");
+}
+function kpi(v,l){ return '<div class="kpi"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'; }
+
+document.addEventListener("click", e => {
+  const rev = e.target.closest("[data-revelar]");
+  if (rev){
+    const i = BD.ideias.find(x => x.id === rev.dataset.revelar);
+    auditar("REVELACAO_DOCUMENTO", i.protocolo, "Servidor · Secretaria");
+    document.getElementById("doc-"+i.id).innerHTML =
+      '<b>'+esc(formataDoc(i.doc,i.tipo))+'</b>'+
+      '<div style="color:var(--verm);font-size:11px">acesso registrado em auditoria</div>';
+    anunciar("Documento revelado. Acesso registrado.");
+    return;
+  }
+
+  const asm = e.target.closest("[data-assumir]");
+  if (asm){
+    const i = BD.ideias.find(x => x.id === asm.dataset.assumir);
+    transicionar(i,"EM_TRIAGEM","Servidor · Secretaria","Análise iniciada.","TRIAGEM");
+    renderTriagem(); anunciar("Análise iniciada em "+i.protocolo);
+    return;
+  }
+
+  const apr = e.target.closest("[data-aprovar]");
+  if (apr){
+    const i = BD.ideias.find(x => x.id === apr.dataset.aprovar);
+    abrirModal("Aprovar "+i.protocolo,
+      '<p>A ideia passará a constar na <b>consulta pública</b> e ficará disponível aos '+
+      'gabinetes.</p><div class="campo"><label for="m-just">Observação da triagem '+
+      '(opcional)</label><textarea id="m-just" style="min-height:70px" '+
+      'placeholder="Ex.: matéria de competência municipal e identificação regular."></textarea></div>',
+      () => {
+        const j = document.getElementById("m-just").value.trim() ||
+                  "Aprovada: matéria de competência municipal e identificação regular.";
+        transicionar(i,"DISPONIVEL","Servidor · Secretaria",j,"TRIAGEM");
+        renderTriagem(); anunciar(i.protocolo+" aprovada e publicada.");
+      });
+    return;
+  }
+
+  const arq = e.target.closest("[data-arquivar]");
+  if (arq){
+    const i = BD.ideias.find(x => x.id === arq.dataset.arquivar);
+    abrirModal("Arquivar "+i.protocolo,
+      '<div class="aviso alerta"><b>A justificativa é obrigatória</b>'+
+      '<p>Ela será exibida ao autor na tela “Acompanhar minha ideia”, e não no acervo '+
+      'público.</p></div>'+
+      '<div class="campo"><label for="m-motivo">Motivo <span class="req">*</span></label>'+
+      '<select id="m-motivo">'+Object.entries(MOTIVOS)
+        .map(([k,v]) => '<option value="'+k+'">'+v+'</option>').join("")+'</select></div>'+
+      '<div class="campo" style="margin-top:12px"><label for="m-just">Justificativa '+
+      '<span class="req">*</span></label><textarea id="m-just" style="min-height:80px" '+
+      'placeholder="Explique ao autor o motivo do arquivamento."></textarea>'+
+      '<p class="erro" id="m-erro"></p></div>',
+      () => {
+        const j = document.getElementById("m-just").value.trim();
+        if (!j){
+          document.getElementById("m-erro").textContent =
+            "Arquivamento exige justificativa — regra validada no servidor.";
+          document.getElementById("m-just").focus();
+          return false;
+        }
+        const m = document.getElementById("m-motivo").value;
+        transicionar(i,"ARQUIVADA","Servidor · Secretaria",MOTIVOS[m]+" — "+j,"TRIAGEM");
+        renderTriagem(); anunciar(i.protocolo+" arquivada.");
+      });
+  }
+});
+
+/* ======================= GABINETE ======================= */
+function renderGabinete(){
+  const q  = document.getElementById("g-busca").value.trim().toLowerCase();
+  const tm = document.getElementById("g-tema").value;
+  const or = document.getElementById("g-ordem").value;
+
+  let lista = BD.ideias.filter(i => ["DISPONIVEL","EM_ANALISE","ADOTADA"].includes(i.status));
+  if (tm) lista = lista.filter(i => i.tema === tm);
+  if (q)  lista = lista.filter(i => (i.titulo+" "+i.descricao).toLowerCase().includes(q));
+  lista.sort((a,b) => or === "apoios"
+    ? b.apoios - a.apoios
+    : new Date(b.criadoEm) - new Date(a.criadoEm));
+
+  document.getElementById("gab-corpo").innerHTML = lista.length ? lista.map(i => {
+    const inter = i.interesses.length
+      ? i.interesses.map(x => esc(x.gabinete)).join("<br>")
+      : '<span class="sub">—</span>';
+    const acao = i.status === "ADOTADA"
+      ? '<span class="sub">Adotada</span>'
+      : '<button class="b pq" data-interagir="'+i.id+'">Interagir</button>';
+    return '<tr><td class="prot">'+esc(i.protocolo)+'</td><td>'+esc(i.tema)+'</td>'+
+      '<td>'+esc(i.titulo)+'<div class="sub">Por: '+esc(autorPublico(i))+'</div></td>'+
+      '<td><b style="color:var(--azul);font-size:16px">'+i.apoios+'</b></td>'+
+      '<td>'+selo(i.status)+'</td><td class="sub">'+inter+'</td><td>'+acao+'</td></tr>';
+  }).join("") : '<tr><td colspan="7" class="sub">Nenhuma ideia encontrada com esses filtros.</td></tr>';
+}
+["g-busca","g-tema","g-ordem"].forEach(id =>
+  document.getElementById(id).addEventListener("input", renderGabinete));
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-interagir]");
+  if (!b) return;
+  const i = BD.ideias.find(x => x.id === b.dataset.interagir);
+  const opcoes = TRANSICOES[i.status].para.filter(s => s !== "ARQUIVADA");
+  abrirModal("Ação parlamentar em "+i.protocolo,
+    '<p><b>'+esc(i.titulo)+'</b><br><span class="sub">'+i.apoios+' apoios · '+
+    esc(i.tema)+'</span></p>'+
+    '<div class="campo"><label for="m-gab">Gabinete ou comissão <span class="req">*</span></label>'+
+    '<input id="m-gab" placeholder="Ex.: Gabinete Vereador X, Comissão de Saúde..."></div>'+
+    '<div class="campo" style="margin-top:12px"><label for="m-dest">Nova situação</label>'+
+    '<select id="m-dest">'+opcoes.map(s =>
+      '<option value="'+s+'">'+ROTULO[s]+'</option>').join("")+'</select></div>'+
+    '<div class="campo" style="margin-top:12px"><label for="m-just">Observação</label>'+
+    '<textarea id="m-just" style="min-height:70px"></textarea>'+
+    '<p class="erro" id="m-erro"></p></div>',
+    () => {
+      const g = document.getElementById("m-gab").value.trim();
+      if (!g){
+        document.getElementById("m-erro").textContent = "Informe o gabinete ou a comissão.";
+        document.getElementById("m-gab").focus(); return false;
+      }
+      const dest = document.getElementById("m-dest").value;
+      const j = document.getElementById("m-just").value.trim() ||
+        (dest === "ADOTADA" ? "Ideia adotada para conversão em proposição."
+                            : "Gabinete assumiu a análise da proposta.");
+      transicionar(i, dest, g, j, "GABINETE");
+      if (dest !== "DISPONIVEL" && !i.interesses.some(x => x.gabinete === g))
+        i.interesses.push({ gabinete:g, tipo:dest === "ADOTADA" ? "ADOCAO" : "ANALISE",
+                            quando:agora() });
+      salvar(); renderGabinete();
+      anunciar(i.protocolo+" agora está como "+ROTULO[dest]);
+    });
+});
+
+/* ======================= CONSULTA PÚBLICA ======================= */
+function renderConsulta(){
+  const q  = document.getElementById("c-busca").value.trim().toLowerCase();
+  const tm = document.getElementById("c-tema").value;
+  const st = document.getElementById("c-status").value;
+
+  let lista = BD.ideias.filter(i => PUBLICOS.includes(i.status));
+  if (tm) lista = lista.filter(i => i.tema === tm);
+  if (st) lista = lista.filter(i => i.status === st);
+  if (q)  lista = lista.filter(i => (i.titulo+" "+i.descricao).toLowerCase().includes(q));
+  lista.sort((a,b) => new Date(b.criadoEm) - new Date(a.criadoEm));
+
+  document.getElementById("con-corpo").innerHTML = lista.length ? lista.map(i => {
+    const inter = i.interesses.length
+      ? ' &nbsp;|&nbsp; <b>Interesse:</b> '+esc(i.interesses.map(x => x.gabinete).join(", "))
+      : "";
+    return '<div class="ideia"><div class="topo"><div>'+
+      '<h4><button data-abrir="'+i.id+'">'+esc(i.titulo)+'</button></h4>'+
+      '<div class="meta"><b>Protocolo:</b> '+esc(i.protocolo)+' &nbsp; <b>Autor:</b> '+
+        esc(autorPublico(i))+' &nbsp; <b>Tema:</b> '+esc(i.tema)+inter+'</div></div>'+
+      selo(i.status)+'</div>'+
+      '<p class="txt">'+esc(i.descricao.slice(0,190))+
+        (i.descricao.length > 190 ? "…" : "")+'</p>'+
+      '<div class="rodape"><span class="apoios"><b>'+i.apoios+'</b> apoios</span>'+
+      '<button class="b ok pq" data-apoiar="'+i.id+'">Apoiar</button>'+
+      '<button class="b sec pq" data-abrir="'+i.id+'">Ver detalhe e tramitação</button>'+
+      '</div></div>';
+  }).join("") : '<div class="aviso info"><b>Nenhuma ideia encontrada</b>'+
+      '<p>Ajuste os filtros ou aguarde novas ideias passarem pela triagem.</p></div>';
+}
+["c-busca","c-tema","c-status"].forEach(id =>
+  document.getElementById(id).addEventListener("input", renderConsulta));
+
+function fecharDetalhe(){
+  document.getElementById("lista-consulta").hidden = false;
+  document.getElementById("detalhe-consulta").hidden = true;
+}
+function abrirDetalhe(id){
+  const i = BD.ideias.find(x => x.id === id);
+  const tempo = i.tramitacoes.filter(t => t.publica).map(t => {
+    const attr = t.para === "ADOTADA" ? " data-fim" : (t.para === "ARQUIVADA" ? " data-arq" : "");
+    return '<li'+attr+'><div class="quando">'+dataBR(t.quando)+'</div>'+
+      '<div class="oque">'+ROTULO[t.para]+'</div>'+
+      '<div class="porque">'+esc(t.quem)+
+      (t.just ? ' — '+esc(t.just) : "")+'</div></li>';
+  }).join("");
+
+  document.getElementById("detalhe-consulta").innerHTML =
+    '<div class="card"><button class="b sec pq" id="bt-voltar-lista">← Voltar ao acervo</button>'+
+    '<h2 style="margin-top:14px">'+esc(i.titulo)+'</h2>'+
+    '<p class="desc"><b>Protocolo:</b> '+esc(i.protocolo)+' &nbsp;·&nbsp; <b>Tema:</b> '+
+      esc(i.tema)+' &nbsp;·&nbsp; <b>Autor:</b> '+esc(autorPublico(i))+
+      (i.rpa ? ' &nbsp;·&nbsp; <b>Região:</b> '+esc(i.rpa) : "")+'</p>'+
+    '<p style="margin-top:14px">'+selo(i.status)+'</p>'+
+    '<h3>A proposta</h3><p>'+esc(i.descricao)+'</p>'+
+    '<div class="rodape" style="border-top:1px solid var(--linha);padding-top:12px;'+
+      'display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+
+      '<span class="apoios"><b>'+i.apoios+'</b> apoios registrados</span>'+
+      '<button class="b ok pq" data-apoiar="'+i.id+'">Apoiar esta ideia</button></div>'+
+    '<h3>Tramitação</h3><ol class="tempo">'+tempo+'</ol>'+
+    (i.nomePublico ? "" :
+      '<div class="aviso info" style="margin-top:16px"><b>Autoria preservada</b>'+
+      '<p>Quem enviou esta ideia não autorizou a divulgação do nome. O registro '+
+      'completo existe internamente para a Câmara.</p></div>')+
+    '</div>';
+
+  document.getElementById("lista-consulta").hidden = true;
+  document.getElementById("detalhe-consulta").hidden = false;
+  document.getElementById("bt-voltar-lista").addEventListener("click", () => {
+    fecharDetalhe(); renderConsulta();
+  });
+  window.scrollTo({ top:0, behavior:"smooth" });
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-abrir]");
+  if (b) abrirDetalhe(b.dataset.abrir);
+});
+
+/* ======================= ACOMPANHAR ======================= */
+document.getElementById("bt-acomp").addEventListener("click", () => {
+  const prot = document.getElementById("a-prot").value.trim().toUpperCase();
+  const doc  = soDigitos(document.getElementById("a-doc").value);
+  const cx   = document.getElementById("acomp-res");
+  const i = BD.ideias.find(x => x.protocolo.toUpperCase() === prot && x.doc === doc);
+
+  if (!i){
+    cx.innerHTML = '<div class="aviso mau"><b>Não localizamos essa ideia</b>'+
+      '<p>Confira o protocolo e o documento do autor. Na demonstração, tente '+
+      '<b>BIL-2026-000003</b> com o CPF <b>168.995.350-09</b>.</p></div>';
+    anunciar("Ideia não localizada."); return;
+  }
+
+  const arq = i.tramitacoes.filter(t => t.para === "ARQUIVADA").pop();
+  const tempo = i.tramitacoes.map(t => {
+    const attr = t.para === "ADOTADA" ? " data-fim" : (t.para === "ARQUIVADA" ? " data-arq" : "");
+    return '<li'+attr+'><div class="quando">'+dataBR(t.quando)+'</div>'+
+      '<div class="oque">'+ROTULO[t.para]+'</div>'+
+      '<div class="porque">'+esc(t.quem)+(t.just ? ' — '+esc(t.just) : "")+'</div></li>';
+  }).join("");
+
+  cx.innerHTML = '<div class="aviso bom" style="margin-top:18px"><b>Ideia localizada</b>'+
+    '<p>'+esc(i.titulo)+'</p></div>'+
+    '<p><b>Situação atual:</b> '+selo(i.status)+'</p>'+
+    (arq ? '<div class="aviso mau"><b>Motivo do arquivamento</b><p>'+esc(arq.just)+
+      '</p></div>' : "")+
+    (["RECEBIDA","EM_TRIAGEM"].includes(i.status)
+      ? '<div class="aviso alerta"><b>Ainda em triagem</b><p>Enviada há '+
+        diasCorridos(i.criadoEm)+' dia(s). Prazo de referência: '+SLA_DIAS+' dias.</p></div>'
+      : "")+
+    '<h3>Tramitação completa</h3><ol class="tempo">'+tempo+'</ol>';
+  anunciar("Ideia "+i.protocolo+" localizada. Situação: "+ROTULO[i.status]);
+});
+
+/* ======================= INDICADORES ======================= */
+function barras(mapa, alvo){
+  const ent = Object.entries(mapa).filter(([,v]) => v > 0).sort((a,b) => b[1] - a[1]);
+  const max = Math.max(1, ...ent.map(([,v]) => v));
+  document.getElementById(alvo).innerHTML = ent.length ? ent.map(([k,v]) =>
+    '<div class="barra"><span>'+esc(k)+'</span>'+
+    '<span class="tr"><i style="width:'+Math.round(v/max*100)+'%"></i></span>'+
+    '<span class="q">'+v+'</span></div>').join("")
+    : '<p class="sub">Sem dados ainda.</p>';
+}
+function renderIndicadores(){
+  const t = BD.ideias;
+  const triadas = t.filter(i => i.triadoEm || !["RECEBIDA","EM_TRIAGEM"].includes(i.status));
+  const aprov = t.filter(i => PUBLICOS.includes(i.status)).length;
+  const decid = aprov + t.filter(i => i.status === "ARQUIVADA").length;
+  const temposTri = t.map(i => {
+    const tr = i.tramitacoes.find(x => ["DISPONIVEL","ARQUIVADA"].includes(x.para));
+    return tr ? (new Date(tr.quando) - new Date(i.criadoEm)) / 86400000 : null;
+  }).filter(x => x !== null);
+  const medio = temposTri.length
+    ? (temposTri.reduce((a,b) => a+b, 0) / temposTri.length).toFixed(1).replace(".",",")
+    : "—";
+
+  document.getElementById("ind-kpis").innerHTML =
+    kpi(t.length,"Ideias recebidas") +
+    kpi(aprov,"No acervo público") +
+    kpi(t.filter(i => i.status === "ADOTADA").length,"Adotadas por gabinete") +
+    kpi(t.reduce((a,i) => a+i.apoios, 0),"Apoios registrados") +
+    kpi(medio === "—" ? "—" : medio+"d","Tempo médio de triagem") +
+    kpi(decid ? Math.round(aprov/decid*100)+"%" : "—","Taxa de aprovação");
+
+  const porTema = {}; TEMAS.forEach(x => porTema[x] = 0);
+  const porStatus = {}; Object.values(ROTULO).forEach(x => porStatus[x] = 0);
+  const porRpa = {};
+  t.forEach(i => {
+    porTema[i.tema] = (porTema[i.tema]||0) + 1;
+    porStatus[ROTULO[i.status]]++;
+    const r = i.rpa || "Não informada";
+    porRpa[r] = (porRpa[r]||0) + 1;
+  });
+  barras(porTema,"ind-tema"); barras(porStatus,"ind-status"); barras(porRpa,"ind-rpa");
+}
+
+/* ======================= INICIALIZAÇÃO ======================= */
+function preencherTemas(){
+  document.getElementById("f-tema").innerHTML =
+    TEMAS.map(t => '<option>'+t+'</option>').join("");
+  ["g-tema","c-tema"].forEach(id =>
+    document.getElementById(id).innerHTML = '<option value="">Todos os temas</option>'+
+      TEMAS.map(t => '<option>'+t+'</option>').join(""));
+}
+
+document.getElementById("bt-reset").addEventListener("click", () => {
+  if (!confirm("Reiniciar a demonstração? Todas as ideias cadastradas aqui serão apagadas.")) return;
+  BD = semente(); salvar();
+  document.getElementById("bt-nova").click();
+  irPara("cadastro");
+  anunciar("Demonstração reiniciada.");
+});
+
+carregar();
+preencherTemas();
+mostrarPasso(1);
+irPara("cadastro");
+</script>
+</body>
+</html>

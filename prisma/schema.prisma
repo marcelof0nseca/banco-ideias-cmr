@@ -1,0 +1,368 @@
+// =============================================================================
+// Banco de Ideias Legislativas - Camara Municipal do Recife
+// Especificacao tecnica, secao 5 (Modelo de dados)
+//
+// DONO DESTE ARQUIVO: Pessoa B.
+// Pessoa A pede alteracoes por issue; nao edita direto (ver CONTRIBUTING.md).
+// =============================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "./gen"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -----------------------------------------------------------------------------
+// ENUMERACOES
+// -----------------------------------------------------------------------------
+
+enum TipoAutor {
+  FISICA
+  JURIDICA
+}
+
+/// Situacoes da ideia. O grafo de transicoes permitidas vive em
+/// lib/maquina-status.ts e e validado NO SERVIDOR a cada mutacao.
+enum StatusIdeia {
+  RECEBIDA
+  EM_TRIAGEM
+  DISPONIVEL
+  EM_ANALISE
+  ADOTADA
+  ARQUIVADA
+}
+
+enum Perfil {
+  TRIAGEM
+  GABINETE
+  ADMIN
+}
+
+enum TipoInteresse {
+  ANALISE
+  ADOCAO
+}
+
+/// Eventos auditaveis que NAO sao mudanca de situacao.
+/// Mudanca de situacao vive em Tramitacao - ver nota de projeto abaixo.
+enum AcaoAuditoria {
+  LOGIN
+  LOGIN_FALHA
+  LOGOUT
+  REVELACAO_DOCUMENTO
+  EXPORTACAO
+  CONSULTA_AUDITORIA
+  USUARIO_CRIADO
+  USUARIO_ALTERADO
+  USUARIO_DESATIVADO
+  LISTA_CONTROLADA_ALTERADA
+  TEXTO_EDITADO_NA_TRIAGEM
+  TITULAR_EXPORTADO
+  TITULAR_ANONIMIZADO
+  CONSENTIMENTO_REVOGADO
+}
+
+// -----------------------------------------------------------------------------
+// AUTOR - concentra TODO o dado pessoal do sistema.
+// A concentracao e deliberada: facilita atender requisicao de titular
+// (art. 18 da LGPD) e aplicar a politica de retencao sem varrer o banco.
+// -----------------------------------------------------------------------------
+
+model Autor {
+  id String @id @default(cuid())
+
+  tipo TipoAutor
+
+  /// CPF/CNPJ cifrado com AES-256-GCM. Chave fora do codigo (DOCUMENTO_CHAVE).
+  /// So e decifrado em acao explicita e registrada (revelar-documento).
+  documentoCifrado String
+
+  /// SHA-256 do documento + pepper. Permite deduplicar e conferir apoio
+  /// repetido SEM decifrar nada. O pepper impede enumeracao de CPFs a
+  /// partir de um dump do banco.
+  documentoHash String @unique
+
+  /// "111.***.***-44" - o que a tela da Triagem mostra por padrao.
+  documentoMascarado String
+
+  nome     String
+  email    String
+  telefone String?
+
+  /// Consentimento ESPECIFICO para divulgar o nome na consulta publica.
+  /// Base legal distinta da coleta do CPF - ver especificacao, secao 9.1.
+  /// Revogavel a qualquer tempo.
+  nomePublico Boolean @default(false)
+
+  consentimentoEm DateTime
+
+  /// Versao do texto do aviso de privacidade vigente no momento do
+  /// consentimento. Sem isso nao ha como comprovar O QUE foi consentido.
+  /// (Lacuna da especificacao resolvida no dia 1 - secao 9.3.)
+  avisoPrivacidadeVersao String
+
+  /// Preenchido quando o titular pede anonimizacao. As colunas de documento
+  /// e contato sao esvaziadas; a ideia e sua tramitacao permanecem.
+  anonimizadoEm DateTime?
+
+  ideias Ideia[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("autor")
+}
+
+// -----------------------------------------------------------------------------
+// IDEIA
+// -----------------------------------------------------------------------------
+
+model Ideia {
+  id String @id @default(cuid())
+
+  /// Formato BIL-AAAA-NNNNNN, unico e sequencial por ano.
+  /// Geracao em lib/protocolo.ts (dono: Pessoa A), apoiada na
+  /// tabela ContadorProtocolo no fim deste arquivo.
+  protocolo String @unique
+
+  /// Hash do token impresso no comprovante. Junto com o protocolo, permite
+  /// ao autor acompanhar sem criar conta.
+  tokenAcompHash String
+
+  autorId String
+  autor   Autor  @relation(fields: [autorId], references: [id])
+
+  temaId String
+  tema   Tema   @relation(fields: [temaId], references: [id])
+
+  titulo    String @db.VarChar(150)
+  descricao String @db.VarChar(5000)
+
+  /// Redacao original do cidadao, preservada quando a Triagem corrige
+  /// ortografia ou clareza. Protege contra alegacao de alteracao indevida.
+  textoOriginal String? @db.VarChar(5000)
+
+  /// Territorio a que a IDEIA se refere (coletado no passo 2 do cadastro).
+  bairro String?
+  rpa    Int? // 1..6 - Regioes Politico-Administrativas do Recife
+
+  status StatusIdeia @default(RECEBIDA)
+
+  /// Controle otimista de concorrencia. A rota /tramitar compara a versao
+  /// enviada pelo cliente com esta; divergencia responde 409 em vez de
+  /// sobrescrever silenciosamente a decisao de outro servidor.
+  /// (Lacuna da especificacao resolvida no dia 1 - secao 7.2.)
+  versao Int @default(0)
+
+  /// Desnormalizado para evitar COUNT em toda listagem publica.
+  /// Atualizado na MESMA transacao do insert em Apoio.
+  apoiosCount Int @default(0)
+
+  criadoEm    DateTime  @default(now())
+  triadoEm    DateTime?
+  publicadoEm DateTime?
+
+  tramitacoes Tramitacao[]
+  apoios      Apoio[]
+  interesses  InteresseGabinete[]
+
+  @@index([status, publicadoEm])
+  @@index([status, criadoEm])
+  @@index([temaId])
+  @@map("ideia")
+}
+
+// -----------------------------------------------------------------------------
+// TRAMITACAO
+//
+// NOTA DE PROJETO (especificacao, secao 6.3):
+// A linha do tempo publica e a trilha de auditoria de mudanca de situacao
+// sao a MESMA tabela. A unica forma de alterar o status de uma ideia e
+// gravando uma linha aqui, na mesma transacao. O campo `publica` controla
+// apenas o que aparece na tela, jamais se o registro existe.
+// Um gatilho no banco (migracao 002) recusa UPDATE e DELETE nesta tabela.
+// -----------------------------------------------------------------------------
+
+model Tramitacao {
+  id String @id @default(cuid())
+
+  ideiaId String
+  ideia   Ideia  @relation(fields: [ideiaId], references: [id])
+
+  statusAnterior StatusIdeia?
+  statusNovo     StatusIdeia
+
+  /// Obrigatoria quando statusNovo = ARQUIVADA (regra validada no servidor).
+  justificativa String?
+
+  motivoId String?
+  motivo   MotivoArquivamento? @relation(fields: [motivoId], references: [id])
+
+  gabinete String?
+
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+
+  /// false = evento interno, nao aparece na linha do tempo publica.
+  publica Boolean @default(true)
+
+  /// Hash do IP, nunca o IP. Detecta abuso sem reter dado pessoal em claro.
+  ipHash String?
+
+  criadoEm DateTime @default(now())
+
+  @@index([ideiaId, criadoEm])
+  @@map("tramitacao")
+}
+
+// -----------------------------------------------------------------------------
+// APOIO
+// -----------------------------------------------------------------------------
+
+model Apoio {
+  id String @id @default(cuid())
+
+  ideiaId String
+  ideia   Ideia  @relation(fields: [ideiaId], references: [id])
+
+  /// Mesmo hash com pepper usado em Autor. O CPF de quem apoia nunca e
+  /// armazenado, nem cifrado: para esta funcao basta comparar hashes.
+  documentoHash String
+
+  ipHash String?
+
+  criadoEm DateTime @default(now())
+
+  /// Garantia no banco, nao so na aplicacao: um apoio por documento por ideia.
+  @@unique([ideiaId, documentoHash])
+  @@map("apoio")
+}
+
+// -----------------------------------------------------------------------------
+// USUARIO INTERNO
+// -----------------------------------------------------------------------------
+
+model Usuario {
+  id String @id @default(cuid())
+
+  nome  String
+  email String @unique
+
+  /// argon2id. Nunca sai do servidor, nunca entra em log.
+  senhaHash String
+
+  perfil   Perfil
+  gabinete String?
+
+  ativo Boolean @default(true)
+
+  ultimoLoginEm    DateTime?
+  tentativasFalhas Int       @default(0)
+  bloqueadoAte     DateTime?
+
+  tramitacoes Tramitacao[]
+  interesses  InteresseGabinete[]
+  eventos     EventoAuditoria[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("usuario")
+}
+
+// -----------------------------------------------------------------------------
+// INTERESSE DE GABINETE
+// Varios gabinetes podem manifestar interesse na mesma ideia: reserva
+// exclusiva por ordem de clique geraria disputa e travaria o acervo.
+// -----------------------------------------------------------------------------
+
+model InteresseGabinete {
+  id String @id @default(cuid())
+
+  ideiaId String
+  ideia   Ideia  @relation(fields: [ideiaId], references: [id])
+
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+
+  gabinete String
+  tipo     TipoInteresse
+
+  criadoEm DateTime @default(now())
+
+  @@unique([ideiaId, gabinete])
+  @@map("interesse_gabinete")
+}
+
+// -----------------------------------------------------------------------------
+// LISTAS CONTROLADAS (geridas pelo Admin)
+// Lacuna da especificacao resolvida no dia 1.
+// -----------------------------------------------------------------------------
+
+model Tema {
+  id     String  @id @default(cuid())
+  nome   String  @unique
+  ordem  Int     @default(0)
+  ativo  Boolean @default(true)
+  ideias Ideia[]
+
+  @@map("tema")
+}
+
+model MotivoArquivamento {
+  id        String  @id @default(cuid())
+  codigo    String  @unique // FORA_DA_COMPETENCIA, OFENSIVO, ...
+  descricao String
+  ordem     Int     @default(0)
+  ativo     Boolean @default(true)
+
+  tramitacoes Tramitacao[]
+
+  @@map("motivo_arquivamento")
+}
+
+// -----------------------------------------------------------------------------
+// AUDITORIA (eventos que NAO sao mudanca de situacao)
+// Exigida pela secao 8.6 e ausente do modelo original da especificacao.
+// Lacuna resolvida no dia 1.
+// -----------------------------------------------------------------------------
+
+model EventoAuditoria {
+  id String @id @default(cuid())
+
+  acao AcaoAuditoria
+
+  usuarioId String?
+  usuario   Usuario? @relation(fields: [usuarioId], references: [id])
+
+  /// Ex.: "Ideia" + protocolo, "Usuario" + id.
+  alvoTipo String?
+  alvoId   String?
+
+  /// Contexto livre. NUNCA gravar CPF, senha ou token aqui.
+  detalhe String?
+
+  ipHash String?
+
+  criadoEm DateTime @default(now())
+
+  @@index([acao, criadoEm])
+  @@index([usuarioId, criadoEm])
+  @@map("evento_auditoria")
+}
+
+// -----------------------------------------------------------------------------
+// CONTADOR DE PROTOCOLO POR ANO
+// Lacuna da especificacao resolvida no dia 1.
+// Consumido por lib/protocolo.ts (dono: Pessoa A).
+// -----------------------------------------------------------------------------
+
+model ContadorProtocolo {
+  ano    Int @id
+  ultimo Int @default(0)
+
+  @@map("contador_protocolo")
+}

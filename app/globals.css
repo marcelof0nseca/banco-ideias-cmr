@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+/*
+  Tokens de cor institucionais (especificacao, secao 12.2).
+  Derivados dos mockups; confirmar contra o manual de identidade da CMR
+  na fase de implementacao (contrato "Tokens de cor", dono: Pessoa A).
+*/
+@theme {
+  --color-azul-cmr: #17356b;
+  --color-azul-medio: #2f5ca8;
+  --color-azul-acao: #2563eb;
+  --color-verde-cmr: #146c43;
+  --color-vermelho-cmr: #b42318;
+  --color-ambar-cmr: #b54708;
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: #f2f5f9;
+  color: #1a1f2b;
+}

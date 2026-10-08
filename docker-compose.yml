@@ -1,0 +1,30 @@
+# =============================================================================
+# Banco local para desenvolvimento (Pessoa A nao precisa instalar PostgreSQL).
+#   docker compose up -d
+# Depois, no .env:
+#   DATABASE_URL="postgresql://bancoideias:senhalocal@localhost:5433/banco_ideias?schema=public"
+#
+# Porta 5433 para nao colidir com um PostgreSQL ja instalado na maquina (5432).
+# Dados de DEV apenas. Producao usa o PostgreSQL provisionado pela TI da Camara.
+# =============================================================================
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: banco_ideias_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bancoideias
+      POSTGRES_PASSWORD: senhalocal
+      POSTGRES_DB: banco_ideias
+    ports:
+      - "5433:5432"
+    volumes:
+      - banco_ideias_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bancoideias -d banco_ideias"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  banco_ideias_pgdata:

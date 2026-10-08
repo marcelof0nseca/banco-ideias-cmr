@@ -1,0 +1,37 @@
+# =============================================================================
+# CI inicial (especificacao, secao 11.3) - dono: Pessoa B.
+# A cada push/PR: lint, typecheck e testes unitarios.
+# Testes e2e, axe-core, npm audit e build de imagem entram na Fase 5.
+# =============================================================================
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Gerar Prisma Client
+        run: npm run db:generate
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Testes unitarios
+        run: npm run test
