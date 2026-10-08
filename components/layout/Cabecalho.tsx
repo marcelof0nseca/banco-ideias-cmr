@@ -11,7 +11,7 @@ import { NavPublica } from "./NavPublica";
  */
 export function Cabecalho({ navegacao = <NavPublica /> }: { navegacao?: React.ReactNode }) {
   return (
-    <header className="bg-azul-cmr text-white">
+    <header className="bg-azul-cmr text-white print:hidden">
       <div className="border-b border-azul-escuro bg-[#10264f]">
         <div className="mx-auto flex max-w-6xl justify-end px-4 py-1.5">
           <a href={urlCamara()} className="text-sm font-semibold text-white underline">

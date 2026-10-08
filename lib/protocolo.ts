@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@/prisma/gen/client";
+import type { Prisma } from "@/prisma/gen/client";
 
 /**
  * Geracao de protocolo BIL-AAAA-NNNNNN, unico e sequencial por ano.
@@ -6,10 +6,8 @@ import type { PrismaClient } from "@/prisma/gen/client";
  *
  * DONO: Pessoa A.  CONSUMIDOR: Pessoa B (busca na Triagem por protocolo).
  *
- * >>> STUB <<< Esta e a assinatura acordada no dia 1. A implementacao real
- * (dona: Pessoa A, semana 2) usa a tabela ContadorProtocolo dentro de uma
- * transacao, incrementando de forma atomica para nao gerar numero repetido
- * sob concorrencia. Ate la, quem consome programa contra esta assinatura.
+ * Se a Secretaria confirmar um protocolo institucional (SEI) ja em uso
+ * (risco da secao 14), so `gerarProtocolo` precisa mudar.
  */
 
 const FORMATO = /^BIL-\d{4}-\d{6}$/;
@@ -25,14 +23,25 @@ export function formatarProtocolo(ano: number, sequencial: number): string {
 }
 
 /**
- * Gera o proximo protocolo do ano corrente, de forma atomica.
+ * Gera o proximo protocolo do ano, de forma atomica.
  *
- * TODO(Pessoa A): implementar com ContadorProtocolo em transacao.
- * Deixado como stub para destravar os consumidores (ver CONTRIBUTING.md).
+ * Deve ser chamada DENTRO da transacao do cadastro: o UPSERT trava a linha
+ * do ano ate o commit, entao duas gravacoes simultaneas nunca recebem o mesmo
+ * numero; se a transacao falhar, o incremento e desfeito e nao ha lacuna.
  */
 export async function gerarProtocolo(
-  _tx: PrismaClient,
-  _ano: number = new Date().getFullYear(),
+  tx: Prisma.TransactionClient,
+  ano: number = new Date().getFullYear(),
 ): Promise<string> {
-  throw new Error("gerarProtocolo: stub - implementacao pendente (Pessoa A).");
+  const linhas = await tx.$queryRaw<{ ultimo: number }[]>`
+    INSERT INTO contador_protocolo (ano, ultimo)
+    VALUES (${ano}, 1)
+    ON CONFLICT (ano) DO UPDATE SET ultimo = contador_protocolo.ultimo + 1
+    RETURNING ultimo
+  `;
+  const ultimo = linhas[0]?.ultimo;
+  if (ultimo === undefined) {
+    throw new Error("gerarProtocolo: contador nao retornou valor.");
+  }
+  return formatarProtocolo(ano, Number(ultimo));
 }

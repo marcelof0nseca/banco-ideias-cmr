@@ -38,31 +38,35 @@
   --color-foco: #ffb020;
 }
 
-:root {
-  color-scheme: light;
-}
+/* Estilos base dentro de @layer base: assim as classes utilitarias
+   (ex.: text-white num link) continuam vencendo. */
+@layer base {
+  :root {
+    color-scheme: light;
+  }
 
-body {
-  background: var(--color-fundo);
-  color: var(--color-tinta);
-  font-family: var(--font-sans);
-  line-height: 1.55;
-}
+  body {
+    background: var(--color-fundo);
+    color: var(--color-tinta);
+    font-family: var(--font-sans);
+    line-height: 1.55;
+  }
 
-a {
-  color: var(--color-azul-acao);
-}
+  a {
+    color: var(--color-azul-acao);
+  }
 
-/* Foco sempre visivel (eMAG 4.1 / WCAG 2.4.7). Nunca remover sem substituto. */
-:focus-visible {
-  outline: 3px solid var(--color-foco);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 2px var(--color-tinta);
-  border-radius: 3px;
-}
+  /* Foco sempre visivel (eMAG 4.1 / WCAG 2.4.7). Nunca remover sem substituto. */
+  :focus-visible {
+    outline: 3px solid var(--color-foco);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px var(--color-tinta);
+    border-radius: 3px;
+  }
 
-/* Alvo do "Ir ao conteudo" e titulos de passo recebem foco por script;
-   o anel aparece so quando a navegacao e por teclado. */
-[tabindex="-1"]:focus:not(:focus-visible) {
-  outline: none;
+  /* Alvo do "Ir ao conteudo" e titulos de passo recebem foco por script;
+     o anel aparece so quando a navegacao e por teclado. */
+  [tabindex="-1"]:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
