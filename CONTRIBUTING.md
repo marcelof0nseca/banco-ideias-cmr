@@ -9,7 +9,7 @@ Cada um revisa os PRs do outro (exigência da especificação, seção 8.7).
 |---|---|
 | `app/(pages)/(publico)/*`, `app/api/ideias`, `app/api/acompanhar`, `app/api/dados-abertos`, `app/api/indicadores` | **A** |
 | `components/ui`, `components/layout`, `types/publico.ts`, `lib/sistema/url.ts`, `lib/ideias/protocolo.ts` | **A** |
-| `app/(pages)/(painel)/*`, `app/api/ideias/[id]/tramitar`, `app/api/ideias/[id]/revelar-documento`, `app/api/admin`, `middleware.ts` | **B** |
+| `app/(pages)/(painel)/*`, `app/api/ideias/[id]/tramitar`, `app/api/ideias/[id]/revelar-documento`, `app/api/admin`, `proxy.ts` | **B** |
 | `prisma/*`, `lib/seguranca/documento.ts`, `lib/tramitacao/maquina-status.ts`, `lib/tramitacao/tramitacao.ts`, `lib/seguranca/limite.ts`, `lib/seguranca/auth.ts` | **B** |
 | `nginx/*`, `Dockerfile`, `docker-compose*.yml`, `.github/workflows` | **B** |
 | `e2e/*` (Playwright) | ambos |

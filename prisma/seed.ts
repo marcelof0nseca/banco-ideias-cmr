@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { createHash } from "node:crypto";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { hashSenha } from "../lib/seguranca/senha";
 import { PrismaClient, StatusIdeia } from "./gen/client";
 
 /**
@@ -52,15 +53,13 @@ function diasAtras(n: number): Date {
 
 async function main() {
   console.log("Limpando dados anteriores...");
-  await prisma.tramitacao.deleteMany();
-  await prisma.apoio.deleteMany();
-  await prisma.interesseGabinete.deleteMany();
-  await prisma.ideia.deleteMany();
-  await prisma.autor.deleteMany();
-  await prisma.usuario.deleteMany();
-  await prisma.tema.deleteMany();
-  await prisma.motivoArquivamento.deleteMany();
-  await prisma.contadorProtocolo.deleteMany();
+  // TRUNCATE em vez de deleteMany: "tramitacao" e append-only (migracao 002
+  // bloqueia DELETE), e TRUNCATE nao dispara o gatilho de DELETE. E um reset
+  // explicito de ambiente de desenvolvimento - o seed nao roda em producao.
+  await prisma.$executeRaw`TRUNCATE TABLE
+    "tramitacao","apoio","interesse_gabinete","ideia","autor",
+    "usuario","tema","motivo_arquivamento","evento_auditoria","contador_protocolo"
+   RESTART IDENTITY CASCADE`;
 
   console.log("Temas...");
   const temas = new Map<string, string>();
@@ -78,15 +77,18 @@ async function main() {
     });
   }
 
-  console.log("Usuários de teste (senha provisória - trocar antes de usar)...");
-  const SENHA_FAKE = "argon2id$placeholder$trocar-na-semana-2";
+  console.log("Usuários de teste (senha única de desenvolvimento)...");
+  // Senha de DESENVOLVIMENTO para os tres usuarios. Trocar em producao.
+  const SENHA_DEV = "banco-ideias-2026";
+  const senhaHash = await hashSenha(SENHA_DEV);
   await prisma.usuario.createMany({
     data: [
-      { nome: "Servidor Triagem", email: "triagem@exemplo.gov.br", senhaHash: SENHA_FAKE, perfil: "TRIAGEM" },
-      { nome: "Gabinete Teste", email: "gabinete@exemplo.gov.br", senhaHash: SENHA_FAKE, perfil: "GABINETE", gabinete: "Gabinete Ver. Teste" },
-      { nome: "Administrador", email: "admin@exemplo.gov.br", senhaHash: SENHA_FAKE, perfil: "ADMIN" },
+      { nome: "Servidor Triagem", email: "triagem@exemplo.gov.br", senhaHash, perfil: "TRIAGEM" },
+      { nome: "Gabinete Teste", email: "gabinete@exemplo.gov.br", senhaHash, perfil: "GABINETE", gabinete: "Gabinete Ver. Teste" },
+      { nome: "Administrador", email: "admin@exemplo.gov.br", senhaHash, perfil: "ADMIN" },
     ],
   });
+  console.log(`  login: triagem@exemplo.gov.br | senha: ${SENHA_DEV}`);
 
   console.log("Contador de protocolo do ano...");
   const ano = new Date().getFullYear();
