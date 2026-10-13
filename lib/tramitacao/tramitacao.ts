@@ -224,6 +224,27 @@ export async function manifestarInteresse(
   });
 }
 
+export const MENSAGEM_SEM_ANALISE = "Seu gabinete precisa iniciar a análise antes de adotar a ideia.";
+
+/**
+ * Gabinete adota a ideia. So pode adotar quem iniciou a analise (tem
+ * interesse registrado) - evita "tomar" a ideia de outro gabinete. O ADMIN
+ * pode registrar a adocao em nome de um gabinete.
+ */
+export async function adotarIdeia(pedido: Omit<PedidoTransicao, "destino">): Promise<ResultadoTramitar> {
+  return prisma.$transaction(async (tx) => {
+    const gabinete = pedido.gabinete?.trim();
+    if (!gabinete) {
+      return { ok: false, httpStatus: 422, motivo: "Informe o gabinete ou a comissão responsável." } as const;
+    }
+    if (pedido.perfil !== Perfil.ADMIN) {
+      const interesse = await tx.interesseGabinete.count({ where: { ideiaId: pedido.ideiaId, gabinete } });
+      if (interesse === 0) return { ok: false, httpStatus: 422, motivo: MENSAGEM_SEM_ANALISE } as const;
+    }
+    return transitar(tx, { ...pedido, destino: StatusIdeia.ADOTADA });
+  });
+}
+
 /**
  * Gabinete desiste da analise. Remove so o interesse dele; se nenhum outro
  * gabinete continuar interessado, a ideia volta ao acervo (DISPONIVEL).

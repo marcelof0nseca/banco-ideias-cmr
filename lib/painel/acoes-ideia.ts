@@ -1,4 +1,4 @@
-import type { Perfil } from "@/prisma/gen/client";
+import { Prisma, type Perfil } from "@/prisma/gen/client";
 import { decifrarDocumento, formatarDocumento } from "../seguranca/documento";
 import { registrarEvento } from "../seguranca/auditoria";
 import { prisma } from "../sistema/prisma";
@@ -68,7 +68,7 @@ export async function editarRedacao(
     }
 
     await registrarEvento(
-      { acao: "TEXTO_EDITADO_NA_TRIAGEM", usuarioId: quem.usuarioId, alvoTipo: "Ideia", alvoId: ideia.protocolo, ipHash: quem.ipHash },
+      { acao: "TEXTO_EDITADO_NA_TRIAGEM", usuarioId: quem.usuarioId, alvoTipo: Prisma.ModelName.Ideia, alvoId: ideia.protocolo, ipHash: quem.ipHash },
       tx,
     );
     return { ok: true } as const;
@@ -102,7 +102,7 @@ export async function revelarDocumento(quem: Quem, ideiaId: string): Promise<Res
   await registrarEvento({
     acao: "REVELACAO_DOCUMENTO",
     usuarioId: quem.usuarioId,
-    alvoTipo: "Ideia",
+    alvoTipo: Prisma.ModelName.Ideia,
     alvoId: ideia.protocolo,
     ipHash: quem.ipHash,
   });

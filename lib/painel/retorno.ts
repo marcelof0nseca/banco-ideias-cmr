@@ -29,6 +29,7 @@ export const MENSAGENS_ERRO = {
   motivo: "Escolha o motivo do arquivamento.",
   justificativa: "Escreva a justificativa do arquivamento: o autor vai lê-la.",
   gabinete: "Informe o gabinete ou a comissão responsável.",
+  "sem-analise": "Seu gabinete precisa iniciar a análise antes de adotar a ideia.",
   texto: "O título precisa ter entre 5 e 150 caracteres e a descrição entre 30 e 5.000.",
   situacao: "Esta ação não é possível na situação atual da ideia.",
   "email-repetido": "Já existe um usuário com este e-mail.",
@@ -57,6 +58,7 @@ export function codigoDaFalha(falha: { httpStatus: number; motivo: string }): Co
   if (falha.httpStatus === 403) return "permissao";
   if (falha.httpStatus === 404) return "nao-encontrada";
   const m = falha.motivo.toLowerCase();
+  if (m.includes("antes de adotar")) return "sem-analise";
   if (m.includes("motivo")) return "motivo";
   if (m.includes("justificativa")) return "justificativa";
   if (m.includes("gabinete")) return "gabinete";
