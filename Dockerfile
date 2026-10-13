@@ -13,12 +13,12 @@
 # entram na imagem: sao passados em tempo de execucao (docker-compose.prod.yml).
 # =============================================================================
 
-FROM node:22-bookworm-slim AS deps
+FROM node:26-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
-FROM node:22-bookworm-slim AS build
+FROM node:26-bookworm-slim AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG NEXT_PUBLIC_BASE_PATH=""
@@ -36,7 +36,7 @@ FROM build AS migrar
 CMD ["npx", "prisma", "migrate", "deploy"]
 
 # --- aplicacao ---------------------------------------------------------------
-FROM node:22-bookworm-slim AS app
+FROM node:26-bookworm-slim AS app
 WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
