@@ -1,7 +1,11 @@
 # =============================================================================
-# CI inicial (especificacao, secao 11.3) - dono: Pessoa B.
-# A cada push/PR: lint, typecheck e testes unitarios.
-# Testes e2e, axe-core, npm audit e build de imagem entram na Fase 5.
+# CI (especificacao, secao 11.3) - dono: Pessoa B.
+# A cada push/PR:
+#   verificar  - tipos, lint, testes e build (o "pronto" da dupla)
+#   fumaca     - PostgreSQL real: migra, popula, sobe o servidor de producao e
+#                confere rotas, protecao do painel e ausencia de dado pessoal
+#   seguranca  - npm audit e varredura de segredos
+#   imagem     - gera a imagem Docker de producao (valida o Dockerfile)
 # =============================================================================
 name: CI
 
@@ -10,28 +14,117 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
 jobs:
   verificar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run db:generate
+      - name: Tipos, lint e testes
+        run: npm run verificar
+      - name: Build de producao
+        run: npx next build
 
-      - name: Instalar dependencias
-        run: npm ci
+  fumaca:
+    runs-on: ubuntu-latest
+    needs: verificar
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: bancoideias
+          POSTGRES_PASSWORD: senhaci
+          POSTGRES_DB: banco_ideias
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U bancoideias" --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://bancoideias:senhaci@localhost:5432/banco_ideias?schema=public
+      # Segredos so de teste, gerados a cada execucao.
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Segredos de teste
+        run: |
+          for v in DOCUMENTO_CHAVE DOCUMENTO_PEPPER AUTH_SECRET; do
+            echo "$v=$(node -e "console.log(require('crypto').randomBytes(32).toString('base64'))")" >> "$GITHUB_ENV"
+          done
+      - run: npm run db:generate
+      - name: Migracoes (inclui a trava append-only da tramitacao)
+        run: npx prisma migrate deploy
+      - name: Carga de dados ficticios
+        run: npm run db:seed
+      - run: npx next build
+      - name: Sobe o servidor de producao (o mesmo pacote que vai no contêiner)
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+          (cd .next/standalone && PORT=3000 NODE_ENV=production node server.js > ../../servidor.log 2>&1 &)
+          for i in $(seq 1 60); do curl -sf http://localhost:3000/api/health && exit 0; sleep 1; done
+          cat servidor.log; exit 1
+      - name: Rotas publicas respondem
+        run: |
+          for r in / /participar /consulta /acompanhar /indicadores /login /api/dados-abertos /api/indicadores; do
+            c=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3000$r")
+            echo "$c $r"; test "$c" = "200"
+          done
+      - name: Painel exige login (307 para /login) e API exige sessao (401)
+        run: |
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/triagem)" = "307"
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:3000/api/ideias/BIL-2026-000001/tramitar -H 'Content-Type: application/json' -d '{"destino":"EM_TRIAGEM","versao":0}')" = "401"
+      - name: Cabecalhos de seguranca presentes
+        run: |
+          h=$(curl -sI http://localhost:3000/)
+          echo "$h" | grep -qi "content-security-policy: .*nonce-"
+          echo "$h" | grep -qi "x-frame-options: DENY"
+          echo "$h" | grep -qi "strict-transport-security"
+      - name: Nenhum dado pessoal em pagina ou dado publico
+        run: |
+          for r in /consulta /api/dados-abertos "/api/dados-abertos?formato=csv" /api/indicadores; do
+            if curl -s "http://localhost:3000$r" | grep -Eqi '@exemplo|529\.982|52998224725'; then
+              echo "DADO PESSOAL EXPOSTO em $r"; exit 1
+            fi
+          done
+      - name: Trava append-only da tramitacao funciona no banco
+        run: |
+          if psql "${DATABASE_URL%%\?*}" -c 'DELETE FROM tramitacao' 2>/dev/null; then
+            echo "DELETE em tramitacao deveria falhar"; exit 1
+          fi
 
-      - name: Gerar Prisma Client
-        run: npm run db:generate
+  seguranca:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Vulnerabilidades criticas bloqueiam
+        run: npm audit --audit-level=critical
+      - name: Vulnerabilidades altas (relatorio)
+        # Hoje as altas vem so de CLIs de desenvolvimento (Prisma/shadcn),
+        # comprovadamente fora do pacote de producao (.next/standalone).
+        # Revisar quando o Prisma 8 sair do release candidate.
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+      - name: Varredura de segredos
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Testes unitarios
-        run: npm run test
+  imagem:
+    runs-on: ubuntu-latest
+    needs: verificar
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gera a imagem de producao (sem publicar)
+        run: docker build --target app -t banco-ideias:ci .

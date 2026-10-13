@@ -94,6 +94,17 @@ export function validarTransicao(params: {
     };
   }
 
+  // As permissoes do grafo sao por situacao de ORIGEM; arquivar e excecao:
+  // fora da triagem, so a administracao arquiva (secao 6.2 - gabinete nao
+  // arquiva). Sem esta regra, GABINETE poderia arquivar DISPONIVEL/EM_ANALISE.
+  if (para === StatusIdeia.ARQUIVADA && de !== StatusIdeia.EM_TRIAGEM && perfil !== Perfil.ADMIN) {
+    return {
+      ok: false,
+      httpStatus: 403,
+      motivo: `Fora da triagem, só a administração pode arquivar (perfil ${perfil}).`,
+    };
+  }
+
   if (para === StatusIdeia.ARQUIVADA && !justificativa?.trim()) {
     return {
       ok: false,

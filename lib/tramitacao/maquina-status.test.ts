@@ -65,6 +65,38 @@ describe("validarTransicao - autorizacao por perfil", () => {
   });
 });
 
+describe("validarTransicao - arquivar fora da triagem e so da administracao", () => {
+  test("GABINETE nao arquiva ideia DISPONIVEL (403)", () => {
+    const r = validarTransicao({ de: "DISPONIVEL", para: "ARQUIVADA", perfil: "GABINETE", justificativa: "x" });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.httpStatus).toBe(403);
+  });
+
+  test("GABINETE nao arquiva ideia EM_ANALISE (403)", () => {
+    const r = validarTransicao({ de: "EM_ANALISE", para: "ARQUIVADA", perfil: "GABINETE", justificativa: "x" });
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.httpStatus).toBe(403);
+  });
+
+  test("ADMIN arquiva ideia DISPONIVEL com justificativa", () => {
+    expect(
+      validarTransicao({ de: "DISPONIVEL", para: "ARQUIVADA", perfil: "ADMIN", justificativa: "Conteúdo ofensivo." }).ok,
+    ).toBe(true);
+  });
+
+  test("TRIAGEM arquiva durante a triagem", () => {
+    expect(
+      validarTransicao({ de: "EM_TRIAGEM", para: "ARQUIVADA", perfil: "TRIAGEM", justificativa: "Fora do escopo." }).ok,
+    ).toBe(true);
+  });
+
+  test("GABINETE continua podendo assumir, adotar e devolver", () => {
+    expect(validarTransicao({ de: "DISPONIVEL", para: "EM_ANALISE", perfil: "GABINETE" }).ok).toBe(true);
+    expect(validarTransicao({ de: "EM_ANALISE", para: "ADOTADA", perfil: "GABINETE" }).ok).toBe(true);
+    expect(validarTransicao({ de: "EM_ANALISE", para: "DISPONIVEL", perfil: "GABINETE" }).ok).toBe(true);
+  });
+});
+
 describe("validarTransicao - justificativa de arquivamento", () => {
   test("arquivar sem justificativa retorna 422", () => {
     const r = validarTransicao({

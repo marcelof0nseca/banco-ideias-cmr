@@ -1,0 +1,16 @@
+# Nada de segredo, cache ou artefato local dentro da imagem.
+.env
+.env.*
+!.env.example
+node_modules
+.next
+prisma/gen
+coverage
+test-results
+playwright-report
+.git
+.github
+docs
+prototipo
+*.log
+*.tsbuildinfo

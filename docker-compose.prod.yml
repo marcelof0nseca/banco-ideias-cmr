@@ -1,0 +1,45 @@
+# =============================================================================
+# Producao (modelo para a TI da Camara). DONO: Pessoa B.
+#
+#   1. crie o arquivo .env.producao (fora do Git) com os segredos;
+#   2. docker compose -f docker-compose.prod.yml build
+#   3. docker compose -f docker-compose.prod.yml run --rm migrar
+#   4. docker compose -f docker-compose.prod.yml up -d app
+#
+# O Nginx da Camara fica na frente (nginx/subdominio.conf ou proxy-portal.conf)
+# e faz o TLS. O PostgreSQL pode ser o da TI (ajuste DATABASE_URL) ou este.
+# =============================================================================
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: .env.producao
+    environment:
+      POSTGRES_DB: banco_ideias
+    volumes:
+      - banco_ideias_dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d banco_ideias"]
+      interval: 10s
+      retries: 10
+    # Sem "ports": o banco so e acessivel pela rede interna do compose.
+
+  migrar:
+    build: { context: ., target: migrar }
+    env_file: .env.producao
+    depends_on:
+      db: { condition: service_healthy }
+    profiles: ["manutencao"]
+
+  app:
+    build: { context: ., target: app }
+    restart: unless-stopped
+    env_file: .env.producao
+    depends_on:
+      db: { condition: service_healthy }
+    # So o Nginx local enxerga a aplicacao.
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  banco_ideias_dados:
