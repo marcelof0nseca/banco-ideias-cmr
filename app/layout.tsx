@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { headers } from "next/headers";
 import { VLibras } from "@/components/layout/VLibras";
 import "./globals.css";
 
@@ -42,14 +43,17 @@ export const metadata: Metadata = {
     "Apresente ideias legislativas e acompanhe sua tramitação.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Nonce da CSP, gerado pelo proxy.ts. Ler cabecalhos torna as paginas
+  // dinamicas - exigencia do Next para aplicar o nonce (docs: CSP).
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="pt-BR" className={`${fonteTitulo.variable} ${fonteCorpo.variable}`}>
       <body>
         {children}
-        <VLibras />
+        <VLibras nonce={nonce} />
       </body>
     </html>
   );

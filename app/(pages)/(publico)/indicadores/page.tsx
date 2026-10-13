@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { classesBotao } from "@/components/ui/Botao";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { GraficoBarras } from "@/components/ui/GraficoBarras";
 import { formatarPercentual } from "@/lib/indicadores/indicadores";
@@ -137,10 +138,32 @@ export default async function IndicadoresPage() {
         </div>
       </section>
 
-      <p className="text-sm text-muted-foreground">
-        Os mesmos dados estão disponíveis em formato aberto em{" "}
-        <a href={caminho("/api/indicadores")}>/api/indicadores</a>.
-      </p>
+      <section aria-labelledby="titulo-dados-abertos" className="flex flex-col gap-3">
+        <h2 id="titulo-dados-abertos" className="text-xl font-bold text-marca">
+          Dados abertos
+        </h2>
+        <p className="max-w-3xl text-muted-foreground">
+          Baixe o acervo completo para pesquisa, reportagem ou fiscalização, sem nenhum dado pessoal (Lei de
+          Acesso à Informação). Licença CC BY 4.0: pode reutilizar, citando a Câmara Municipal do Recife.
+        </p>
+        <ul className="flex flex-wrap gap-3">
+          <li>
+            <a className={classesBotao("secundario")} href={caminho("/api/dados-abertos?formato=csv")}>
+              Ideias publicadas (CSV)
+            </a>
+          </li>
+          <li>
+            <a className={classesBotao("contorno")} href={caminho("/api/dados-abertos")}>
+              Ideias publicadas (JSON)
+            </a>
+          </li>
+          <li>
+            <a className={classesBotao("contorno")} href={caminho("/api/indicadores")}>
+              Indicadores (JSON)
+            </a>
+          </li>
+        </ul>
+      </section>
     </div>
   );
 }

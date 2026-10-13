@@ -9,8 +9,8 @@ import Script from "next/script";
  * acessibilidade e identidade visual).
  *
  * E o UNICO recurso externo que o sistema carrega (ver docs/implantacao/
- * integracao-portal.md). Quando a Pessoa B definir a CSP completa, o dominio
- * vlibras.gov.br precisa entrar em script-src/connect-src/img-src.
+ * integracao-portal.md). A CSP (lib/seguranca/csp.ts) libera vlibras.gov.br
+ * e o nonce chega por prop, vindo do layout raiz.
  *
  * Os atributos `vw`, `vw-access-button` e `vw-plugin-wrapper` sao os que o
  * plugin procura no DOM; vao por spread porque nao sao atributos conhecidos
@@ -21,7 +21,7 @@ interface JanelaComVLibras {
   VLibras?: { Widget: new (opcoesOuUrl: string) => void };
 }
 
-export function VLibras() {
+export function VLibras({ nonce }: { nonce?: string }) {
   return (
     <>
       <div {...{ vw: "true" }} className="enabled">
@@ -33,6 +33,7 @@ export function VLibras() {
       <Script
         src="https://vlibras.gov.br/app/vlibras-plugin.js"
         strategy="afterInteractive"
+        nonce={nonce}
         onLoad={() => {
           const janela = window as unknown as JanelaComVLibras;
           if (janela.VLibras) {

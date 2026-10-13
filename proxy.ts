@@ -1,58 +1,72 @@
 import { NextResponse, type NextRequest } from "next/server";
-import {
-  COOKIE_SESSAO,
-  INATIVIDADE_MS,
-  assinarSessao,
-  verificarSessao,
-} from "@/lib/seguranca/sessao";
+import { gerarNonce, politicaCsp } from "@/lib/seguranca/csp";
+import { COOKIE_SESSAO, INATIVIDADE_MS, assinarSessao, verificarSessao } from "@/lib/seguranca/sessao";
 
 /**
- * Protege as rotas do painel interno (especificacao, secao 8.2, 1a camada).
- * Convencao "proxy" do Next 16 (sucessora de middleware.ts).
- * Roda no Edge: usa so lib/seguranca/sessao.ts (jose), sem Prisma nem argon2.
+ * Proxy (convencao do Next 16, sucessora de middleware.ts). DONO: Pessoa B.
  *
- * - Sem sessao valida numa rota do painel -> redireciona para /login.
- * - Com sessao valida -> renova o cookie (janela de inatividade deslizante).
+ * 1. Toda pagina: gera um nonce e envia a Content Security Policy
+ *    (lib/seguranca/csp.ts). O Next aplica o nonce nos scripts dele.
+ * 2. Rotas do painel: sem sessao valida -> /login; com sessao -> renova o
+ *    cookie (inatividade deslizante). A checagem fina de PERFIL fica nas
+ *    paginas e rotas (defesa em profundidade, secao 8.2).
  *
- * A checagem fina de PERFIL fica nas proprias paginas/rotas (sessaoAtual /
- * exigirPerfil): defesa em profundidade, nao so no middleware.
+ * Roda no Edge: usa so jose (sessao.ts) e a Web Crypto.
  */
 
 const PREFIXOS_PROTEGIDOS = ["/triagem", "/gabinete", "/admin"];
 
 function ehProtegida(pathname: string): boolean {
-  return PREFIXOS_PROTEGIDOS.some(
-    (p) => pathname === p || pathname.startsWith(`${p}/`),
-  );
+  return PREFIXOS_PROTEGIDOS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  if (!ehProtegida(pathname)) return NextResponse.next();
 
-  const token = req.cookies.get(COOKIE_SESSAO)?.value;
-  const sessao = await verificarSessao(token);
-
-  if (!sessao) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/login";
-    url.search = `?destino=${encodeURIComponent(pathname)}`;
-    return NextResponse.redirect(url);
+  // --- painel: exige sessao ---------------------------------------------
+  let sessaoRenovada: string | null = null;
+  if (ehProtegida(pathname)) {
+    const sessao = await verificarSessao(req.cookies.get(COOKIE_SESSAO)?.value);
+    if (!sessao) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/login";
+      url.search = `?destino=${encodeURIComponent(pathname)}`;
+      return NextResponse.redirect(url);
+    }
+    sessaoRenovada = await assinarSessao(sessao);
   }
 
-  // Sessao valida: renova o cookie (desliza a inatividade, preserva o absoluto).
-  const resposta = NextResponse.next();
-  const novo = await assinarSessao(sessao);
-  resposta.cookies.set(COOKIE_SESSAO, novo, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: process.env.NEXT_PUBLIC_BASE_PATH || "/",
-    maxAge: Math.floor(INATIVIDADE_MS / 1000),
-  });
+  // --- CSP com nonce ----------------------------------------------------
+  const nonce = gerarNonce();
+  const csp = politicaCsp(nonce, { desenvolvimento: process.env.NODE_ENV === "development" });
+  const cabecalhos = new Headers(req.headers);
+  cabecalhos.set("x-nonce", nonce);
+  cabecalhos.set("Content-Security-Policy", csp);
+
+  const resposta = NextResponse.next({ request: { headers: cabecalhos } });
+  resposta.headers.set("Content-Security-Policy", csp);
+
+  if (sessaoRenovada) {
+    resposta.cookies.set(COOKIE_SESSAO, sessaoRenovada, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: process.env.NEXT_PUBLIC_BASE_PATH || "/",
+      maxAge: Math.floor(INATIVIDADE_MS / 1000),
+    });
+  }
   return resposta;
 }
 
 export const config = {
-  matcher: ["/triagem/:path*", "/gabinete/:path*", "/admin/:path*"],
+  matcher: [
+    {
+      // Paginas; fora: API, arquivos estaticos, imagens e fontes.
+      source: "/((?!api|_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|.*\\.(?:png|jpg|svg|woff2)$).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+  ],
 };
