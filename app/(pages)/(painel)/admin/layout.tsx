@@ -20,6 +20,7 @@ export default async function LayoutAdmin({ children }: { children: React.ReactN
           { href: "/admin", rotulo: "Visão geral" },
           { href: "/admin/acessos", rotulo: "Usuários" },
           { href: "/admin/listas", rotulo: "Temas e motivos" },
+          { href: "/admin/titulares", rotulo: "Titulares (LGPD)" },
           { href: "/admin/auditoria", rotulo: "Trilha de auditoria" },
         ]}
       />

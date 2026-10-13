@@ -19,6 +19,8 @@ export const MENSAGENS_OK = {
   "senha-redefinida": "Senha redefinida. Informe a nova senha por um canal seguro.",
   "lista-incluida": "Item incluído na lista.",
   "lista-alterada": "Item da lista atualizado.",
+  "consentimento-revogado": "Consentimento revogado: o nome do titular não aparece mais na consulta pública.",
+  "titular-anonimizado": "Titular anonimizado. Documento e contatos foram apagados; as ideias seguem como registro público.",
 } as const;
 
 export const MENSAGENS_ERRO = {
@@ -38,6 +40,7 @@ export const MENSAGENS_ERRO = {
   "proprio-usuario": "Você não pode desativar o seu próprio usuário.",
   "lista-vazia": "Escreva o nome do item.",
   "lista-repetida": "Já existe um item com este nome.",
+  confirmacao: "Marque a confirmação de que o próprio titular fez o pedido.",
   invalido: "Não foi possível concluir a ação. Confira os dados e tente de novo.",
 } as const;
 
@@ -65,4 +68,12 @@ export function codigoDaFalha(falha: { httpStatus: number; motivo: string }): Co
   if (m.includes("título") || m.includes("descrição")) return "texto";
   if (m.includes("transição") || m.includes("situação") || m.includes("triagem")) return "situacao";
   return "invalido";
+}
+
+/**
+ * Monta a URL de retorno com o codigo tipado: o TypeScript recusa um codigo
+ * que nao exista nas tabelas acima.
+ */
+export function urlRetorno(base: string, retorno: { ok: CodigoOk } | { erro: CodigoErro }): string {
+  return "ok" in retorno ? `${base}?ok=${retorno.ok}` : `${base}?erro=${retorno.erro}`;
 }

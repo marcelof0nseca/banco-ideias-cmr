@@ -1,4 +1,4 @@
-import { ClipboardList, Download, ListChecks, ShieldCheck, Users } from "lucide-react";
+import { ClipboardList, Download, ListChecks, ShieldCheck, UserRoundSearch, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -69,6 +69,7 @@ export default async function AdminPage() {
           <li><Atalho href="/admin/acessos" titulo="Usuários" texto="Criar acessos, redefinir senhas e desativar quem saiu." icone={<Users aria-hidden="true" className="size-5" />} /></li>
           <li><Atalho href="/admin/listas" titulo="Temas e motivos" texto="Listas dos formulários: temas das ideias e motivos de arquivamento." icone={<ListChecks aria-hidden="true" className="size-5" />} /></li>
           <li><Atalho href="/admin/auditoria" titulo="Trilha de auditoria" texto="Quem entrou, revelou CPF, editou textos ou alterou usuários. A consulta também é registrada." icone={<ShieldCheck aria-hidden="true" className="size-5" />} /></li>
+          <li><Atalho href="/admin/titulares" titulo="Pedidos de titulares (LGPD)" texto="Exportar os dados de um cidadão, revogar a divulgação do nome ou anonimizar." icone={<UserRoundSearch aria-hidden="true" className="size-5" />} /></li>
           <li><Atalho href="/triagem" titulo="Triagem e gabinetes" texto="A administração enxerga as duas filas e pode arquivar em qualquer situação." icone={<ClipboardList aria-hidden="true" className="size-5" />} /></li>
           <li><Atalho externo href={caminho("/api/painel/exportar")} titulo="Exportar ideias (CSV)" texto="Planilha para relatório: protocolo, tema, situação, datas e apoios. Sem dados pessoais." icone={<Download aria-hidden="true" className="size-5" />} /></li>
         </ul>
