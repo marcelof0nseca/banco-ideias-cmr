@@ -1,5 +1,8 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 import type { Perfil } from "@/prisma/gen/client";
+import { hashIp } from "../ideias/cadastro";
+import { ipDe } from "../ideias/cadastro-registro";
 import { prisma } from "../sistema/prisma";
 import { verificarSenha } from "./senha";
 import {
@@ -135,6 +138,22 @@ export async function limparCookieSessao(): Promise<void> {
 export async function sessaoAtual(): Promise<Sessao | null> {
   const jar = await cookies();
   return verificarSessao(jar.get(COOKIE_SESSAO)?.value);
+}
+
+/**
+ * Para paginas do painel: devolve a sessao ou manda para o login, voltando
+ * depois para `destino`. A checagem de PERFIL fica com a pagina.
+ */
+export async function sessaoDaPagina(destino: string): Promise<Sessao> {
+  const sessao = await sessaoAtual();
+  if (!sessao) redirect(`/login?destino=${encodeURIComponent(destino)}`);
+  return sessao;
+}
+
+/** Hash do IP da requisicao atual, para auditoria (nunca o IP em claro). */
+export async function ipHashAtual(): Promise<string | null> {
+  const ip = ipDe(await headers());
+  return ip ? hashIp(ip) : null;
 }
 
 // ---------------------------------------------------------------------------
