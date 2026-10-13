@@ -82,7 +82,7 @@ types/publico.ts                 ← tipos do que pode sair em público (sem dad
 - **Nunca crie uma pasta `pages/`** (sem parênteses). Na raiz ela liga o Pages Router antigo; dentro de `app/` ela vira `/pages/...` na URL. Por isso o nome é `(pages)`.
 - **`lib/` é organizada por assunto.** Arquivo novo vai para a pasta do assunto, com o teste ao lado (`x.ts` + `x.test.ts`). Importe sempre pelo caminho completo (`@/lib/ideias/cadastro`); dentro da mesma pasta, `./cadastro`. O alias `utils` do shadcn aponta para `@/lib/sistema/utils` em `components.json`.
 - Pasta entre parênteses `(nome)` = organização, não muda a URL. A home está em `(inicio)/` para ter pasta própria e continuar em `/`.
-- **Donos por pasta** (ver `CONTRIBUTING.md`): `(publico)`, `components/*`, `lib/sistema/url.ts` são da Pessoa A; `(painel)`, `prisma/*`, `lib/seguranca/documento.ts`, `lib/tramitacao/maquina-status.ts`, `middleware.ts` são da Pessoa B. **O esquema do banco (`prisma/schema.prisma`) só a Pessoa B altera.**
+- **Donos por pasta** (ver `CONTRIBUTING.md`): `(publico)`, `components/*`, `lib/sistema/url.ts` são da Pessoa A; `(painel)`, `prisma/*`, `lib/seguranca/documento.ts`, `lib/tramitacao/maquina-status.ts`, `proxy.ts` são da Pessoa B. **O esquema do banco (`prisma/schema.prisma`) só a Pessoa B altera.**
 
 ---
 
@@ -111,9 +111,9 @@ O sistema roda em `bancodeideias.recife.pe.leg.br` **ou** atrás do portal em `/
 ### 4.3 Sem recursos externos e sem estilo inline
 
 - Proibido: `next/font/google`, `fonts.googleapis`, CDN, `@import url(https://...)`. O teste `components/ui/tema.test.ts` falha.
-- Fonte é a do sistema (`--font-sans` em `globals.css`).
+- Fontes: Lexend (títulos) e Source Sans 3 (corpo), **arquivos no repositório** (`app/fontes/*.woff2`) via `next/font/local` em `app/layout.tsx`. Nunca `next/font/google`.
 - Ícones: `lucide-react`; marcas (redes sociais) em **SVG inline** dentro do componente.
-- **Sem `style={{ }}`**: a CSP proíbe estilo inline. Largura dinâmica usa classe (ex.: `barra-0` … `barra-100` em `GraficoBarras`).
+- **Sem `style={{ }}`**: regra do código. Largura dinâmica usa classe (ex.: `barra-0` … `barra-100` em `GraficoBarras`). A CSP fica em `lib/seguranca/csp.ts` (nonce por requisição, aplicado pelo `proxy.ts`); ela aceita estilo inline **só** porque o VLibras injeta estilos — não é licença para o nosso código usar.
 
 ### 4.4 Acessibilidade (eMAG + WCAG 2.1 AA) — obrigatória por lei
 

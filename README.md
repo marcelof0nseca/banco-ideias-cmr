@@ -27,9 +27,10 @@ npm install
 cp .env.example .env
 #    edite o .env:
 #    - DATABASE_URL conforme seu Postgres (Docker = porta 5433)
-#    - gere as duas chaves:
+#    - gere as três chaves:
 node -e "console.log('DOCUMENTO_CHAVE=' + require('crypto').randomBytes(32).toString('base64'))"
 node -e "console.log('DOCUMENTO_PEPPER=' + require('crypto').randomBytes(32).toString('base64'))"
+node -e "console.log('AUTH_SECRET=' + require('crypto').randomBytes(32).toString('base64'))"
 
 # 3. banco: aplica migrações + carga de dados fictícios
 npm run db:migrate
@@ -39,7 +40,28 @@ npm run db:seed
 npm run dev          # http://localhost:3000
 ```
 
-Confira: `http://localhost:3000/consulta` deve listar as 3 ideias de exemplo.
+Confira: `http://localhost:3000/consulta` deve listar as ideias de exemplo.
+
+## Painel interno
+
+Entre em `http://localhost:3000/login` com um dos usuários do seed (senha **`banco-ideias-2026`**,
+só de desenvolvimento):
+
+| Usuário | Perfil | Vai para |
+|---|---|---|
+| `triagem@exemplo.gov.br` | Secretaria · Triagem | `/triagem` — fila, aprovar, arquivar, revelar CPF |
+| `gabinete@exemplo.gov.br` | Gabinete (Gabinete Ver. Teste) | `/gabinete` — acervo, analisar, adotar |
+| `admin@exemplo.gov.br` | Administração | `/admin` — usuários, listas, LGPD, auditoria, CSV |
+
+Para o **Acompanhar**: protocolo `BIL-2026-000006` + CPF `258.036.914-70` (ideia arquivada, mostra o motivo),
+ou `BIL-2026-000001` + `529.982.247-25`.
+
+## Produção
+
+Imagem Docker multi-estágio (`Dockerfile`) e modelo de implantação em `docker-compose.prod.yml`.
+Passo a passo para a TI em [`docs/implantacao/guia-ti.md`](docs/implantacao/guia-ti.md).
+O CI (`.github/workflows/ci.yml`) roda tipos, lint, testes, build, um teste de fumaça com PostgreSQL
+real, `npm audit`, varredura de segredos e o build da imagem.
 
 ## Comandos
 
