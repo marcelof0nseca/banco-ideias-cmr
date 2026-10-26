@@ -22,7 +22,7 @@ jobs:
   verificar:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
@@ -50,7 +50,7 @@ jobs:
       # Segredos so de teste, gerados a cada execucao.
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
@@ -104,7 +104,7 @@ jobs:
   seguranca:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
@@ -131,7 +131,7 @@ jobs:
     env:
       COMPOSE: docker compose -f docker-compose.prod.yml --profile manutencao
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Segredos de teste (gerados agora, descartados no fim)
         run: |
           SENHA=$(openssl rand -hex 16)
