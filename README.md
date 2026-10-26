@@ -61,7 +61,8 @@ ou `BIL-2026-000001` + `529.982.247-25`.
 Imagem Docker multi-estágio (`Dockerfile`) e modelo de implantação em `docker-compose.prod.yml`.
 Passo a passo para a TI em [`docs/implantacao/guia-ti.md`](docs/implantacao/guia-ti.md).
 O CI (`.github/workflows/ci.yml`) roda tipos, lint, testes, build, um teste de fumaça com PostgreSQL
-real, `npm audit`, varredura de segredos e o build da imagem.
+real, `npm audit`, varredura de segredos e sobe o `docker-compose.prod.yml` de verdade, testando o
+sistema dentro do contêiner.
 
 ## Comandos
 

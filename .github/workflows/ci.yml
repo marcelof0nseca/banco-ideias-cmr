@@ -5,7 +5,8 @@
 #   fumaca     - PostgreSQL real: migra, popula, sobe o servidor de producao e
 #                confere rotas, protecao do painel e ausencia de dado pessoal
 #   seguranca  - npm audit e varredura de segredos
-#   imagem     - gera a imagem Docker de producao (valida o Dockerfile)
+#   conteiner  - sobe o docker-compose de producao e testa o sistema dentro
+#                do contêiner (health, rotas, sem root, sem segredo na imagem)
 # =============================================================================
 name: CI
 
@@ -121,10 +122,64 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  imagem:
+  conteiner:
+    # Sobe o sistema EXATAMENTE como a TI vai subir (docker-compose.prod.yml e
+    # docs/implantacao/guia-ti.md): gera as imagens, aplica as migracoes, liga o
+    # contêiner, espera o HEALTHCHECK do Docker e confere o sistema la dentro.
     runs-on: ubuntu-latest
     needs: verificar
+    env:
+      COMPOSE: docker compose -f docker-compose.prod.yml --profile manutencao
     steps:
       - uses: actions/checkout@v4
-      - name: Gera a imagem de producao (sem publicar)
-        run: docker build --target app -t banco-ideias:ci .
+      - name: Segredos de teste (gerados agora, descartados no fim)
+        run: |
+          SENHA=$(openssl rand -hex 16)
+          {
+            echo "POSTGRES_USER=bancoideias"
+            echo "POSTGRES_PASSWORD=$SENHA"
+            echo "DATABASE_URL=postgresql://bancoideias:$SENHA@db:5432/banco_ideias?schema=public"
+            echo "DOCUMENTO_CHAVE=$(openssl rand -base64 32)"
+            echo "DOCUMENTO_PEPPER=$(openssl rand -hex 32)"
+            echo "AUTH_SECRET=$(openssl rand -hex 32)"
+          } > .env.producao
+      - name: Gera as imagens (aplicacao e migracao)
+        run: $COMPOSE build
+      - name: Sobe o banco
+        run: $COMPOSE up -d --wait db
+      - name: Aplica as migracoes (contêiner "migrar")
+        run: $COMPOSE run --rm migrar
+      - name: Carga de dados ficticios
+        run: $COMPOSE run --rm migrar npm run db:seed
+      - name: Liga a aplicacao e espera o HEALTHCHECK ficar "healthy"
+        run: $COMPOSE up -d --wait --wait-timeout 180 app
+      - name: Sistema responde de dentro do contêiner
+        run: |
+          set -e
+          curl -sf http://127.0.0.1:3000/api/health | grep -q '"status":"ok"'
+          for r in / /participar /consulta /acompanhar /indicadores /login /api/dados-abertos; do
+            c=$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:3000$r")
+            echo "$c $r"; test "$c" = "200"
+          done
+          curl -s http://127.0.0.1:3000/consulta | grep -q "Ciclovia protegida"
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/triagem)" = "307"
+          curl -sI http://127.0.0.1:3000/ | grep -qi "content-security-policy: .*nonce-"
+      - name: Contêiner seguro (sem root, sem segredo dentro da imagem)
+        run: |
+          set -e
+          test "$($COMPOSE exec -T app id -u)" = "1001"
+          IMAGEM=$($COMPOSE images -q app)
+          ENV_IMAGEM=$(docker image inspect --format '{{json .Config.Env}}' "$IMAGEM")
+          echo "$ENV_IMAGEM"
+          if echo "$ENV_IMAGEM" | grep -Eq 'DOCUMENTO_CHAVE|DOCUMENTO_PEPPER|AUTH_SECRET|DATABASE_URL|POSTGRES_PASSWORD'; then
+            echo "SEGREDO DENTRO DA IMAGEM"; exit 1
+          fi
+          if $COMPOSE exec -T app sh -c 'ls -a /app' | grep -E '^\.env'; then
+            echo "ARQUIVO .env DENTRO DA IMAGEM"; exit 1
+          fi
+      - name: Logs (so se falhar)
+        if: failure()
+        run: $COMPOSE logs --no-color
+      - name: Desliga e apaga tudo
+        if: always()
+        run: $COMPOSE down -v
