@@ -47,3 +47,7 @@ npm-debug.log*
 # gerados pelo build/TS
 *.tsbuildinfo
 next-env.d.ts
+
+# backups do banco - tem dados pessoais (scripts/backup.sh)
+backups/
+*.dump
