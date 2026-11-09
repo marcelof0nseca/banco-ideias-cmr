@@ -10,7 +10,7 @@
 # imagem de novo com outro NEXT_PUBLIC_BASE_PATH. Nenhuma linha de codigo muda.
 #
 # Segredos (DATABASE_URL, DOCUMENTO_CHAVE, DOCUMENTO_PEPPER, AUTH_SECRET) NAO
-# entram na imagem: sao passados em tempo de execucao (docker-compose.prod.yml).
+# entram na imagem: sao passados em tempo de execucao (docker-compose.yml).
 # =============================================================================
 
 FROM node:22-bookworm-slim AS deps

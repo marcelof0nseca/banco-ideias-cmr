@@ -1,30 +1,51 @@
 # =============================================================================
-# Banco local para desenvolvimento (Pessoa A nao precisa instalar PostgreSQL).
-#   docker compose up -d
-# Depois, no .env:
-#   DATABASE_URL="postgresql://bancoideias:senhalocal@localhost:5433/banco_ideias?schema=public"
+# Banco de Ideias Legislativas - PRODUCAO. DONO: Pessoa B.
+# Passo a passo completo em docs/implantacao/guia-ti.md.
 #
-# Porta 5433 para nao colidir com um PostgreSQL ja instalado na maquina (5432).
-# Dados de DEV apenas. Producao usa o PostgreSQL provisionado pela TI da Camara.
+#   1. cp .env.example .env    (e preencha os segredos - o .env fica fora do Git)
+#   2. docker compose build
+#   3. docker compose up -d --wait db
+#   4. docker compose run --rm migrar            (aplica as migracoes do banco)
+#   5. docker compose up -d --wait app
+#
+# O Nginx da Camara fica na frente (nginx/subdominio.conf ou proxy-portal.conf)
+# e faz o TLS. Para desenvolvimento, use docker-compose.dev.yml.
 # =============================================================================
+name: banco-ideias
+
 services:
   db:
     image: postgres:16-alpine
-    container_name: banco_ideias_db
     restart: unless-stopped
+    env_file: .env
     environment:
-      POSTGRES_USER: bancoideias
-      POSTGRES_PASSWORD: senhalocal
       POSTGRES_DB: banco_ideias
-    ports:
-      - "5433:5432"
     volumes:
-      - banco_ideias_pgdata:/var/lib/postgresql/data
+      - banco_ideias_dados:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bancoideias -d banco_ideias"]
-      interval: 5s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d banco_ideias"]
+      interval: 10s
       retries: 10
+    # Sem "ports": o banco so e acessivel pela rede interna do compose.
+
+  # Tarefas de manutencao (migracoes, criacao do administrador). Nao fica
+  # ligado: roda e termina com "docker compose run --rm migrar ...".
+  migrar:
+    build: { context: ., target: migrar }
+    env_file: .env
+    depends_on:
+      db: { condition: service_healthy }
+    profiles: ["manutencao"]
+
+  app:
+    build: { context: ., target: app }
+    restart: unless-stopped
+    env_file: .env
+    depends_on:
+      db: { condition: service_healthy }
+    # So o proprio servidor (Nginx) enxerga a aplicacao.
+    ports:
+      - "127.0.0.1:3000:3000"
 
 volumes:
-  banco_ideias_pgdata:
+  banco_ideias_dados:

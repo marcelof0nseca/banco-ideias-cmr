@@ -14,7 +14,7 @@ e qualquer pessoa consulta o acervo. Especificação técnica completa em
 
 - **Node.js 22+** e npm
 - **PostgreSQL** — de uma das duas formas:
-  - Docker: `docker compose up -d` (sobe um Postgres 16 na porta **5433**), ou
+  - Docker: `docker compose -f docker-compose.dev.yml up -d` (sobe um Postgres 16 na porta **5433**), ou
   - PostgreSQL já instalado na máquina (porta 5432)
 
 ## Rodando pela primeira vez
@@ -58,10 +58,10 @@ ou `BIL-2026-000001` + `529.982.247-25`.
 
 ## Produção
 
-Imagem Docker multi-estágio (`Dockerfile`) e modelo de implantação em `docker-compose.prod.yml`.
+Imagem Docker multi-estágio (`Dockerfile`) e implantação em `docker-compose.yml`.
 Passo a passo para a TI em [`docs/implantacao/guia-ti.md`](docs/implantacao/guia-ti.md).
 O CI (`.github/workflows/ci.yml`) roda tipos, lint, testes, build, um teste de fumaça com PostgreSQL
-real, `npm audit`, varredura de segredos e sobe o `docker-compose.prod.yml` de verdade, testando o
+real, `npm audit`, varredura de segredos e sobe o `docker-compose.yml` de verdade, testando o
 sistema dentro do contêiner.
 
 ## Comandos

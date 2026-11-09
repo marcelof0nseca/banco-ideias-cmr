@@ -14,7 +14,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"  # A
 Guardar em cofre de segredos. **Nunca** no Git. Perder a `DOCUMENTO_CHAVE` torna os CPFs
 irrecuperáveis; trocá-la exige recifrar a tabela `autor` (procedimento a combinar).
 
-## 2. Arquivo `.env.producao` (no servidor, fora do Git)
+## 2. Arquivo `.env` (no servidor, fora do Git)
 
 ```dotenv
 DATABASE_URL="postgresql://USUARIO:SENHA@db:5432/banco_ideias?schema=public"
@@ -32,14 +32,14 @@ LIMITE_IDEIAS_POR_DOCUMENTO_DIA="3"
 
 ```bash
 # Cenário 1 - subdomínio (recomendado)
-docker compose -f docker-compose.prod.yml build \
+docker compose build \
   --build-arg NEXT_PUBLIC_SITE_URL=https://bancodeideias.recife.pe.leg.br
 
 # Cenário 2 - rota no portal: acrescente
 #   --build-arg NEXT_PUBLIC_BASE_PATH=/participacao-popular/banco-de-ideias
 
-docker compose -f docker-compose.prod.yml run --rm migrar   # aplica as migrações
-docker compose -f docker-compose.prod.yml up -d app
+docker compose run --rm migrar   # aplica as migrações
+docker compose up -d app
 curl http://127.0.0.1:3000/api/health                        # {"status":"ok","banco":"ok"}
 ```
 
@@ -84,7 +84,7 @@ da Câmara filtrar saída, esses dois destinos precisam estar liberados para o n
 ## 7. Monitoramento
 
 - `GET /api/health` → 200 com `{"status":"ok"}`; 503 se o banco cair.
-- Logs: `docker compose -f docker-compose.prod.yml logs -f app`. A aplicação não registra CPF, senha nem token.
+- Logs: `docker compose logs -f app`. A aplicação não registra CPF, senha nem token.
 
 ## 8. Pendências que dependem da Câmara (seção 13.2)
 

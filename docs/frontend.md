@@ -37,7 +37,7 @@
 Comandos:
 
 ```bash
-docker compose up -d   # PostgreSQL local na porta 5433
+docker compose -f docker-compose.dev.yml up -d   # PostgreSQL local na porta 5433
 npm run dev            # http://localhost:3000
 npm run verificar      # typecheck + lint + testes = "pronto"
 ```
