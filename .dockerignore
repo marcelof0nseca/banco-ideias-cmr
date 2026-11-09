@@ -14,3 +14,5 @@ docs
 prototipo
 *.log
 *.tsbuildinfo
+backups
+*.dump

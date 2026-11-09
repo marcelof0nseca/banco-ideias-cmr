@@ -185,6 +185,32 @@ jobs:
           echo "detalhe: $P"
           curl -s "http://127.0.0.1:3000/$P" | grep -q "http://ci.teste.local/$P"
           test "$($COMPOSE exec -T app node -e 'console.log(Intl.DateTimeFormat().resolvedOptions().timeZone)')" = "America/Recife"
+      - name: Backup e restauracao (scripts/backup.sh e scripts/restaurar.sh)
+        run: |
+          set -e
+          SQL() { docker compose exec -T db sh -c "psql -tA -U \"\$POSTGRES_USER\" -d banco_ideias -c \"$1\""; }
+          scripts/backup.sh
+          ARQ=$(ls -t backups/banco_ideias-*.dump | head -1)
+          test "$(stat -c %a "$ARQ")" = "600"
+          IDEIAS=$(SQL "select count(*) from ideia")
+          # Muda o banco DEPOIS do backup: a restauracao tem de desfazer isso.
+          SENHA=$(openssl rand -hex 16)
+          printf '%s\n%s\n' "$SENHA" "$SENHA" | $COMPOSE run --rm -T migrar npm run --silent admin:criar -- --nome "Depois do backup" --email depois@teste.local
+          test "$(SQL "select count(*) from usuario where email='depois@teste.local'")" = "1"
+          # Sem digitar RESTAURAR, nao restaura
+          if echo "nao" | scripts/restaurar.sh "$ARQ"; then echo "restaurou sem confirmacao"; exit 1; fi
+          # Arquivo invalido e recusado antes de mexer em qualquer coisa
+          echo "lixo" > backups/invalido.dump
+          if scripts/restaurar.sh backups/invalido.dump --sim; then echo "aceitou backup invalido"; exit 1; fi
+          scripts/restaurar.sh "$ARQ" --sim
+          test "$(SQL "select count(*) from usuario where email='depois@teste.local'")" = "0"
+          test "$(SQL "select count(*) from usuario where email='admin.ci@teste.local'")" = "1"
+          test "$(SQL "select count(*) from ideia")" = "$IDEIAS"
+          ls backups/antes-de-restaurar/banco_ideias-*.dump
+          # Trava append-only voltou junto
+          if SQL "delete from tramitacao" 2>/dev/null; then echo "trava append-only sumiu"; exit 1; fi
+          curl -sf http://127.0.0.1:3000/api/health | grep -q '"status":"ok"'
+          curl -s http://127.0.0.1:3000/consulta | grep -q "Ciclovia protegida"
       - name: Contêiner seguro (sem root, sem segredo dentro da imagem)
         run: |
           set -e
