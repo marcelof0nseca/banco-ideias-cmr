@@ -132,19 +132,29 @@ jobs:
       COMPOSE: docker compose --profile manutencao
     steps:
       - uses: actions/checkout@v7
-      - name: Segredos de teste (gerados agora, descartados no fim)
+      - name: Cria o .env exatamente como no guia (guia-ti.md, passo 4.3)
         run: |
-          SENHA=$(openssl rand -hex 16)
-          {
-            echo "POSTGRES_USER=bancoideias"
-            echo "POSTGRES_PASSWORD=$SENHA"
-            echo "DATABASE_URL=postgresql://bancoideias:$SENHA@db:5432/banco_ideias?schema=public"
-            echo "DOCUMENTO_CHAVE=$(openssl rand -base64 32)"
-            echo "DOCUMENTO_PEPPER=$(openssl rand -hex 32)"
-            echo "AUTH_SECRET=$(openssl rand -hex 32)"
-            # Valor fora do padrao: prova que o .env chega ao build da imagem.
-            echo "NEXT_PUBLIC_SITE_URL=http://ci.teste.local"
-          } > .env
+          set -e
+          cp .env.example .env
+          chmod 600 .env
+
+          SENHA_BD=$(openssl rand -hex 24)
+          sed -i \
+            -e "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=$SENHA_BD|" \
+            -e "s|COLE_A_SENHA_AQUI|$SENHA_BD|" \
+            -e "s|^DOCUMENTO_CHAVE=.*|DOCUMENTO_CHAVE=$(openssl rand -base64 32)|" \
+            -e "s|^DOCUMENTO_PEPPER=.*|DOCUMENTO_PEPPER=$(openssl rand -hex 32)|" \
+            -e "s|^AUTH_SECRET=.*|AUTH_SECRET=$(openssl rand -hex 32)|" \
+            .env
+          unset SENHA_BD
+          # Valor fora do padrao: prova que o .env chega ao build da imagem.
+          sed -i "s|^NEXT_PUBLIC_SITE_URL=.*|NEXT_PUBLIC_SITE_URL=http://ci.teste.local|" .env
+
+          # Conferencia do guia: nao pode imprimir nada
+          if grep -E '^(POSTGRES_PASSWORD|DOCUMENTO_CHAVE|DOCUMENTO_PEPPER|AUTH_SECRET)=$|COLE_A_SENHA' .env; then
+            echo ".env incompleto"; exit 1
+          fi
+          test "$(stat -c %a .env)" = "600"
       - name: Gera as imagens (aplicacao e migracao)
         run: $COMPOSE build
       - name: Sobe o banco
@@ -227,6 +237,25 @@ jobs:
           if $COMPOSE exec -T db env | grep -Eq 'DOCUMENTO_|AUTH_SECRET'; then
             echo "CHAVE DO CPF OU DA SESSAO NO CONTEINER DO BANCO"; exit 1
           fi
+      - name: Copia do volume e restauracao do volume (guia-ti.md, secao 5.6)
+        run: |
+          set -e
+          SQL() { docker compose exec -T db sh -c "psql -tA -U \"\$POSTGRES_USER\" -d banco_ideias -c \"$1\""; }
+          IDEIAS=$(SQL "select count(*) from ideia")
+          # Copia (com tudo parado)
+          docker compose stop app db
+          docker run --rm -v banco-ideias_banco_ideias_dados:/dados:ro -v "$PWD/backups":/destino \
+            alpine:3.20 tar czf /destino/volume-teste.tar.gz -C /dados .
+          docker compose up -d --wait db app
+          # Restauracao: apaga o volume e devolve a copia
+          docker compose down
+          docker volume rm banco-ideias_banco_ideias_dados
+          docker compose up --no-start db
+          docker run --rm -v banco-ideias_banco_ideias_dados:/dados -v "$PWD/backups":/origem \
+            alpine:3.20 tar xzf /origem/volume-teste.tar.gz -C /dados
+          docker compose up -d --wait db app
+          test "$(SQL "select count(*) from ideia")" = "$IDEIAS"
+          curl -sf http://127.0.0.1:3000/api/health | grep -q '"status":"ok"'
       - name: Logs (so se falhar)
         if: failure()
         run: $COMPOSE logs --no-color
