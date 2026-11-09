@@ -20,7 +20,8 @@ RUN npm ci --no-audit --no-fund
 
 FROM node:22-bookworm-slim AS build
 WORKDIR /app
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_TELEMETRY_DISABLED=1 \
+    TZ=America/Recife
 ARG NEXT_PUBLIC_BASE_PATH=""
 ARG NEXT_PUBLIC_SITE_URL="https://bancodeideias.recife.pe.leg.br"
 ARG NEXT_PUBLIC_URL_CAMARA="https://www.recife.pe.leg.br"
@@ -38,8 +39,10 @@ CMD ["npx", "prisma", "migrate", "deploy"]
 # --- aplicacao ---------------------------------------------------------------
 FROM node:22-bookworm-slim AS app
 WORKDIR /app
+# TZ: o prazo da triagem conta dias pelo relogio de Recife, nao UTC.
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
+    TZ=America/Recife \
     PORT=3000 \
     HOSTNAME=0.0.0.0
 # Usuario sem privilegios: o processo nao roda como root.

@@ -13,12 +13,21 @@
 # =============================================================================
 name: banco-ideias
 
+# NEXT_PUBLIC_* vao para dentro da imagem no build. O Docker Compose le o
+# .env desta pasta e repassa aqui (sem valor no .env, vale o padrao).
+x-build-args: &build-args
+  NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://bancodeideias.recife.pe.leg.br}
+  NEXT_PUBLIC_BASE_PATH: ${NEXT_PUBLIC_BASE_PATH:-}
+  NEXT_PUBLIC_URL_CAMARA: ${NEXT_PUBLIC_URL_CAMARA:-https://www.recife.pe.leg.br}
+
 services:
   db:
     image: postgres:16-alpine
     restart: unless-stopped
-    env_file: .env
+    # So usuario e senha: o banco nao precisa (nem deve ver) as chaves do CPF.
     environment:
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
       POSTGRES_DB: banco_ideias
     volumes:
       - banco_ideias_dados:/var/lib/postgresql/data
@@ -31,14 +40,14 @@ services:
   # Tarefas de manutencao (migracoes, criacao do administrador). Nao fica
   # ligado: roda e termina com "docker compose run --rm migrar ...".
   migrar:
-    build: { context: ., target: migrar }
+    build: { context: ., target: migrar, args: *build-args }
     env_file: .env
     depends_on:
       db: { condition: service_healthy }
     profiles: ["manutencao"]
 
   app:
-    build: { context: ., target: app }
+    build: { context: ., target: app, args: *build-args }
     restart: unless-stopped
     env_file: .env
     depends_on:

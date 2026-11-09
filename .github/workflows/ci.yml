@@ -142,6 +142,8 @@ jobs:
             echo "DOCUMENTO_CHAVE=$(openssl rand -base64 32)"
             echo "DOCUMENTO_PEPPER=$(openssl rand -hex 32)"
             echo "AUTH_SECRET=$(openssl rand -hex 32)"
+            # Valor fora do padrao: prova que o .env chega ao build da imagem.
+            echo "NEXT_PUBLIC_SITE_URL=http://ci.teste.local"
           } > .env
       - name: Gera as imagens (aplicacao e migracao)
         run: $COMPOSE build
@@ -164,6 +166,13 @@ jobs:
           curl -s http://127.0.0.1:3000/consulta | grep -q "Ciclovia protegida"
           test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/triagem)" = "307"
           curl -sI http://127.0.0.1:3000/ | grep -qi "content-security-policy: .*nonce-"
+      - name: Configuracao do .env chegou ao sistema (URL do site e fuso de Recife)
+        run: |
+          set -e
+          P=$(curl -s http://127.0.0.1:3000/consulta | grep -o 'consulta/BIL-[0-9]*-[0-9]*' | head -1)
+          echo "detalhe: $P"
+          curl -s "http://127.0.0.1:3000/$P" | grep -q "http://ci.teste.local/$P"
+          test "$($COMPOSE exec -T app node -e 'console.log(Intl.DateTimeFormat().resolvedOptions().timeZone)')" = "America/Recife"
       - name: Contêiner seguro (sem root, sem segredo dentro da imagem)
         run: |
           set -e
@@ -176,6 +185,9 @@ jobs:
           fi
           if $COMPOSE exec -T app sh -c 'ls -a /app' | grep -E '^\.env'; then
             echo "ARQUIVO .env DENTRO DA IMAGEM"; exit 1
+          fi
+          if $COMPOSE exec -T db env | grep -Eq 'DOCUMENTO_|AUTH_SECRET'; then
+            echo "CHAVE DO CPF OU DA SESSAO NO CONTEINER DO BANCO"; exit 1
           fi
       - name: Logs (so se falhar)
         if: failure()
