@@ -12,6 +12,7 @@ import {
   type Quem,
   type ResultadoAdmin,
 } from "@/lib/painel/admin";
+import { mensagemErro } from "@/lib/painel/retorno";
 import { exigirPerfil, ipHashAtual } from "@/lib/seguranca/auth";
 
 /**
@@ -39,15 +40,43 @@ function concluir(volta: string, r: ResultadoAdmin, okCodigo: string): never {
 
 const USUARIOS = "/admin/acessos";
 
-export async function criarUsuarioAcao(fd: FormData) {
-  const r = await criarUsuario(await quem(USUARIOS), {
+/** Valores digitados que voltam ao formulario num erro (a senha nunca volta). */
+export interface ValoresNovoUsuario {
+  nome: string;
+  email: string;
+  perfil: string;
+  gabinete: string;
+}
+
+export interface EstadoNovoUsuario {
+  valores: ValoresNovoUsuario;
+  erro?: { mensagem: string; campo?: "nome" | "email" | "gabinete" | "senha" };
+  /** Muda a cada envio: remonta o form para os valores voltarem. */
+  tentativa: number;
+}
+
+/**
+ * Criar usuario com useActionState: num erro, devolve o que foi digitado
+ * (menos a senha) e aponta o campo. Funciona sem JS. No sucesso, redireciona.
+ */
+export async function criarUsuarioAcao(anterior: EstadoNovoUsuario, fd: FormData): Promise<EstadoNovoUsuario> {
+  const valores: ValoresNovoUsuario = {
     nome: texto(fd, "nome"),
     email: texto(fd, "email"),
     perfil: texto(fd, "perfil"),
     gabinete: texto(fd, "gabinete"),
-    senha: texto(fd, "senha"),
-  });
-  concluir(USUARIOS, r, "usuario-criado");
+  };
+  const r = await criarUsuario(await quem(USUARIOS), { ...valores, senha: texto(fd, "senha") });
+  if (r.ok) concluir(USUARIOS, r, "usuario-criado");
+
+  const tentativa = anterior.tentativa + 1;
+  const mensagem = mensagemErro(r.codigo) ?? "Não foi possível criar o usuário.";
+  if (r.codigo === "email-repetido") return { valores, tentativa, erro: { mensagem, campo: "email" } };
+  if (r.codigo === "senha-fraca") return { valores, tentativa, erro: { mensagem, campo: "senha" } };
+  if (r.codigo === "dados-usuario" && valores.perfil === "GABINETE" && !valores.gabinete.trim()) {
+    return { valores, tentativa, erro: { mensagem: "Informe o gabinete ou a comissão desta pessoa.", campo: "gabinete" } };
+  }
+  return { valores, tentativa, erro: { mensagem } };
 }
 
 export async function ativarUsuarioAcao(fd: FormData) {

@@ -151,7 +151,14 @@ export async function anonimizarTitular(quem: Quem, autorId: string): Promise<bo
       },
     });
     await registrarEvento(
-      { acao: "TITULAR_ANONIMIZADO", usuarioId: quem.usuarioId, alvoTipo: Prisma.ModelName.Autor, alvoId: autorId, ipHash: quem.ipHash },
+      {
+        acao: "TITULAR_ANONIMIZADO",
+        usuarioId: quem.usuarioId,
+        alvoTipo: Prisma.ModelName.Autor,
+        alvoId: autorId,
+        ipHash: quem.ipHash,
+        detalhe: "A pedido do titular, com confirmação do administrador.",
+      },
       tx,
     );
   });
