@@ -1,0 +1,34 @@
+# =============================================================================
+# DESENVOLVIMENTO: so o PostgreSQL, para rodar o sistema com "npm run dev".
+# (Producao e o docker-compose.yml.)
+#
+#   docker compose -f docker-compose.dev.yml up -d
+#
+# No .env:
+#   DATABASE_URL="postgresql://bancoideias:senhalocal@localhost:5433/banco_ideias?schema=public"
+#
+# Porta 5433 para nao colidir com um PostgreSQL ja instalado na maquina (5432).
+# =============================================================================
+name: banco-ideias-dev
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: banco_ideias_db_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bancoideias
+      POSTGRES_PASSWORD: senhalocal
+      POSTGRES_DB: banco_ideias
+    ports:
+      - "5433:5432"
+    volumes:
+      - banco_ideias_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bancoideias -d banco_ideias"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  banco_ideias_pgdata:
