@@ -16,6 +16,7 @@
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset --force",
     "db:studio": "prisma studio",
+    "admin:criar": "tsx prisma/criar-admin.ts",
     "verificar": "npm run typecheck && npm run lint && npm run test"
   },
   "prisma": {

@@ -153,6 +153,18 @@ jobs:
         run: $COMPOSE run --rm migrar
       - name: Carga de dados ficticios
         run: $COMPOSE run --rm migrar npm run db:seed
+      - name: Cria o administrador inicial (como no guia da TI)
+        run: |
+          set -e
+          SENHA=$(openssl rand -hex 16)
+          ADMIN="$COMPOSE run --rm -T migrar npm run --silent admin:criar --"
+          printf '%s\n%s\n' "$SENHA" "$SENHA" | $ADMIN --nome "Admin CI" --email admin.ci@teste.local
+          # E-mail repetido tem que ser recusado
+          if printf '%s\n%s\n' "$SENHA" "$SENHA" | $ADMIN --nome "Admin CI" --email admin.ci@teste.local; then
+            echo "deveria recusar e-mail repetido"; exit 1
+          fi
+          # Recuperacao de acesso
+          printf '%s\n%s\n' "$SENHA-2" "$SENHA-2" | $ADMIN --redefinir --email admin.ci@teste.local
       - name: Liga a aplicacao e espera o HEALTHCHECK ficar "healthy"
         run: $COMPOSE up -d --wait --wait-timeout 180 app
       - name: Sistema responde de dentro do contêiner
