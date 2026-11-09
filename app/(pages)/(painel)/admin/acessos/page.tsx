@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Botao } from "@/components/ui/Botao";
-import { CampoSelecao, CampoTexto } from "@/components/ui/Campo";
+import { CampoTexto } from "@/components/ui/Campo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabela } from "@/components/ui/Tabela";
 import { listarUsuarios } from "@/lib/painel/admin";
@@ -10,7 +10,8 @@ import { sessaoDaPagina } from "@/lib/seguranca/auth";
 import { SENHA_MINIMA } from "@/lib/seguranca/senha";
 import { CabecalhoPagina, Retorno } from "../../_componentes/Blocos";
 import { ROTULO_PERFIL } from "../../_componentes/BarraUsuario";
-import { ativarUsuarioAcao, criarUsuarioAcao, desativarUsuarioAcao, redefinirSenhaAcao } from "../acoes";
+import { ativarUsuarioAcao, desativarUsuarioAcao, redefinirSenhaAcao } from "../acoes";
+import { FormNovoUsuario } from "./FormNovoUsuario";
 
 export const metadata: Metadata = { title: "Usuários", robots: { index: false } };
 
@@ -114,32 +115,7 @@ export default async function UsuariosPage({ searchParams }: { searchParams: Pro
             </p>
           </CardHeader>
           <CardContent>
-            <form action={criarUsuarioAcao} className="flex flex-col gap-4">
-              <CampoTexto id="nome" rotulo="Nome" name="nome" autoComplete="off" obrigatorio />
-              <CampoTexto id="email" rotulo="E-mail institucional" name="email" type="email" autoComplete="off" obrigatorio />
-              <CampoSelecao id="perfil" rotulo="Perfil" name="perfil" defaultValue="TRIAGEM" obrigatorio>
-                <option value="TRIAGEM">Secretaria · Triagem</option>
-                <option value="GABINETE">Gabinete</option>
-                <option value="ADMIN">Administração</option>
-              </CampoSelecao>
-              <CampoTexto
-                id="gabinete"
-                rotulo="Gabinete ou comissão"
-                dica="Obrigatório para o perfil Gabinete. Ex.: Gabinete Ver. Fulano."
-                name="gabinete"
-              />
-              <CampoTexto
-                id="senha-nova"
-                rotulo="Senha inicial"
-                dica={`Mínimo de ${SENHA_MINIMA} caracteres.`}
-                name="senha"
-                type="password"
-                autoComplete="new-password"
-                minLength={SENHA_MINIMA}
-                obrigatorio
-              />
-              <Botao type="submit">Criar usuário</Botao>
-            </form>
+            <FormNovoUsuario senhaMinima={SENHA_MINIMA} />
           </CardContent>
         </Card>
       </div>

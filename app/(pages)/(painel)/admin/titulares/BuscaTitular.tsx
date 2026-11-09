@@ -98,8 +98,11 @@ export function BuscaTitular() {
               {!estado.titular.anonimizadoEm && (
                 <form action={anonimizarAcao} className="flex flex-col gap-2">
                   <input type="hidden" name="autorId" value={estado.titular.id} />
-                  <p className="text-sm"><strong>Anonimizar.</strong> Apaga documento, e-mail e telefone. Não tem volta.</p>
-                  {/* Checkbox nativo, como no cadastro: funciona sem JS. */}
+                  <p className="text-sm">
+                    <strong>Anonimizar.</strong> Apaga de vez documento, e-mail e telefone e troca o nome. As ideias continuam
+                    publicadas, sem autor identificável.
+                  </p>
+                  {/* Checkbox nativo obrigatorio (o servidor confere de novo): funciona sem JS. */}
                   <label
                     htmlFor="confirmo-anonimizar"
                     className="flex items-start gap-3 rounded-lg border border-input bg-card p-3 text-sm has-checked:border-destructive has-checked:bg-vermelho-fundo"
@@ -112,9 +115,12 @@ export function BuscaTitular() {
                       required
                       className="mt-0.5 size-5 shrink-0 accent-primary"
                     />
-                    <span>O próprio titular pediu a eliminação dos dados.</span>
+                    <span>
+                      Confirmo que <strong>{estado.titular.nome}</strong> pediu a eliminação dos dados e que esta ação{" "}
+                      <strong>não pode ser desfeita</strong>.
+                    </span>
                   </label>
-                  <Botao type="submit" variante="perigo">Anonimizar titular</Botao>
+                  <Botao type="submit" variante="perigo">Anonimizar definitivamente</Botao>
                 </form>
               )}
             </div>
