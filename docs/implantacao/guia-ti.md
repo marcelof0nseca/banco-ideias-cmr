@@ -133,11 +133,17 @@ depois de reentrar.
 **Confira:**
 
 ```bash
-docker compose version     # Docker Compose version v2.20 ou maior
+docker compose version     # v2.20 ou maior (versões novas mostram v5.x: também serve)
 docker run --rm hello-world   # termina com "Hello from Docker!"
 ```
 
 ### 4.2 Baixar o sistema
+
+**Antes de começar, consiga o acesso.** O repositório é privado. Peça à equipe do
+projeto um *deploy token* de leitura: quem é mantenedor no GitLab cria em
+**Projeto › Settings › Repository › Deploy tokens**, marcando só `read_repository`. Você
+recebe dois valores: o **nome de usuário** do token (algo como `gitlab+deploy-token-123`)
+e o **token** em si. Guarde os dois num lugar seguro: o token só é mostrado uma vez.
 
 ```bash
 sudo mkdir -p /opt/banco-de-ideias
@@ -146,9 +152,19 @@ git clone https://gitlab.com/camara.recife/banco-de-ideias.git /opt/banco-de-ide
 cd /opt/banco-de-ideias
 ```
 
-O repositório é privado: o `git clone` pede um usuário do GitLab com acesso ao projeto
-(ou um *deploy token* de leitura). **Todos os comandos daqui em diante rodam dentro de
-`/opt/banco-de-ideias`.**
+O `git clone` pede `Username` e `Password`:
+
+- **Username:** o usuário **do token** (`gitlab+deploy-token-...`), e **não** o seu
+  usuário pessoal do GitLab. Com o usuário pessoal o GitLab responde
+  `HTTP Basic: Access denied`.
+- **Password:** o token (começa com `gldt-`). Ele não aparece na tela enquanto você cola.
+
+O mesmo par é pedido de novo a cada `git pull` (seção 5.3).
+
+> **Não ponha o token dentro da URL** (`https://usuario:token@gitlab.com/...`). Ele
+> ficaria gravado em texto puro no arquivo `.git/config` do servidor.
+
+**Todos os comandos daqui em diante rodam dentro de `/opt/banco-de-ideias`.**
 
 **Confira:**
 
@@ -199,11 +215,15 @@ Agora **guarde uma cópia do `.env` no cofre de senhas da TI**.
 ### 4.4 Gerar as imagens
 
 ```bash
-docker compose build
+docker compose --profile manutencao build
 ```
 
 Leva de 2 a 10 minutos, conforme o servidor e a rede. Os valores `NEXT_PUBLIC_*` do
 `.env` entram na imagem neste momento.
+
+> **Não esqueça o `--profile manutencao`.** A imagem `migrar` (migrações e criação de
+> administrador) fica num *profile* separado, e um `docker compose build` sem ele gera
+> só a imagem da aplicação.
 
 **Confira:**
 
@@ -244,8 +264,8 @@ o que falta.
 docker compose run --rm migrar npm run admin:criar
 ```
 
-O comando pergunta nome, e-mail institucional e senha (mínimo de 12 caracteres, digitada
-duas vezes, sem aparecer na tela). A criação fica registrada na trilha de auditoria. Os
+O comando pergunta, nesta ordem, e-mail institucional, nome completo e senha (mínimo de
+12 caracteres, digitada duas vezes, sem aparecer na tela). A criação fica registrada na trilha de auditoria. Os
 demais usuários (Triagem, Gabinetes, outros administradores) são criados **pelo painel**,
 em **Administração › Acessos**.
 
@@ -378,14 +398,18 @@ na **trilha de auditoria** dentro do banco, em **Administração › Auditoria**
 ```bash
 cd /opt/banco-de-ideias
 scripts/backup.sh /var/backups/banco-de-ideias    # 1. backup antes de tudo
-git pull                                          # 2. baixa a versao nova
-docker compose build                              # 3. gera as imagens novas
+git pull                                          # 2. baixa a versao nova (pede o token, ver 4.2)
+docker compose --profile manutencao build         # 3. gera as imagens novas (app e migrar)
 docker compose run --rm migrar                    # 4. aplica migracoes novas (se houver)
 docker compose up -d --wait app                   # 5. troca a aplicacao
 curl -s http://127.0.0.1:3000/api/health          # 6. confere: {"status":"ok",...}
 ```
 
 O site fica fora do ar só alguns segundos, no passo 5.
+
+> **Se o passo 1 der erro, pare.** Não atualize sem backup. O erro mais comum é
+> `Permission denied` ao criar a pasta: ela é criada no passo 4.10; rode as duas
+> primeiras linhas de lá e repita o backup.
 
 **Voltar para a versão anterior** se algo der errado:
 
@@ -524,8 +548,9 @@ O `docker image prune` não toca no volume do banco.
 
 ## 6. Problemas comuns
 
-> Seção mantida pela Pessoa A, a partir do teste de implantação em servidor limpo.
-> Os itens abaixo são o ponto de partida.
+> Seção mantida pela Pessoa A. Inclui o que apareceu no teste de implantação em
+> servidor limpo (Ubuntu 24.04, passos 4.1 a 4.8 e 5.3, novembro de 2026). Procure
+> pela mensagem que aparece na sua tela.
 
 | Sintoma | Causa provável | Solução |
 |---|---|---|
@@ -538,6 +563,11 @@ O `docker image prune` não toca no volume do banco.
 | Mudei o `.env` e nada mudou | `restart` não relê o `.env`; `NEXT_PUBLIC_*` exigem imagem nova | `docker compose up -d app`; para `NEXT_PUBLIC_*`, `docker compose build` antes |
 | Links do site sem estilo, ou página 404 no cenário "pasta no portal" | `NEXT_PUBLIC_BASE_PATH` diferente do `location` do Nginx | Os dois têm de ser exatamente `/participacao-popular/banco-de-ideias`; depois `docker compose build && docker compose up -d app` |
 | O cidadão recebe "muitas tentativas" ao cadastrar | Muitas pessoas na mesma rede (evento) ou o Nginx não repassa o IP real | Conferir `X-Real-IP` no Nginx; aumentar `LIMITE_CADASTRO_POR_IP_HORA` |
+| `HTTP Basic: Access denied` no `git clone` ou `git pull` | Foi digitado o usuário pessoal do GitLab no lugar do usuário do token, ou o token expirou ou foi revogado | Usuário `gitlab+deploy-token-...` e o token como senha (passo 4.2). Expirado: peça um token novo à equipe |
+| No passo 4.4, só aparece a imagem `banco-ideias-app` (falta `banco-ideias-migrar`) | `docker compose build` sem `--profile manutencao` | `docker compose --profile manutencao build` |
+| `timeout awaiting response headers` ou `failed to copy: httpReadSeeker` ao baixar imagens (passos 4.4, 4.5 ou 5.3) | Instabilidade na rede até o Docker Hub (download grande, como a imagem do PostgreSQL) | Rode o mesmo comando de novo: ele continua de onde parou. Se repetir sempre, peça à rede para liberar `registry-1.docker.io` e `production.cloudfront.docker.com` |
+| `prisma:warn Prisma failed to detect the libssl/openssl version` nos passos 4.4, 4.6 ou 4.7 | Aviso da imagem `migrar`; não impede nada | Pode ignorar se o passo terminar como o guia espera: as duas imagens na conferência (4.4), `All migrations have been successfully applied` (4.6) ou `Pronto: administrador criado.` (4.7) |
+| `mkdir: cannot create directory '/var/backups/banco-de-ideias': Permission denied` no backup | A pasta de backup ainda não foi criada | Rode as duas primeiras linhas do passo 4.10 (`sudo mkdir` e `sudo chown`) e repita o backup |
 
 ---
 
