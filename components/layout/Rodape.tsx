@@ -41,10 +41,6 @@ export function Rodape() {
               Lista de Telefones:{" "}
               <a className="text-white underline" href={listaTelefones.gabinetes}>
                 Gabinetes
-              </a>{" "}
-              /{" "}
-              <a className="text-white underline" href={listaTelefones.administracao}>
-                Administração
               </a>
             </span>
           </address>
