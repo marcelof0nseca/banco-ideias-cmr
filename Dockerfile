@@ -13,12 +13,12 @@
 # entram na imagem: sao passados em tempo de execucao (docker-compose.yml).
 # =============================================================================
 
-FROM node:22-bookworm-slim AS deps
+FROM node:25-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
 
-FROM node:22-bookworm-slim AS build
+FROM node:25-bookworm-slim AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1 \
     TZ=America/Recife
@@ -37,7 +37,7 @@ FROM build AS migrar
 CMD ["npx", "prisma", "migrate", "deploy"]
 
 # --- aplicacao ---------------------------------------------------------------
-FROM node:22-bookworm-slim AS app
+FROM node:25-bookworm-slim AS app
 WORKDIR /app
 # TZ: o prazo da triagem conta dias pelo relogio de Recife, nao UTC.
 ENV NODE_ENV=production \
