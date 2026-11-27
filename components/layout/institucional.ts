@@ -11,8 +11,8 @@ export const INSTITUCIONAL = {
   horario: ["De segunda a sexta-feira", "- das 7h30 às 18h"],
   listaTelefones: {
     gabinetes: "https://www.recife.pe.leg.br/lista-de-contatos/lista-de-contatos",
-    administracao:
-      "https://www.recife.pe.leg.br/acl_users/credentials_cookie_auth/require_login?came_from=https%3A//www.recife.pe.leg.br/lista-de-contatos",
+    // A lista "Administracao" do portal exige login interno (Plone): fica fora
+    // do rodape, porque o cidadao nao tem acesso.
   },
   redes: [
     { rede: "facebook", rotulo: "Facebook", href: "https://www.facebook.com/camaradorecife" },

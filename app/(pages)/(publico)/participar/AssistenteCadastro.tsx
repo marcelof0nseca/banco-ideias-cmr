@@ -127,8 +127,13 @@ export function AssistenteCadastro(props: Props) {
     if (estado.fase === "erro") {
       setErrosCliente({});
       const primeiro = Object.keys(estado.erros)[0];
-      setPasso(primeiro ? passoDoCampo(primeiro) : 3);
+      const comErro = primeiro ? passoDoCampo(primeiro) : 3;
+      setPasso(comErro);
+      setAnuncio(`Passo ${comErro} de 4: ${NOMES_PASSO[comErro - 1]}`);
       setTipoAutor(estado.valores.tipoAutor ?? "FISICA");
+    } else if (estado.fase === "ok") {
+      // Sem isto a regiao viva continuava em "Passo 3 de 4" na confirmacao.
+      setAnuncio(`Passo 4 de 4: ${NOMES_PASSO[3]}`);
     }
   }
 

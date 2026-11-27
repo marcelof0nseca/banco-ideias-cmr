@@ -36,7 +36,14 @@ export type ResultadoApoio =
       jaApoiou?: true;
     };
 
-const MENSAGEM_GENERICA = "Não foi possível registrar o apoio agora. Aguarde alguns segundos e tente novamente.";
+const JA_APOIOU = {
+  ok: false,
+  httpStatus: 409,
+  jaApoiou: true,
+  mensagem: "Você já apoiou esta ideia. Cada pessoa pode apoiar uma vez.",
+} as const satisfies ResultadoApoio;
+
+const MENSAGEM_GENERICA ="Não foi possível registrar o apoio agora. Aguarde alguns segundos e tente novamente.";
 
 /** CPF (11 digitos) ou CNPJ (14 digitos), pelo digito verificador. */
 export function documentoDeApoioValido(documento: string): boolean {
@@ -85,6 +92,14 @@ export async function apoiarIdeia(pedido: PedidoApoio): Promise<ResultadoApoio> 
         // Inexistente, em triagem, adotada ou arquivada: nao revela qual.
         return { ok: false as const, httpStatus: 409 as const, mensagem: "Esta ideia não está recebendo apoios." };
       }
+      // Confere antes do insert: apoio repetido e o caso comum e nao deve
+      // gerar prisma:error no log. A unique continua cobrindo a corrida
+      // (dois envios ao mesmo tempo), tratada no catch abaixo.
+      const existente = await tx.apoio.findUnique({
+        where: { ideiaId_documentoHash: { ideiaId: ideia.id, documentoHash } },
+        select: { id: true },
+      });
+      if (existente) return JA_APOIOU;
       await tx.apoio.create({ data: { ideiaId: ideia.id, documentoHash, ipHash: ipHash ?? null } });
       const atualizada = await tx.ideia.update({
         where: { id: ideia.id },
@@ -94,14 +109,7 @@ export async function apoiarIdeia(pedido: PedidoApoio): Promise<ResultadoApoio> 
       return { ok: true as const, apoiosCount: atualizada.apoiosCount };
     });
   } catch (erro) {
-    if (erro instanceof Prisma.PrismaClientKnownRequestError && erro.code === "P2002") {
-      return {
-        ok: false,
-        httpStatus: 409,
-        jaApoiou: true,
-        mensagem: "Você já apoiou esta ideia. Cada pessoa pode apoiar uma vez.",
-      };
-    }
+    if (erro instanceof Prisma.PrismaClientKnownRequestError && erro.code === "P2002") return JA_APOIOU;
     throw erro;
   }
 }

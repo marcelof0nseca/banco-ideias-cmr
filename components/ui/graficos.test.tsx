@@ -63,7 +63,7 @@ describe("LinhaDoTempo", () => {
     const html = renderToStaticMarkup(<LinhaDoTempo eventos={eventos} />);
     expect(html).toContain("<ol");
     expect(html).toContain("Recebida");
-    expect(html).toContain('<time dateTime="2026-01-05T12:00:00.000Z">05 de janeiro de 2026</time>');
+    expect(html).toContain('<time dateTime="2026-01-05T12:00:00.000Z">5 de janeiro de 2026</time>');
     expect(html).toContain("(situação atual)");
     expect(html).toContain("Motivo interno");
   });

@@ -8,12 +8,8 @@ import { rotuloStatus } from "./status";
  * O marcador colorido e decorativo: a situacao vem escrita.
  */
 
-const FORMATO_DATA = new Intl.DateTimeFormat("pt-BR", {
-  day: "2-digit",
-  month: "long",
-  year: "numeric",
-  timeZone: "America/Recife",
-});
+// Mesmo formato das demais telas ("9 de novembro de 2026", sem zero a esquerda).
+const FORMATO_DATA = new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeZone: "America/Recife" });
 
 export function LinhaDoTempo({
   eventos,
